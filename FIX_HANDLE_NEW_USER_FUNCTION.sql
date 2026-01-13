@@ -1,0 +1,114 @@
+-- ============================================================================
+-- FIX handle_new_user FUNCTION FOR RLS
+-- ============================================================================
+-- This script fixes the handle_new_user function to work with RLS
+-- ============================================================================
+
+-- Step 1: Get current function definition
+SELECT pg_get_functiondef(oid) 
+FROM pg_proc 
+WHERE proname = 'handle_new_user';
+
+-- Step 2: Drop and recreate function with proper RLS handling
+-- IMPORTANT: Replace the function definition below with the actual one from Step 1
+-- Then modify it to handle RLS properly
+
+-- Example fix (adjust based on actual function definition):
+-- DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
+-- 
+-- CREATE OR REPLACE FUNCTION public.handle_new_user()
+-- RETURNS TRIGGER AS $$
+-- DECLARE
+--   user_full_name TEXT;
+--   user_role TEXT := 'viewer';
+--   user_firm_id UUID;
+--   invite_record RECORD;
+-- BEGIN
+--   -- Get full name from metadata
+--   user_full_name := COALESCE(
+--     NEW.raw_user_meta_data->>'full_name',
+--     'User'
+--   );
+--   
+--   -- Try to get invite data (with RLS bypass using SECURITY DEFINER)
+--   -- Since this function is SECURITY DEFINER, it should bypass RLS
+--   -- But if it's still failing, we can make the query more permissive
+--   BEGIN
+--     SELECT role, firm_id, full_name INTO invite_record
+--     FROM public.invites
+--     WHERE LOWER(TRIM(email)) = LOWER(TRIM(NEW.email))
+--     AND status = 'pending'
+--     AND (expires_at IS NULL OR expires_at > now())
+--     ORDER BY created_at DESC
+--     LIMIT 1;
+--     
+--     IF FOUND THEN
+--       user_role := COALESCE(invite_record.role, 'viewer');
+--       user_firm_id := invite_record.firm_id;
+--       user_full_name := COALESCE(invite_record.full_name, user_full_name);
+--     END IF;
+--   EXCEPTION
+--     WHEN OTHERS THEN
+--       -- If invite query fails, use defaults
+--       user_role := 'viewer';
+--       user_firm_id := NULL;
+--   END;
+--   
+--   -- Insert into public.users
+--   INSERT INTO public.users (
+--     id,
+--     email,
+--     full_name,
+--     role,
+--     firm_id,
+--     is_active
+--   )
+--   VALUES (
+--     NEW.id,
+--     NEW.email,
+--     user_full_name,
+--     user_role,
+--     user_firm_id,
+--     true
+--   )
+--   ON CONFLICT (id) DO UPDATE SET
+--     email = EXCLUDED.email,
+--     full_name = EXCLUDED.full_name,
+--     role = COALESCE(EXCLUDED.role, users.role),
+--     firm_id = COALESCE(EXCLUDED.firm_id, users.firm_id);
+--   
+--   RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql SECURITY DEFINER
+-- SET search_path = public;
+
+-- ============================================================================
+-- ALTERNATIVE: If function doesn't need invites table, simplify it
+-- ============================================================================
+
+-- Simple version without invites table query:
+-- DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
+-- 
+-- CREATE OR REPLACE FUNCTION public.handle_new_user()
+-- RETURNS TRIGGER AS $$
+-- BEGIN
+--   INSERT INTO public.users (
+--     id,
+--     email,
+--     full_name,
+--     role,
+--     is_active
+--   )
+--   VALUES (
+--     NEW.id,
+--     NEW.email,
+--     COALESCE(NEW.raw_user_meta_data->>'full_name', 'User'),
+--     COALESCE(NEW.raw_user_meta_data->>'role', 'viewer'),
+--     true
+--   )
+--   ON CONFLICT (id) DO NOTHING;
+--   
+--   RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql SECURITY DEFINER
+-- SET search_path = public;
