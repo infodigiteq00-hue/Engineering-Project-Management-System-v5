@@ -29,23 +29,71 @@ const api = axios.create({
   timeout: 30000 // 30 seconds timeout
 });
 
+// Cache for session token to avoid repeated getSession() calls
+let cachedSessionToken: string | null = null;
+let sessionCacheTime = 0;
+const SESSION_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Helper function to get session token with fallbacks
+async function getSessionToken(): Promise<string | null> {
+  // Try to get from cache first (if less than 5 minutes old)
+  if (cachedSessionToken && Date.now() - sessionCacheTime < SESSION_CACHE_DURATION) {
+    return cachedSessionToken;
+  }
+  
+  // Try to get from localStorage (Supabase stores session there)
+  try {
+    const storageKey = 'sb-ypdlbqrcxnugrvllbmsi-auth-token';
+    const storedSession = localStorage.getItem(storageKey);
+    if (storedSession) {
+      const parsed = JSON.parse(storedSession);
+      if (parsed?.access_token) {
+        cachedSessionToken = parsed.access_token;
+        sessionCacheTime = Date.now();
+        return cachedSessionToken;
+      }
+    }
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+  
+  // Fallback: Try getSession with short timeout
+  try {
+    const sessionPromise = supabase.auth.getSession();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('getSession timeout')), 2000) // 2 second timeout
+    );
+    
+    const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+    
+    if (!error && session?.access_token) {
+      cachedSessionToken = session.access_token;
+      sessionCacheTime = Date.now();
+      return cachedSessionToken;
+    }
+  } catch (error) {
+    // Ignore getSession errors
+  }
+  
+  return null;
+}
+
 // Add request interceptor to dynamically set Authorization header with user's JWT token
 // This is required for RLS (Row Level Security) to work correctly
 api.interceptors.request.use(async (config: any) => {
   try {
-    // Get the current session from Supabase
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const token = await getSessionToken();
     
-    if (session?.access_token) {
+    if (token) {
       // Use the user's JWT token for authenticated requests
       // This allows RLS policies to identify the user via auth.uid()
-      config.headers.Authorization = `Bearer ${session.access_token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     } else {
       // Fallback to anon key if no session (for public/unauthenticated requests)
       config.headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
     }
-  } catch (error) {
-    console.error('Error getting session for API request:', error);
+  } catch (error: any) {
+    console.error('❌ Interceptor: Error getting session, using anon key:', error?.message || error);
     // Fallback to anon key on error to prevent breaking existing functionality
     config.headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
   }
@@ -313,7 +361,13 @@ export const fastAPI = {
         projects = (response.data as any[]) || [];
       } else if (userRole === 'firm_admin') {
         // Firm Admin sees all projects in their firm
+        console.log('🔍 Fetching projects for firm_admin, firmId:', firmId);
         const response = await api.get(`/projects?firm_id=eq.${firmId}&select=*&order=created_at.desc`);
+        console.log('✅ Projects API response received:', { 
+          status: response.status, 
+          dataLength: Array.isArray(response.data) ? response.data.length : 0,
+          firstProject: Array.isArray(response.data) ? response.data[0] : null
+        });
         projects = (response.data as any[]) || [];
       } else if (userId) {
         // All other roles (project_manager, vdcr_manager, editor, viewer) see only assigned projects

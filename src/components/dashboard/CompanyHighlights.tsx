@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { fastAPI } from '@/lib/api';
 import { activityApi } from '@/lib/activityApi';
+import { useAuth } from '@/contexts/AuthContext';
 import axios from 'axios';
 import { Clock, User, FileText, CheckCircle, Send, Play, Pause, X, Eye, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,7 @@ type ProductionSubTab = 'key-progress' | 'all-updates';
 type TimelineSubTab = 'with-dates' | 'without-dates';
 
 const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
+  const { firmId: authFirmId, userRole: authUserRole, loading: authLoading } = useAuth();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('1 Week');
   const [activeTab, setActiveTab] = useState<ActiveTab>('production');
   const [productionSubTab, setProductionSubTab] = useState<ProductionSubTab>('key-progress');
@@ -41,10 +43,10 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [showProgressImageModal, setShowProgressImageModal] = useState<{ url: string, description?: string, uploadedBy?: string, uploadDate?: string } | null>(null);
   
-  // User role and project/firm scoping
-  const [userRole, setUserRole] = useState<string>('');
+  // User role and project/firm scoping - use AuthContext values
+  const userRole = authUserRole || '';
+  const firmId = authFirmId || '';
   const [assignedProjectIds, setAssignedProjectIds] = useState<string[]>([]);
-  const [firmId, setFirmId] = useState<string>('');
   const [firmProjectIds, setFirmProjectIds] = useState<string[]>([]);
   const [projectIdsLoaded, setProjectIdsLoaded] = useState(false);
   // Store completed project IDs to filter them out from Company Highlights
@@ -55,9 +57,15 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
     try {
       const api = (await import('@/lib/api')).default;
       // Fetch projects with status to identify completed ones
+      console.log('📋 CompanyHighlights: Fetching firm projects for firmId:', firmId);
       const response = await api.get(`/projects?firm_id=eq.${firmId}&select=id,status`);
       const projects = response.data as any[];
       const projectIds = projects.map((project: any) => project.id).filter(Boolean);
+      console.log('📋 CompanyHighlights: Firm projects loaded:', {
+        totalProjects: projects.length,
+        projectIds: projectIds.length,
+        ids: projectIds
+      });
       setFirmProjectIds([...new Set(projectIds)]);
       
       // Extract completed project IDs
@@ -162,25 +170,50 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
   };
 
   // Load user role and fetch assigned projects on mount
+  // Wait for AuthContext to finish loading, but use localStorage if available
   useEffect(() => {
-    const loadUserData = async () => {
-      const role = localStorage.getItem('userRole') || '';
-      const userId = localStorage.getItem('userId') || '';
-      const userFirmId = localStorage.getItem('firmId') || '';
+    // Check if we have data in localStorage
+    const localStorageFirmId = JSON.parse(localStorage.getItem('userData') || '{}').firm_id || localStorage.getItem('firmId');
+    const localStorageUserRole = localStorage.getItem('userRole');
+    
+    // If AuthContext is still loading but localStorage has data, proceed anyway
+    if (authLoading) {
+      if (localStorageFirmId && localStorageUserRole) {
+        console.log('⚠️ CompanyHighlights: AuthContext still loading but localStorage has data, proceeding...', { localStorageFirmId, localStorageUserRole });
+        // Continue - don't return
+      } else {
+        console.log('⏳ CompanyHighlights: Waiting for auth to load...');
+        return;
+      }
+    }
 
-      setUserRole(role);
-      setFirmId(userFirmId);
+    // Get firmId from AuthContext or localStorage (fallback)
+    const currentFirmId = firmId || JSON.parse(localStorage.getItem('userData') || '{}').firm_id;
+    const currentUserRole = userRole || localStorage.getItem('userRole') || '';
+    
+    if (!currentFirmId) {
+      console.error('❌ CompanyHighlights: No firmId found. AuthContext:', { firmId, userRole, authLoading }, 'localStorage:', localStorage.getItem('userData'));
+      return;
+    }
+    
+    console.log('✅ CompanyHighlights: Starting data fetch', { currentFirmId, currentUserRole });
+
+    const loadUserData = async () => {
+      const userId = localStorage.getItem('userId') || '';
+      
+      // Use values from AuthContext (already available via destructuring)
+      // userRole and firmId are now from AuthContext
       
       // If VDCR Manager, set active tab to documentation
-      if (role === 'vdcr_manager') {
+      if (currentUserRole === 'vdcr_manager') {
         setActiveTab('documentation');
       }
       
       // Fetch project IDs based on role
-      if (role === 'firm_admin') {
-        if (userFirmId) {
+      if (currentUserRole === 'firm_admin') {
+        if (currentFirmId) {
           // Preload all project IDs for this firm to enforce firm-level isolation
-          await fetchFirmProjects(userFirmId);
+          await fetchFirmProjects(currentFirmId);
         }
         setProjectIdsLoaded(true);
       } else if (userId) {
@@ -194,7 +227,7 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
     };
     
     loadUserData();
-  }, []);
+  }, [authLoading, firmId, userRole]); // Re-run when auth values change
   
   // Check if user can see a tab
   const canSeeTab = (tab: ActiveTab) => {
@@ -214,7 +247,29 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
 
     const fetchMilestoneUpdates = async () => {
       try {
-        const projectIds = userRole === 'firm_admin' ? firmProjectIds : assignedProjectIds;
+        // Get userRole from localStorage if empty
+        const currentUserRole = userRole || localStorage.getItem('userRole') || '';
+        
+        // Priority: Use firmProjectIds if available (regardless of userRole)
+        let projectIds: string[] = [];
+        if (firmProjectIds.length > 0) {
+          projectIds = firmProjectIds;
+        } else if (currentUserRole === 'firm_admin') {
+          // If firmProjectIds empty but user is firm_admin, fetch directly
+          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          const firmId = userData.firm_id || localStorage.getItem('firmId');
+          if (firmId) {
+            const api = (await import('@/lib/api')).default;
+            const response = await api.get(`/projects?firm_id=eq.${firmId}&select=id,status`);
+            const projects = response.data as any[];
+            projectIds = projects.map((project: any) => project.id).filter(Boolean);
+            if (projectIds.length > 0) {
+              setFirmProjectIds([...new Set(projectIds)]);
+            }
+          }
+        } else {
+          projectIds = assignedProjectIds;
+        }
 
         // If user has no visible projects, nothing to fetch
         if (!projectIds || projectIds.length === 0) {
@@ -224,25 +279,13 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
         }
 
         // Fetch all equipment with next_milestone data and cache the raw list
-        const projectKeyPart = projectIds ? projectIds.slice().sort().join('_') || 'none' : 'all';
-        const cacheKey = `${CACHE_KEYS.COMPANY_HIGHLIGHTS_MILESTONE}_${userRole || 'none'}_${projectKeyPart}`;
+        // Always fetch fresh data - don't rely on cache after refresh
+        setLoading(true);
 
-        // Only show loader if we don't already have cached data for this context
-        const hasCached = hasCache(cacheKey);
-        if (!hasCached) {
-          setLoading(true);
-        }
-
-        const equipment = await prefetchWithCache(
-          cacheKey,
-          () => fastAPI.getAllEquipmentNearingCompletion(
-            undefined,
-            undefined,
-            projectIds
-          ),
-          {
-            ttl: 30 * 1000,
-          }
+        const equipment = await fastAPI.getAllEquipmentNearingCompletion(
+          undefined,
+          undefined,
+          projectIds
         );
         
         // Filter equipment that has next_milestone - show all equipment with next_milestone set
@@ -286,7 +329,11 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
     // Determine which project IDs this user is allowed to see:
     // - firm_admin: all projects belonging to their firm (firmProjectIds)
     // - others: only projects they are assigned to (assignedProjectIds)
-    const visibleProjectIds = userRole === 'firm_admin' ? firmProjectIds : assignedProjectIds;
+    // Priority: Use firmProjectIds if available (regardless of userRole)
+    const currentUserRole = userRole || localStorage.getItem('userRole') || '';
+    const visibleProjectIds = (currentUserRole === 'firm_admin' || firmProjectIds.length > 0) 
+      ? firmProjectIds 
+      : assignedProjectIds;
 
     if (!visibleProjectIds || visibleProjectIds.length === 0) {
       // No visible projects for this user/firm, so no data should be shown
@@ -372,7 +419,29 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
       try {
         if (productionSubTab === 'key-progress') {
           // Fetch progress image METADATA for Key Progress tab with caching (no image/audio blobs here)
-          const projectIds = userRole === 'firm_admin' ? firmProjectIds : assignedProjectIds;
+          // Get userRole from localStorage if empty
+          const currentUserRole = userRole || localStorage.getItem('userRole') || '';
+          
+          // Priority: Use firmProjectIds if available (regardless of userRole)
+          let projectIds: string[] = [];
+          if (firmProjectIds.length > 0) {
+            projectIds = firmProjectIds;
+          } else if (currentUserRole === 'firm_admin') {
+            // If firmProjectIds empty but user is firm_admin, fetch directly
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            const firmId = userData.firm_id || localStorage.getItem('firmId');
+            if (firmId) {
+              const api = (await import('@/lib/api')).default;
+              const response = await api.get(`/projects?firm_id=eq.${firmId}&select=id,status`);
+              const projects = response.data as any[];
+              projectIds = projects.map((project: any) => project.id).filter(Boolean);
+              if (projectIds.length > 0) {
+                setFirmProjectIds([...new Set(projectIds)]);
+              }
+            }
+          } else {
+            projectIds = assignedProjectIds;
+          }
 
           // If user has no visible projects, nothing to fetch
           if (!projectIds || projectIds.length === 0) {
@@ -383,26 +452,15 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
             return;
           }
 
-          const projectKeyPart = projectIds ? projectIds.slice().sort().join('_') || 'none' : 'all';
-          const cacheKey = `${CACHE_KEYS.COMPANY_HIGHLIGHTS_PRODUCTION}_key_progress_${userRole || 'none'}_${timePeriod}_${projectKeyPart}`;
-
-          // Only show loader if we don't already have cached data for this context
-          const hasCached = hasCache(cacheKey);
-          if (!hasCached && isMounted && !abortController.signal.aborted) {
+          // Always fetch fresh data - don't rely on cache after refresh
+          if (isMounted && !abortController.signal.aborted) {
             setLoading(true);
           }
 
-          const images = await prefetchWithCache(
-            cacheKey,
-            () => fastAPI.getAllProgressImagesMetadata(
-              dateRangeStart, 
-              dateRangeEnd,
-              projectIds
-            ),
-            {
-              // Short TTL (30s) for testing cache behaviour; increase later for production.
-              ttl: 30 * 1000,
-            }
+          const images = await fastAPI.getAllProgressImagesMetadata(
+            dateRangeStart, 
+            dateRangeEnd,
+            projectIds
           );
           
           // Only update state if component is still mounted and request wasn't aborted
@@ -413,7 +471,29 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
           }
         } else {
           // All Updates: fetch progress entry METADATA with caching (no image/audio blobs here)
-          const projectIds = userRole === 'firm_admin' ? firmProjectIds : assignedProjectIds;
+          // Get userRole from localStorage if empty
+          const currentUserRole = userRole || localStorage.getItem('userRole') || '';
+          
+          // Priority: Use firmProjectIds if available (regardless of userRole)
+          let projectIds: string[] = [];
+          if (firmProjectIds.length > 0) {
+            projectIds = firmProjectIds;
+          } else if (currentUserRole === 'firm_admin') {
+            // If firmProjectIds empty but user is firm_admin, fetch directly
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            const firmId = userData.firm_id || localStorage.getItem('firmId');
+            if (firmId) {
+              const api = (await import('@/lib/api')).default;
+              const response = await api.get(`/projects?firm_id=eq.${firmId}&select=id,status`);
+              const projects = response.data as any[];
+              projectIds = projects.map((project: any) => project.id).filter(Boolean);
+              if (projectIds.length > 0) {
+                setFirmProjectIds([...new Set(projectIds)]);
+              }
+            }
+          } else {
+            projectIds = assignedProjectIds;
+          }
 
           // If user has no visible projects, nothing to fetch
           if (!projectIds || projectIds.length === 0) {
@@ -424,25 +504,15 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
             return;
           }
 
-          const projectKeyPart = projectIds ? projectIds.slice().sort().join('_') || 'none' : 'all';
-          const cacheKey = `${CACHE_KEYS.COMPANY_HIGHLIGHTS_PRODUCTION}_all_updates_${userRole || 'none'}_${timePeriod}_${projectKeyPart}`;
-
-          // Only show loader if we don't already have cached data for this context
-          const hasCached = hasCache(cacheKey);
-          if (!hasCached && isMounted && !abortController.signal.aborted) {
+          // Always fetch fresh data - don't rely on cache after refresh
+          if (isMounted && !abortController.signal.aborted) {
             setLoading(true);
           }
 
-          const entries = await prefetchWithCache(
-            cacheKey,
-            () => fastAPI.getAllProgressEntriesMetadata(
-              dateRangeStart,
-              dateRangeEnd,
-              projectIds
-            ),
-            {
-              ttl: 30 * 1000,
-            }
+          const entries = await fastAPI.getAllProgressEntriesMetadata(
+            dateRangeStart,
+            dateRangeEnd,
+            projectIds
           );
           
           // Only update state if component is still mounted and request wasn't aborted
@@ -493,10 +563,52 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
       // Don't set main loading state here to avoid conflicts
       // Equipment card updates are fetched separately and merged if needed
       try {
-        const projectIds = userRole === 'firm_admin' ? firmProjectIds : assignedProjectIds;
+        // Get userRole from localStorage if empty
+        const currentUserRole = userRole || localStorage.getItem('userRole') || '';
+        
+        console.log('🔧 CompanyHighlights: fetchEquipmentCardUpdates called', {
+          userRole,
+          currentUserRole,
+          firmProjectIdsLength: firmProjectIds.length,
+          assignedProjectIdsLength: assignedProjectIds.length
+        });
+        
+        // For firm_admin, use firmProjectIds if available, otherwise fetch
+        let projectIds: string[] = [];
+        
+        // Priority 1: Use firmProjectIds if available (regardless of userRole)
+        if (firmProjectIds.length > 0) {
+          projectIds = firmProjectIds;
+          console.log('🔧 CompanyHighlights: Using cached firmProjectIds:', projectIds.length, projectIds);
+        } 
+        // Priority 2: If firmProjectIds empty but user is firm_admin, fetch directly
+        else if (currentUserRole === 'firm_admin') {
+          console.log('🔧 CompanyHighlights: firmProjectIds empty, fetching directly...');
+          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          const firmId = userData.firm_id || localStorage.getItem('firmId');
+          console.log('🔧 CompanyHighlights: FirmId from localStorage:', firmId);
+          if (firmId) {
+            const api = (await import('@/lib/api')).default;
+            const response = await api.get(`/projects?firm_id=eq.${firmId}&select=id,status`);
+            const projects = response.data as any[];
+            projectIds = projects.map((project: any) => project.id).filter(Boolean);
+            console.log('🔧 CompanyHighlights: Fetched projectIds directly:', projectIds.length, projectIds);
+            // Update state for future use
+            if (projectIds.length > 0) {
+              setFirmProjectIds([...new Set(projectIds)]);
+            }
+          } else {
+            console.warn('⚠️ CompanyHighlights: No firmId found in localStorage');
+          }
+        } 
+        // Priority 3: Use assignedProjectIds for non-firm_admin users
+        else {
+          projectIds = assignedProjectIds;
+          console.log('🔧 CompanyHighlights: Using assignedProjectIds:', projectIds.length);
+        }
         
         if (!projectIds || projectIds.length === 0) {
-          // No visible projects, so no equipment updates to show
+          console.warn('⚠️ CompanyHighlights: No project IDs available, skipping equipment logs fetch');
           setEquipmentCardUpdates([]);
           setLoading(false);
           return;
@@ -504,6 +616,22 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
 
         // Fetch equipment activity logs with activity_type = 'equipment_updated'
         const allUpdates: any[] = [];
+        
+        console.log('🔧 CompanyHighlights: Fetching equipment logs...', {
+          projectIds: projectIds?.length || 0,
+          projectIdsArray: projectIds,
+          firmProjectIdsLength: firmProjectIds.length,
+          dateRangeStart,
+          dateRangeEnd,
+          userRole
+        });
+        
+        if (!projectIds || projectIds.length === 0) {
+          console.warn('⚠️ CompanyHighlights: No project IDs available, skipping equipment logs fetch');
+          setEquipmentCardUpdates([]);
+          setLoading(false);
+          return;
+        }
         
         if (projectIds && projectIds.length > 0) {
           // Fetch for each assigned project
@@ -515,10 +643,11 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
                 dateTo: dateRangeEnd
               });
               if (Array.isArray(logs)) {
+                console.log(`🔧 CompanyHighlights: Got ${logs.length} equipment logs for project ${projectId}`);
                 allUpdates.push(...logs);
               }
             } catch (error) {
-              console.error(`Error fetching updates for project ${projectId}:`, error);
+              console.error(`❌ CompanyHighlights: Error fetching equipment logs for project ${projectId}:`, error);
             }
           }
         } else if (userRole === 'firm_admin') {
@@ -538,11 +667,14 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
             let url = `/equipment_activity_logs?activity_type=eq.equipment_updated&created_at=gte.${dateRangeStart}&created_at=lte.${dateRangeEnd}&select=*,equipment:equipment_id(id,tag_number,type,name,project_id,projects:project_id(id,name)),created_by_user:created_by(full_name,email)&order=created_at.desc`;
             const response = await apiClient.get(url);
             const logs = Array.isArray(response.data) ? response.data : [];
+            console.log(`🔧 CompanyHighlights: Got ${logs.length} equipment logs for firm_admin`);
             allUpdates.push(...logs);
           } catch (error) {
             console.error('Error fetching all equipment updates:', error);
           }
         }
+
+        console.log('🔧 CompanyHighlights: Total equipment updates collected:', allUpdates.length);
 
         // Transform activity logs to match the format expected by the UI
         const transformedUpdates = allUpdates.map((log: any) => ({
@@ -573,8 +705,20 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
       // Don't set loading to false here - let production updates control the loading state
     };
 
+    console.log('🔧 CompanyHighlights: Equipment logs fetch conditions check:', {
+      isExpanded,
+      activeTab,
+      productionSubTab,
+      canSeeTab: canSeeTab('production'),
+      projectIdsLoaded,
+      projectIds: userRole === 'firm_admin' ? firmProjectIds.length : assignedProjectIds.length
+    });
+    
     if (isExpanded && activeTab === 'production' && canSeeTab('production') && productionSubTab === 'all-updates') {
+      console.log('✅ CompanyHighlights: Conditions met, fetching equipment logs...');
       fetchEquipmentCardUpdates();
+    } else {
+      console.log('⚠️ CompanyHighlights: Equipment logs fetch skipped - conditions not met');
     }
   }, [dateRangeStart, dateRangeEnd, isExpanded, activeTab, productionSubTab, userRole, assignedProjectIds, projectIdsLoaded, completedProjectIds]);
 
@@ -758,10 +902,53 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
 
     const fetchDocumentationUpdates = async () => {
       try {
-        const projectIds = userRole === 'firm_admin' ? firmProjectIds : assignedProjectIds;
+        // Get userRole from localStorage if empty
+        const currentUserRole = userRole || localStorage.getItem('userRole') || '';
+        
+        console.log('📄 CompanyHighlights: fetchDocumentationUpdates called', {
+          userRole,
+          currentUserRole,
+          firmProjectIdsLength: firmProjectIds.length,
+          assignedProjectIdsLength: assignedProjectIds.length
+        });
+        
+        // For firm_admin, use firmProjectIds if available, otherwise fetch
+        let projectIds: string[] = [];
+        
+        // Priority 1: Use firmProjectIds if available (regardless of userRole)
+        if (firmProjectIds.length > 0) {
+          projectIds = firmProjectIds;
+          console.log('📄 CompanyHighlights: Using cached firmProjectIds:', projectIds.length, projectIds);
+        } 
+        // Priority 2: If firmProjectIds empty but user is firm_admin, fetch directly
+        else if (currentUserRole === 'firm_admin') {
+          console.log('📄 CompanyHighlights: firmProjectIds empty, fetching directly...');
+          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          const firmId = userData.firm_id || localStorage.getItem('firmId');
+          console.log('📄 CompanyHighlights: FirmId from localStorage:', firmId);
+          if (firmId) {
+            const api = (await import('@/lib/api')).default;
+            const response = await api.get(`/projects?firm_id=eq.${firmId}&select=id,status`);
+            const projects = response.data as any[];
+            projectIds = projects.map((project: any) => project.id).filter(Boolean);
+            console.log('📄 CompanyHighlights: Fetched projectIds directly:', projectIds.length, projectIds);
+            // Update state for future use
+            if (projectIds.length > 0) {
+              setFirmProjectIds([...new Set(projectIds)]);
+            }
+          } else {
+            console.warn('⚠️ CompanyHighlights: No firmId found in localStorage');
+          }
+        } 
+        // Priority 3: Use assignedProjectIds for non-firm_admin users
+        else {
+          projectIds = assignedProjectIds;
+          console.log('📄 CompanyHighlights: Using assignedProjectIds:', projectIds.length);
+        }
 
         // If user has no visible projects, nothing to fetch
         if (!projectIds || projectIds.length === 0) {
+          console.warn('⚠️ CompanyHighlights: No project IDs available, skipping VDCR fetch');
           setDocumentationUpdates([]);
           setLoading(false);
           return;
@@ -773,22 +960,36 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
         const cacheKey = `${CACHE_KEYS.COMPANY_HIGHLIGHTS_DOCUMENTATION}_${userRole || 'none'}_${timePeriod}_${projectKeyPart}`;
 
         // Only show loader if we don't already have cached data for this context
-        const hasCached = hasCache(cacheKey);
-        if (!hasCached) {
-          setLoading(true);
+        // Always fetch fresh data - don't rely on cache after refresh
+        setLoading(true);
+
+        console.log('📄 CompanyHighlights: Fetching VDCR documents...', {
+          projectIds: projectIds?.length || 0,
+          projectIdsArray: projectIds,
+          firmProjectIdsLength: firmProjectIds.length,
+          dateRangeStart,
+          dateRangeEnd,
+          userRole
+        });
+
+        if (!projectIds || projectIds.length === 0) {
+          console.warn('⚠️ CompanyHighlights: No project IDs available, skipping VDCR fetch');
+          setDocumentationUpdates([]);
+          setLoading(false);
+          return;
         }
 
-        const documents = await prefetchWithCache(
-          cacheKey,
-          () => fastAPI.getAllVDCRDocuments(
-            dateRangeStart, 
-            dateRangeEnd,
-            projectIds
-          ),
-          {
-            ttl: 30 * 1000,
-          }
+        const documents = await fastAPI.getAllVDCRDocuments(
+          dateRangeStart, 
+          dateRangeEnd,
+          projectIds
         );
+
+        console.log('📄 CompanyHighlights: VDCR documents received:', {
+          totalDocuments: Array.isArray(documents) ? documents.length : 0,
+          firstDoc: Array.isArray(documents) ? documents[0] : null,
+          allDocs: documents
+        });
 
         const docsArray = Array.isArray(documents) ? documents : [];
         // Filter to only show records with valid status (not null/undefined)
@@ -796,7 +997,19 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
           // Only show records that have been updated (status changes)
           return doc.vdcr_records?.updated_at && doc.vdcr_records?.status;
         });
+        
+        console.log('📄 CompanyHighlights: After status filter:', {
+          beforeFilter: docsArray.length,
+          afterFilter: statusChangedDocs.length
+        });
+
         const filteredDocs = filterByAssignedProjects(statusChangedDocs, 'vdcr_records.project_id');
+        
+        console.log('📄 CompanyHighlights: Final VDCR documents:', {
+          finalCount: filteredDocs.length,
+          sample: filteredDocs[0]
+        });
+
         setDocumentationUpdates(filteredDocs);
       } catch (error) {
         console.error('Error fetching documentation updates:', error);
@@ -806,8 +1019,25 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
       }
     };
 
+    const currentProjectIds = userRole === 'firm_admin' ? firmProjectIds : assignedProjectIds;
+    console.log('📄 CompanyHighlights: VDCR fetch conditions check:', {
+      isExpanded,
+      activeTab,
+      canSeeTab: canSeeTab('documentation'),
+      projectIdsLoaded,
+      projectIds: currentProjectIds.length,
+      firmProjectIds: firmProjectIds.length,
+      assignedProjectIds: assignedProjectIds.length,
+      firmProjectIdsArray: firmProjectIds,
+      dateRangeStart,
+      dateRangeEnd
+    });
+    
     if (isExpanded && activeTab === 'documentation' && canSeeTab('documentation')) {
+      console.log('✅ CompanyHighlights: Conditions met, fetching VDCR documents...');
       fetchDocumentationUpdates();
+    } else {
+      console.log('⚠️ CompanyHighlights: VDCR fetch skipped - conditions not met');
     }
   }, [dateRangeStart, dateRangeEnd, activeTab, isExpanded, userRole, assignedProjectIds, firmProjectIds, timePeriod, projectIdsLoaded, completedProjectIds]);
 
@@ -821,7 +1051,29 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
 
     const fetchTimelineUpdates = async () => {
       try {
-        const projectIds = userRole === 'firm_admin' ? firmProjectIds : assignedProjectIds;
+        // Get userRole from localStorage if empty
+        const currentUserRole = userRole || localStorage.getItem('userRole') || '';
+        
+        // Priority: Use firmProjectIds if available (regardless of userRole)
+        let projectIds: string[] = [];
+        if (firmProjectIds.length > 0) {
+          projectIds = firmProjectIds;
+        } else if (currentUserRole === 'firm_admin') {
+          // If firmProjectIds empty but user is firm_admin, fetch directly
+          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          const firmId = userData.firm_id || localStorage.getItem('firmId');
+          if (firmId) {
+            const api = (await import('@/lib/api')).default;
+            const response = await api.get(`/projects?firm_id=eq.${firmId}&select=id,status`);
+            const projects = response.data as any[];
+            projectIds = projects.map((project: any) => project.id).filter(Boolean);
+            if (projectIds.length > 0) {
+              setFirmProjectIds([...new Set(projectIds)]);
+            }
+          }
+        } else {
+          projectIds = assignedProjectIds;
+        }
 
         // If user has no visible projects, nothing to fetch
         if (!projectIds || projectIds.length === 0) {
@@ -831,26 +1083,13 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
           return;
         }
 
-        // Fetch all equipment without date filtering, but cache the raw list
-        const projectKeyPart = projectIds ? projectIds.slice().sort().join('_') || 'none' : 'all';
-        const cacheKey = `${CACHE_KEYS.COMPANY_HIGHLIGHTS_TIMELINE}_${userRole || 'none'}_${projectKeyPart}`;
+        // Always fetch fresh data - don't rely on cache after refresh
+        setLoading(true);
 
-        // Only show loader if we don't already have cached data for this context
-        const hasCached = hasCache(cacheKey);
-        if (!hasCached) {
-          setLoading(true);
-        }
-
-        const equipment = await prefetchWithCache(
-          cacheKey,
-          () => fastAPI.getAllEquipmentNearingCompletion(
-            undefined,
-            undefined,
-            projectIds
-          ),
-          {
-            ttl: 30 * 1000,
-          }
+        const equipment = await fastAPI.getAllEquipmentNearingCompletion(
+          undefined,
+          undefined,
+          projectIds
         );
         
         // Separate equipment into two groups: with PO-CDD dates and without
@@ -959,7 +1198,30 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
             setProductionUpdates(Array.isArray(filteredImages) ? filteredImages : []);
           } else {
             // Fetch progress entries for All Updates tab
-            const projectIds = userRole === 'firm_admin' ? firmProjectIds : assignedProjectIds;
+            // Get userRole from localStorage if empty
+            const currentUserRole = userRole || localStorage.getItem('userRole') || '';
+            
+            // Priority: Use firmProjectIds if available (regardless of userRole)
+            let projectIds: string[] = [];
+            if (firmProjectIds.length > 0) {
+              projectIds = firmProjectIds;
+            } else if (currentUserRole === 'firm_admin') {
+              // If firmProjectIds empty but user is firm_admin, fetch directly
+              const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+              const firmId = userData.firm_id || localStorage.getItem('firmId');
+              if (firmId) {
+                const api = (await import('@/lib/api')).default;
+                const response = await api.get(`/projects?firm_id=eq.${firmId}&select=id,status`);
+                const projects = response.data as any[];
+                projectIds = projects.map((project: any) => project.id).filter(Boolean);
+                if (projectIds.length > 0) {
+                  setFirmProjectIds([...new Set(projectIds)]);
+                }
+              }
+            } else {
+              projectIds = assignedProjectIds;
+            }
+            
             if (!projectIds || projectIds.length === 0) {
               setProductionUpdates([]);
               return;

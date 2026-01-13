@@ -227,12 +227,17 @@ const UnifiedProjectView = ({
       // Load activity logs for Activity Log tab
       try {
         const { activityApi } = await import('@/lib/activityApi');
+        console.log('📄 UnifiedProjectView: Fetching VDCR activity logs for project:', projectId);
         const logs = await activityApi.getVDCRActivityLogs(projectId);
         const logsArray = Array.isArray(logs) ? logs : [];
-        console.log('✅ Loaded VDCR activity logs:', logsArray.length, 'logs');
+        console.log('📄 UnifiedProjectView: VDCR activity logs loaded:', {
+          count: logsArray.length,
+          firstLog: logsArray[0],
+          allLogs: logsArray
+        });
         setVdcrRecords(logsArray);
       } catch (error) {
-        console.error('❌ Error loading VDCR activity logs:', error);
+        console.error('❌ UnifiedProjectView: Error loading VDCR activity logs:', error);
         setVdcrRecords([]);
       }
       
@@ -260,12 +265,20 @@ const UnifiedProjectView = ({
   const loadEquipmentProgressEntries = async () => {
     try {
       setIsLoadingEquipmentLogs(true);
+      console.log('🔧 UnifiedProjectView: Loading equipment logs for project:', projectId);
       // Import activityApi to fetch from equipment_activity_logs table
       const { activityApi } = await import('@/lib/activityApi');
       const entries = await activityApi.getEquipmentActivityLogs(projectId);
-      setEquipmentProgressEntries(entries as any[]);
+      const entriesArray = Array.isArray(entries) ? entries : [];
+      console.log('🔧 UnifiedProjectView: Equipment logs loaded:', {
+        count: entriesArray.length,
+        firstEntry: entriesArray[0],
+        allEntries: entriesArray
+      });
+      setEquipmentProgressEntries(entriesArray);
     } catch (error) {
-      // console.error('Error loading equipment activity logs:', error);
+      console.error('❌ UnifiedProjectView: Error loading equipment activity logs:', error);
+      setEquipmentProgressEntries([]);
     } finally {
       setIsLoadingEquipmentLogs(false);
     }
@@ -1665,6 +1678,10 @@ const UnifiedProjectView = ({
                     <div className="space-y-4">
                         {/* Filtered VDCR Logs */}
                         {(() => {
+                          console.log('📄 UnifiedProjectView: Rendering VDCR logs, vdcrRecords:', {
+                            length: vdcrRecords?.length || 0,
+                            records: vdcrRecords
+                          });
                           // Use VDCR activity logs from database
                           const vdcrLogs = (vdcrRecords || []).map((log, index) => {
                             // Determine status based on activity type and new_value
@@ -2135,6 +2152,10 @@ const UnifiedProjectView = ({
 
                           // Use real equipment activity logs from equipment_activity_logs table
                           const entries = equipmentProgressEntries || [];
+                          console.log('🔧 UnifiedProjectView: Rendering equipment logs, equipmentProgressEntries:', {
+                            length: entries.length,
+                            entries: entries
+                          });
                           const equipmentLogs = entries.map((log: any, index: number) => {
                             const changes = parseChanges(log);
                             const activityInfo = getActivityTypeInfo(log.activity_type || '');

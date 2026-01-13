@@ -15,17 +15,65 @@ const api = axios.create({
   timeout: 30000 // 30 seconds timeout
 });
 
+// Cache for session token to avoid repeated getSession() calls
+let cachedSessionToken: string | null = null;
+let sessionCacheTime = 0;
+const SESSION_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Helper function to get session token with fallbacks
+async function getSessionToken(): Promise<string | null> {
+  // Try to get from cache first (if less than 5 minutes old)
+  if (cachedSessionToken && Date.now() - sessionCacheTime < SESSION_CACHE_DURATION) {
+    return cachedSessionToken;
+  }
+  
+  // Try to get from localStorage (Supabase stores session there)
+  try {
+    const storageKey = 'sb-ypdlbqrcxnugrvllbmsi-auth-token';
+    const storedSession = localStorage.getItem(storageKey);
+    if (storedSession) {
+      const parsed = JSON.parse(storedSession);
+      if (parsed?.access_token) {
+        cachedSessionToken = parsed.access_token;
+        sessionCacheTime = Date.now();
+        return cachedSessionToken;
+      }
+    }
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+  
+  // Fallback: Try getSession with short timeout
+  try {
+    const sessionPromise = supabase.auth.getSession();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('getSession timeout')), 2000) // 2 second timeout
+    );
+    
+    const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+    
+    if (!error && session?.access_token) {
+      cachedSessionToken = session.access_token;
+      sessionCacheTime = Date.now();
+      return cachedSessionToken;
+    }
+  } catch (error) {
+    // Ignore getSession errors
+  }
+  
+  return null;
+}
+
 // Add request interceptor to dynamically set Authorization header with user's JWT token
 // This is required for RLS (Row Level Security) to work correctly
 api.interceptors.request.use(async (config) => {
   try {
-    // Get the current session from Supabase
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const token = await getSessionToken();
     
-    if (session?.access_token) {
+    if (token) {
       // Use the user's JWT token for authenticated requests
       // This allows RLS policies to identify the user via auth.uid()
-      config.headers.Authorization = `Bearer ${session.access_token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     } else {
       // Fallback to anon key if no session (for public/unauthenticated requests)
       config.headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
@@ -119,15 +167,23 @@ export const activityApi = {
         query += `&offset=${filters.offset}`;
       }
       
-      // Add user information
-      query += `&select=*,created_by_user:created_by(full_name,email)`;
+      // Add user information and equipment data
+      query += `&select=*,equipment:equipment_id(id,tag_number,type,name,project_id),created_by_user:created_by(full_name,email)`;
       
+      console.log('🔧 activityApi: Equipment logs query:', query);
       const response = await api.get(query);
-      // console.log('✅ Activity logs fetched successfully:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Error fetching activity logs:', error);
-      throw error;
+      const logs = Array.isArray(response.data) ? response.data : [];
+      console.log('🔧 activityApi: Equipment logs fetched successfully:', {
+        count: logs.length,
+        firstLog: logs[0],
+        allLogs: logs
+      });
+      return logs;
+    } catch (error: any) {
+      console.error('❌ activityApi: Error fetching equipment activity logs:', error);
+      console.error('❌ activityApi: Error response:', error?.response?.data);
+      console.error('❌ activityApi: Error status:', error?.response?.status);
+      return [];
     }
   },
 
@@ -399,13 +455,14 @@ export const activityApi = {
         query += `&offset=${filters.offset}`;
       }
       
-      console.log('📋 Query:', query);
+      console.log('📋 activityApi: VDCR logs query:', query);
       const response = await api.get(query);
-      console.log('✅ VDCR activity logs fetched successfully:', response.data?.length || 0, 'logs');
-      
-      // Ensure we return an array even if response.data is null/undefined
       const logs = Array.isArray(response.data) ? response.data : [];
-      console.log('📋 Processed logs count:', logs.length);
+      console.log('📋 activityApi: VDCR activity logs fetched successfully:', {
+        count: logs.length,
+        firstLog: logs[0],
+        allLogs: logs
+      });
       
       return logs;
     } catch (error: any) {

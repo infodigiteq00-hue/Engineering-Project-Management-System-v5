@@ -14,6 +14,7 @@ import AddProjectForm from "@/components/forms/AddProjectForm";
 import { supabase } from "@/lib/supabase";
 import { fastAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import axios from "axios";
 import { logProjectCreated, logProjectUpdated, logProjectDeleted } from "@/lib/activityLogger";
 import { generateRecommendationLetterWord } from "@/utils/wordGenerator";
@@ -72,6 +73,7 @@ interface Project {
 
 const Index = () => {
   const { toast } = useToast();
+  const { firmId: authFirmId, userRole: authUserRole, userName: authUserName, loading: authLoading } = useAuth();
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [selectedProjectTab, setSelectedProjectTab] = useState<string>("equipment");
   const [projects, setProjects] = useState(mockProjects);
@@ -180,29 +182,45 @@ const Index = () => {
     }
   }, []); // Run once on mount
 
-  // Load user data from localStorage on component mount
+  // Load user data from AuthContext and localStorage on component mount
   useEffect(() => {
-    // Load and set user data from localStorage
+    // Wait for AuthContext to finish loading
+    if (authLoading) {
+      return;
+    }
+
+    // Load and set user data from AuthContext (preferred) or localStorage (fallback)
     const loadUserData = async () => {
       try {
-        
-        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        
-        if (userData && userData.full_name) {
-          setUserName(userData.full_name);
-          setUserRole(userData.role);
-          setUserEmail(userData.email);
+        // Use AuthContext values if available, otherwise fall back to localStorage
+        if (authUserName && authUserRole) {
+          setUserName(authUserName);
+          setUserRole(authUserRole);
+          
+          // Get email from localStorage as fallback
+          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          setUserEmail(userData.email || '');
         } else {
-          // Set fallback values
-          setUserName('User');
-          setUserRole('user');
-          setUserEmail('');
+          // Fallback to localStorage if AuthContext values not available
+          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          
+          if (userData && userData.full_name) {
+            setUserName(userData.full_name);
+            setUserRole(userData.role);
+            setUserEmail(userData.email);
+          } else {
+            // Set fallback values
+            setUserName('User');
+            setUserRole('user');
+            setUserEmail('');
+          }
         }
         
-        // Fetch firm data if firm_id is available
-        if (userData && userData.firm_id) {
+        // Fetch firm data if firm_id is available (from AuthContext or localStorage)
+        const firmId = authFirmId || JSON.parse(localStorage.getItem('userData') || '{}').firm_id;
+        if (firmId) {
           try {
-            const firmData = await fastAPI.getFirmById(userData.firm_id);
+            const firmData = await fastAPI.getFirmById(firmId);
             if (firmData) {
               setFirmName(firmData.name || '');
               setFirmLogo(firmData.logo_url || null);
@@ -224,45 +242,51 @@ const Index = () => {
     };
 
     loadUserData();
-  }, []);
+  }, [authLoading, authUserName, authUserRole, authFirmId]);
 
   // Fetch projects from Supabase on component mount
+  // Wait for AuthContext to finish loading, but use localStorage if available
   useEffect(() => {
+    let isMounted = true;
+    
+    // Check if we have data in localStorage
+    const localStorageFirmId = JSON.parse(localStorage.getItem('userData') || '{}').firm_id || localStorage.getItem('firmId');
+    const localStorageUserRole = localStorage.getItem('userRole');
+    
+    // If AuthContext is still loading but localStorage has data, proceed anyway
+    if (authLoading) {
+      if (localStorageFirmId && localStorageUserRole) {
+        console.log('⚠️ AuthContext still loading but localStorage has data, proceeding with fetch...', { localStorageFirmId, localStorageUserRole });
+        // Continue to fetch - don't return
+      } else {
+        console.log('⏳ Waiting for auth to load...', { authFirmId, authUserRole, localStorageFirmId, localStorageUserRole });
+        return;
+      }
+    }
+
     // Fetch and load projects from Supabase database
     const fetchProjectsFromSupabase = async () => {
       try {
-        
-        // Get current user's firm_id
-        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        const firmId = userData.firm_id;
+        // Get firmId from AuthContext or localStorage (fallback)
+        const firmId = authFirmId || JSON.parse(localStorage.getItem('userData') || '{}').firm_id || localStorage.getItem('firmId');
         
         if (!firmId) {
+          console.error('❌ No firmId found. AuthContext:', { authFirmId, authLoading, authUserRole }, 'localStorage userData:', localStorage.getItem('userData'), 'localStorage firmId:', localStorage.getItem('firmId'));
           return;
         }
+        
+        console.log('🔄 Fetching projects...', { authFirmId, firmId, authUserRole, fromAuthContext: !!authFirmId, fromLocalStorage: !authFirmId });
 
         // Fetch projects from Supabase with role-based filtering
-        const userRole = localStorage.getItem('userRole');
+        // Use values from AuthContext, with localStorage as fallback
+        const userRole = authUserRole || localStorage.getItem('userRole');
         const userId = localStorage.getItem('userId');
         
         // Create cache key based on user context
         const cacheKey = `${CACHE_KEYS.PROJECT_CARDS}_${firmId}_${userRole || 'none'}_${userId || 'none'}`;
         
-        // Check cache first for instant display
-        const cachedProjects = getCache<any[]>(cacheKey);
-        if (cachedProjects !== null && Array.isArray(cachedProjects) && cachedProjects.length > 0) {
-          // Use cached data immediately (already filtered to active projects only, max 24)
-          setProjects(cachedProjects);
-          setFilteredProjects(cachedProjects);
-          setLoading(false);
-          
-          // Fetch fresh data in background (fire and forget)
-          fetchFreshProjects(firmId, userRole || undefined, userId || undefined, cacheKey).catch(() => {
-            // Silently fail background refresh
-          });
-          return;
-        }
-        
-        // No cache, fetch fresh data
+        // Always fetch fresh data when auth becomes available (after refresh)
+        // Don't rely on cache on initial load after refresh - ensure fresh data
         setLoading(true);
         await fetchFreshProjects(firmId, userRole || undefined, userId || undefined, cacheKey);
         
@@ -275,9 +299,41 @@ const Index = () => {
     // Helper function to fetch and transform projects
     const fetchFreshProjects = async (firmId: string, userRole?: string, userId?: string, cacheKey?: string) => {
       try {
-        const supabaseProjects = await fastAPI.getProjectsByFirm(firmId, userRole, userId);
+        console.log('📡 Calling fastAPI.getProjectsByFirm...', { firmId, userRole, userId });
+        console.log('⏱️ API call started at:', new Date().toISOString());
+        
+        let supabaseProjects;
+        try {
+          // Add timeout wrapper
+          const apiPromise = fastAPI.getProjectsByFirm(firmId, userRole, userId);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('API call timeout after 60 seconds')), 60000)
+          );
+          
+          supabaseProjects = await Promise.race([apiPromise, timeoutPromise]) as any;
+          
+          console.log('⏱️ API call completed at:', new Date().toISOString());
+          console.log('📦 Received projects from API:', { 
+            isArray: Array.isArray(supabaseProjects), 
+            length: supabaseProjects?.length || 0,
+            firstProject: supabaseProjects?.[0],
+            type: typeof supabaseProjects
+          });
+        } catch (apiError: any) {
+          console.error('⏱️ API call failed at:', new Date().toISOString());
+          console.error('❌ API call failed:', apiError);
+          console.error('❌ API error details:', {
+            message: apiError?.message,
+            response: apiError?.response?.data,
+            status: apiError?.response?.status,
+            config: apiError?.config?.url,
+            stack: apiError?.stack
+          });
+          throw apiError;
+        }
         
         if (supabaseProjects && Array.isArray(supabaseProjects) && supabaseProjects.length > 0) {
+          console.log(`✅ Processing ${supabaseProjects.length} projects...`);
           
           // Transform Supabase data to match our project structure
           const transformedProjects = await Promise.all((supabaseProjects as any[]).map(async (project: any) => {
@@ -371,9 +427,11 @@ const Index = () => {
           }));
 
           // Update state with Supabase data
+          console.log(`✅ Setting ${transformedProjects.length} projects to state...`, transformedProjects.slice(0, 2));
           setProjects(transformedProjects as any);
           setFilteredProjects(transformedProjects as any);
           setLoading(false);
+          console.log('✅ Projects state updated successfully');
           
           // Cache the transformed projects (metadata only, without full equipment arrays)
           // Only cache active projects (not completed), limit to 24 projects max
@@ -394,16 +452,32 @@ const Index = () => {
             });
           }
         } else {
+          console.warn('⚠️ No projects returned from API or empty array', { 
+            supabaseProjects, 
+            isArray: Array.isArray(supabaseProjects),
+            length: supabaseProjects?.length || 0 
+          });
+          setProjects([]);
+          setFilteredProjects([]);
           setLoading(false);
         }
       } catch (error) {
         console.error('❌ Error fetching projects from Supabase:', error);
+        setProjects([]);
+        setFilteredProjects([]);
         setLoading(false);
       }
     };
 
     fetchProjectsFromSupabase();
-  }, []);
+    
+    return () => {
+      isMounted = false;
+    };
+    
+    // Only run when authLoading changes from true to false, or when we have localStorage data
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading]); // Only depend on authLoading to avoid infinite loops
 
   // Apply filters when projects change
   useEffect(() => {
@@ -880,9 +954,8 @@ const Index = () => {
   const handleAddNewProject = async (projectData: any) => {
     try {
       
-      // Get current user's firm_id
-      const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-      const firmId = userData.firm_id;
+      // Get current user's firm_id from AuthContext (preferred) or localStorage (fallback)
+      const firmId = authFirmId || JSON.parse(localStorage.getItem('userData') || '{}').firm_id;
       
       if (!firmId) {
         console.error('❌ Firm ID not found');
@@ -984,9 +1057,8 @@ const Index = () => {
   const handleEditProject = async (projectId: string) => {
     try {
       
-      // Get current user's firm_id
-      const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-      const firmId = userData.firm_id;
+      // Get firmId from AuthContext (preferred) or localStorage (fallback)
+      const firmId = authFirmId || JSON.parse(localStorage.getItem('userData') || '{}').firm_id;
       
       if (!firmId) {
         toast({ title: 'Error', description: 'Firm ID not found. Please login again.', variant: 'destructive' });
@@ -1120,9 +1192,8 @@ const Index = () => {
           setFilteredProjects(prev => prev.filter(p => p.id !== projectId));
           
           // Invalidate project cards cache
-          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-          const firmId = userData.firm_id;
-          const userRole = localStorage.getItem('userRole');
+          const firmId = authFirmId || JSON.parse(localStorage.getItem('userData') || '{}').firm_id;
+          const userRole = authUserRole || localStorage.getItem('userRole');
           const userId = localStorage.getItem('userId');
           if (firmId) {
             const cacheKey = `${CACHE_KEYS.PROJECT_CARDS}_${firmId}_${userRole || 'none'}_${userId || 'none'}`;
@@ -1769,9 +1840,8 @@ Note: Please download the Recommendation Letter template using the link above, f
     
     // Update project cards cache (lightweight version)
     // Only cache active projects (not completed), limit to 24 projects max
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    const firmId = userData.firm_id;
-    const userRole = localStorage.getItem('userRole');
+    const firmId = authFirmId || JSON.parse(localStorage.getItem('userData') || '{}').firm_id;
+    const userRole = authUserRole || localStorage.getItem('userRole');
     const userId = localStorage.getItem('userId');
     if (firmId) {
       const cacheKey = `${CACHE_KEYS.PROJECT_CARDS}_${firmId}_${userRole || 'none'}_${userId || 'none'}`;
