@@ -46,7 +46,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({ loading, userName, userRo
 
   const handleLogout = async () => {
     try {
-      console.log('🚪 Logout initiated...');
+      // console.log('🚪 Logout initiated...');
       
       // IMMEDIATE: Clear ALL storage first (but preserve critical caches)
       // Use synchronous approach to preserve critical caches
@@ -64,7 +64,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({ loading, userName, userRo
       sessionStorage.clear();
       
       // IMMEDIATE: Force redirect right away (don't wait for signOut)
-      console.log('✅ Clearing storage and redirecting immediately...');
+      // console.log('✅ Clearing storage and redirecting immediately...');
       window.location.replace('/login');
       
       // Continue signOut in background (non-blocking)
@@ -199,7 +199,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({ loading, userName, userRo
                   onClick={async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🔴 Logout clicked');
+                    // console.log('🔴 Logout clicked');
                     setShowDropdown(false);
                     await handleLogout();
                   }}

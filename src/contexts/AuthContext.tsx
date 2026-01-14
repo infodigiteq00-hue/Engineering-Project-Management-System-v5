@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(session?.user ?? null);
         if (session?.user) {
           await fetchUserData(session.user.id);
-          console.log('✅ AuthContext: fetchUserData completed', { firmId, userRole });
+          // console.log('✅ AuthContext: fetchUserData completed', { firmId, userRole });
           
           // ALWAYS restore from localStorage as backup - ensures state is always set
           // This handles cases where fetchUserData returns early or fails silently
@@ -62,7 +62,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUserRole(storedRole);
             setUserName(storedName);
             setFirmId(storedFirmId);
-            console.log('✅ AuthContext: Ensured state from localStorage', { storedFirmId, storedRole });
+            // console.log('✅ AuthContext: Ensured state from localStorage', { storedFirmId, storedRole });
           }
         } else {
           // Try to restore from localStorage if no session
@@ -74,7 +74,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUserRole(storedRole);
             setUserName(storedName);
             setFirmId(storedFirmId);
-            console.log('✅ AuthContext: Restored from localStorage (no session)', { storedFirmId, storedRole });
+            // console.log('✅ AuthContext: Restored from localStorage (no session)', { storedFirmId, storedRole });
           }
         }
       } catch (error) {
@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUserRole(storedRole);
           setUserName(storedName);
           setFirmId(storedFirmId);
-          console.log('✅ AuthContext: Restored from localStorage after error', { storedFirmId, storedRole });
+          // console.log('✅ AuthContext: Restored from localStorage after error', { storedFirmId, storedRole });
         }
       } finally {
         // Always restore from localStorage before setting loading to false
@@ -101,14 +101,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUserRole(storedRole);
           setUserName(storedName);
           setFirmId(storedFirmId);
-          console.log('✅ AuthContext: Final localStorage restore in finally block', { storedFirmId, storedRole });
+          // console.log('✅ AuthContext: Final localStorage restore in finally block', { storedFirmId, storedRole });
         }
         
         // Always set loading to false
-        console.log('✅ AuthContext: Setting loading to false', { 
-          firmId: storedFirmId || firmId, 
-          userRole: storedRole || userRole 
-        });
+        // console.log('✅ AuthContext: Setting loading to false', { 
+        //   firmId: storedFirmId || firmId, 
+        //   userRole: storedRole || userRole 
+        // });
         setLoading(false);
       }
     };
@@ -156,7 +156,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUserRole(storedRole);
           setUserName(storedName);
           setFirmId(storedFirmId);
-          console.log('✅ AuthContext: Using localStorage fallback (no email)', { storedFirmId, storedRole });
+          // console.log('✅ AuthContext: Using localStorage fallback (no email)', { storedFirmId, storedRole });
         }
         return;
       }
@@ -181,7 +181,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUserRole(storedRole);
           setUserName(storedName);
           setFirmId(storedFirmId);
-          console.log('✅ AuthContext: Using localStorage fallback (error)', { storedFirmId, storedRole });
+          // console.log('✅ AuthContext: Using localStorage fallback (error)', { storedFirmId, storedRole });
         }
         return;
       }
@@ -219,11 +219,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       };
       localStorage.setItem('userData', JSON.stringify(userDataObject));
       
-      console.log('✅ AuthContext: User data loaded and stored', { 
-        firmId: typedUserData.firm_id, 
-        role: typedUserData.role,
-        hasUserData: !!localStorage.getItem('userData')
-      });
+      // console.log('✅ AuthContext: User data loaded and stored', { 
+      //   firmId: typedUserData.firm_id, 
+      //   role: typedUserData.role,
+      //   hasUserData: !!localStorage.getItem('userData')
+      // });
     } catch (error) {
       console.error('Error in fetchUserData:', error);
     }

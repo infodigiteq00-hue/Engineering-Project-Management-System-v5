@@ -6,13 +6,13 @@ export class DataMigration {
   // Create a demo firm and migrate existing data
   static async migrateMockData() {
     try {
-      // console.log('🚀 Starting data migration...')
+      // // console.log('🚀 Starting data migration...')
 
       // 1. First, let's check if we have an authenticated user
       const { data: { user }, error: authError } = await supabase.auth.getUser()
       
       if (authError || !user) {
-        // console.log('⚠️ No authenticated user found, creating demo user...')
+        // // console.log('⚠️ No authenticated user found, creating demo user...')
         
         // Create a demo user account
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -27,10 +27,10 @@ export class DataMigration {
         })
         
         if (signUpError) {
-          // console.log('⚠️ User creation failed:', signUpError.message)
+          // // console.log('⚠️ User creation failed:', signUpError.message)
           // Continue without user for now
         } else {
-          console.log('✅ Demo user created')
+          // console.log('✅ Demo user created')
         }
       }
 
@@ -39,7 +39,7 @@ export class DataMigration {
         name: 'Demo Engineering Co.',
         subscription_plan: 'premium'
       })
-      // console.log('✅ Firm created:', firm.name)
+      // // console.log('✅ Firm created:', firm.name)
 
       // 3. Migrate existing mock projects
       const mockProjects = [
@@ -105,9 +105,9 @@ export class DataMigration {
         try {
           const project = await DatabaseService.createProject(projectData)
           createdProjects.push(project)
-          // console.log(`✅ Project created: ${project.name}`)
+          // // console.log(`✅ Project created: ${project.name}`)
         } catch (error) {
-          console.log(`⚠️ Project creation failed for ${projectData.name}:`, error)
+          // console.log(`⚠️ Project creation failed for ${projectData.name}:`, error)
         }
       }
 
@@ -199,9 +199,9 @@ export class DataMigration {
           try {
             const equipment = await DatabaseService.createEquipment(equipmentData)
             createdEquipment.push(equipment)
-            // console.log(`✅ Equipment created: ${equipment.type} ${equipment.tag_number}`)
+            // // console.log(`✅ Equipment created: ${equipment.type} ${equipment.tag_number}`)
           } catch (error) {
-            console.log(`⚠️ Equipment creation failed for ${equipmentData.tag_number}:`, error)
+            // console.log(`⚠️ Equipment creation failed for ${equipmentData.tag_number}:`, error)
           }
         }
       }
@@ -221,7 +221,7 @@ export class DataMigration {
               ...entry
             })
           } catch (error) {
-            console.log(`⚠️ Progress entry creation failed:`, error)
+            // console.log(`⚠️ Progress entry creation failed:`, error)
           }
         }
       }
@@ -240,13 +240,13 @@ export class DataMigration {
               ...position
             })
           } catch (error) {
-            console.log(`⚠️ Team position creation failed:`, error)
+            // console.log(`⚠️ Team position creation failed:`, error)
           }
         }
       }
 
-      // console.log('🎉 Data migration completed successfully!')
-      // console.log(`📊 Created: ${createdProjects.length} projects, ${createdEquipment.length} equipment items`)
+      // // console.log('🎉 Data migration completed successfully!')
+      // // console.log(`📊 Created: ${createdProjects.length} projects, ${createdEquipment.length} equipment items`)
       
       return {
         firm,
@@ -275,7 +275,7 @@ export class DataMigration {
         existingData: projects.length > 0
       }
     } catch (error) {
-      // console.log('Database not ready, migration needed')
+      // // console.log('Database not ready, migration needed')
       return {
         needsMigration: true,
         existingData: false

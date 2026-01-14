@@ -83,7 +83,7 @@ const SuperAdminDashboard = () => {
 
   const handleLogout = async () => {
     try {
-      // console.log('🚪 Logout initiated...');
+      // // console.log('🚪 Logout initiated...');
       
       // IMMEDIATE: Clear ALL storage first (but preserve critical caches)
       // Use synchronous approach to preserve critical caches
@@ -101,7 +101,7 @@ const SuperAdminDashboard = () => {
       sessionStorage.clear();
       
       // IMMEDIATE: Force redirect right away (don't wait for signOut)
-      // console.log('✅ Clearing storage and redirecting immediately...');
+      // // console.log('✅ Clearing storage and redirecting immediately...');
       window.location.replace('/login');
       
       // Continue signOut in background (non-blocking)
@@ -223,7 +223,7 @@ const SuperAdminDashboard = () => {
         admin_whatsapp: newCompany.admin_whatsapp
       });
 
-      // console.log('✅ Company created:', companyData);
+      // // console.log('✅ Company created:', companyData);
       const firmId = companyData[0]?.id || companyData.id;
 
       // Upload logo if provided
@@ -243,11 +243,11 @@ const SuperAdminDashboard = () => {
       }
 
       // 🆕 Skip user creation for now - just proceed with invite
-      // console.log('🔍 Skipping user creation, proceeding with invite...');
+      // // console.log('🔍 Skipping user creation, proceeding with invite...');
 
       // 🆕 Test invites table first
       try {
-        // console.log('🔍 Testing invites table...');
+        // // console.log('🔍 Testing invites table...');
         const tableExists = await fastAPI.testInvitesTable();
         if (!tableExists) {
           console.error('❌ Invites table does not exist or is not accessible');
@@ -260,7 +260,7 @@ const SuperAdminDashboard = () => {
 
       // 🆕 Create invite for firm admin
       try {
-        // console.log('📧 Creating invite for firm admin...');
+        // // console.log('📧 Creating invite for firm admin...');
         await fastAPI.createInvite({
           email: newCompany.admin_email,
           full_name: newCompany.admin_name,
@@ -268,7 +268,7 @@ const SuperAdminDashboard = () => {
           firm_id: firmId,
           invited_by: user.id
         });
-        // console.log('✅ Invite created for firm admin');
+        // // console.log('✅ Invite created for firm admin');
       } catch (inviteError) {
         console.error('❌ Error creating invite (company still created):', inviteError);
         // Don't fail the whole operation if invite creation fails
@@ -276,7 +276,7 @@ const SuperAdminDashboard = () => {
 
       // Send notifications to admin
       try {
-        // console.log('📧 Sending notifications to admin...');
+        // // console.log('📧 Sending notifications to admin...');
         const notificationResult = await sendNotifications({
           company_name: newCompany.name,
           admin_name: newCompany.admin_name,
@@ -287,12 +287,12 @@ const SuperAdminDashboard = () => {
           dashboard_url: getDashboardUrl('firm_admin')
         });
 
-        // console.log('📊 Notification result:', notificationResult);
+        // // console.log('📊 Notification result:', notificationResult);
 
         if (notificationResult.success) {
-          console.log('✅ Notifications sent successfully');
+          // console.log('✅ Notifications sent successfully');
         } else {
-          console.log('⚠️ Some notifications failed, but company was created');
+          // console.log('⚠️ Some notifications failed, but company was created');
         }
       } catch (notificationError) {
         console.error('❌ Notification error (company still created):', notificationError);
@@ -344,13 +344,13 @@ const SuperAdminDashboard = () => {
     // Ensure loading state is always reset, even on early return
     try {
       setUpdatingCompany(true);
-      console.log('🔄 Starting company update for:', editingCompany.id);
+      // console.log('🔄 Starting company update for:', editingCompany.id);
 
       // Upload new logo if provided - with timeout protection
       let logoUrl = editingCompany.logo_url;
       if (editingCompanyLogo) {
         try {
-          console.log('📤 Uploading company logo...');
+          // console.log('📤 Uploading company logo...');
           const uploadStartTime = Date.now();
           
           // Add timeout wrapper
@@ -365,7 +365,7 @@ const SuperAdminDashboard = () => {
           
           logoUrl = await uploadWithTimeout;
           const uploadTime = Date.now() - uploadStartTime;
-          console.log(`✅ Logo uploaded successfully in ${uploadTime}ms:`, logoUrl);
+          // console.log(`✅ Logo uploaded successfully in ${uploadTime}ms:`, logoUrl);
         } catch (logoError: any) {
           console.error('⚠️ Error uploading logo:', logoError);
           const errorMessage = logoError?.message || 'Logo upload failed. Company will be updated without logo change.';
@@ -381,7 +381,7 @@ const SuperAdminDashboard = () => {
       }
 
       // Update company in firms table - this should always complete
-      console.log('💾 Updating company data...');
+      // console.log('💾 Updating company data...');
       const updateData = {
         name: editingCompany.name,
         subscription_plan: editingCompany.subscription_plan,
@@ -397,7 +397,7 @@ const SuperAdminDashboard = () => {
       
       try {
         await fastAPI.updateCompany(editingCompany.id, updateData);
-        console.log('✅ Company data updated successfully');
+        // console.log('✅ Company data updated successfully');
       } catch (updateError: any) {
         console.error('❌ Error updating company data:', updateError);
         throw new Error(updateError?.response?.data?.message || updateError?.message || 'Failed to update company data');
@@ -406,14 +406,14 @@ const SuperAdminDashboard = () => {
       // Update admin user if name or email changed (non-critical)
       if (editingCompany.admin_name || editingCompany.admin_email) {
         try {
-          console.log('👤 Updating admin user...');
+          // console.log('👤 Updating admin user...');
           const adminUser = users.find(user => user.firm_id === editingCompany.id && user.role === 'firm_admin');
           if (adminUser) {
             await fastAPI.updateUser(adminUser.id, {
               full_name: editingCompany.admin_name,
               email: editingCompany.admin_email
             });
-            console.log('✅ Admin user updated successfully');
+            // console.log('✅ Admin user updated successfully');
           }
         } catch (userError) {
           console.error('⚠️ Error updating admin user (non-critical):', userError);
@@ -427,10 +427,10 @@ const SuperAdminDashboard = () => {
       setEditingCompanyLogoPreview(null);
       
       // Refresh data
-      console.log('🔄 Refreshing company data...');
+      // console.log('🔄 Refreshing company data...');
       try {
         await fetchData();
-        console.log('✅ Data refreshed successfully');
+        // console.log('✅ Data refreshed successfully');
       } catch (refreshError) {
         console.error('⚠️ Error refreshing data (non-critical):', refreshError);
         // Don't fail the whole operation if refresh fails
@@ -441,7 +441,7 @@ const SuperAdminDashboard = () => {
         description: 'Company updated successfully!', 
         duration: 3000
       });
-      console.log('✅ Company update completed successfully');
+      // console.log('✅ Company update completed successfully');
     } catch (error: any) {
       console.error('❌ Error updating company:', error);
       const errorMessage = error?.response?.data?.message || error?.message || 'Unknown error occurred';
@@ -454,7 +454,7 @@ const SuperAdminDashboard = () => {
     } finally {
       // ALWAYS reset loading state, no matter what
       setUpdatingCompany(false);
-      console.log('🏁 Update process finished - loading state reset');
+      // console.log('🏁 Update process finished - loading state reset');
     }
   };
 
@@ -566,7 +566,7 @@ const SuperAdminDashboard = () => {
                   onClick={async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    // console.log('🔴 Logout clicked');
+                    // // console.log('🔴 Logout clicked');
                     setShowDropdown(false);
                     await handleLogout();
                   }}

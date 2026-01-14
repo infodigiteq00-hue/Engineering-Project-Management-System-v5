@@ -148,9 +148,9 @@ export const fastAPI = {
     
     try {
       // PERFORMANCE: Console logs commented out - uncomment if needed for debugging
-      // console.log('👥 Fetching team members for project ID:', projectId);
+      // // console.log('👥 Fetching team members for project ID:', projectId);
       const response = await api.get(`/project_members?project_id=eq.${projectId}&select=*,users(*)&order=created_at.desc`);
-      // console.log('✅ Team members response:', response.data);
+      // // console.log('✅ Team members response:', response.data);
       
       // Transform the data to include user details
       const transformedData = (response.data as any[]).map((member: any) => ({
@@ -240,16 +240,16 @@ export const fastAPI = {
   // Delete company
   async deleteCompany(id: string) {
     try {
-      // console.log('🗑️ Starting cascade delete for company:', id);
+      // // console.log('🗑️ Starting cascade delete for company:', id);
       
       // Get all projects for this company first
       const projectsResponse = await api.get(`/projects?firm_id=eq.${id}&select=id`);
       const projects = (projectsResponse.data as any[]) || [];
-      // console.log(`📋 Found ${projects.length} projects to delete`);
+      // // console.log(`📋 Found ${projects.length} projects to delete`);
       
       // Delete all related data in correct order
       for (const project of projects) {
-        // console.log(`🗑️ Deleting project: ${project.id}`);
+        // // console.log(`🗑️ Deleting project: ${project.id}`);
         
         // 1. Delete equipment documents
         const equipmentResponse = await api.get(`/equipment?project_id=eq.${project.id}&select=id`);
@@ -288,23 +288,23 @@ export const fastAPI = {
       
       // 6. Clear project_id references from users table first
       await api.patch(`/users?firm_id=eq.${id}`, { project_id: null });
-      // console.log('✅ Cleared project_id references from users');
+      // // console.log('✅ Cleared project_id references from users');
       
       // 7. Delete projects
       await api.delete(`/projects?firm_id=eq.${id}`);
-      // console.log('✅ Projects deleted');
+      // // console.log('✅ Projects deleted');
       
       // 8. Delete invites
       await api.delete(`/invites?firm_id=eq.${id}`);
-      // console.log('✅ Invites deleted');
+      // // console.log('✅ Invites deleted');
       
       // 9. Delete users (now safe)
       await api.delete(`/users?firm_id=eq.${id}`);
-      // console.log('✅ Users deleted');
+      // // console.log('✅ Users deleted');
       
       // 10. Finally delete company
       const response = await api.delete(`/firms?id=eq.${id}`);
-      // console.log('✅ Company deleted successfully');
+      // // console.log('✅ Company deleted successfully');
       return response.data;
     } catch (error) {
       console.error('❌ Error deleting company:', error);
@@ -361,9 +361,9 @@ export const fastAPI = {
         projects = (response.data as any[]) || [];
       } else if (userRole === 'firm_admin') {
         // Firm Admin sees all projects in their firm
-        console.log('🔍 Fetching projects for firm_admin, firmId:', firmId);
+        // console.log('🔍 Fetching projects for firm_admin, firmId:', firmId);
         const response = await api.get(`/projects?firm_id=eq.${firmId}&select=*&order=created_at.desc`);
-        console.log('✅ Projects API response received:', { 
+        // console.log('✅ Projects API response received:', { 
           status: response.status, 
           dataLength: Array.isArray(response.data) ? response.data.length : 0,
           firstProject: Array.isArray(response.data) ? response.data[0] : null
@@ -404,7 +404,7 @@ export const fastAPI = {
           // Remove duplicates
           assignedProjectIds = [...new Set(assignedProjectIds)];
           
-          console.log(`✅ Found ${assignedProjectIds.length} assigned projects for ${normalizedEmail}`);
+          // console.log(`✅ Found ${assignedProjectIds.length} assigned projects for ${normalizedEmail}`);
           
           if (assignedProjectIds.length > 0) {
             // Get projects for assigned project IDs (also filter by firm_id for security)
@@ -437,27 +437,27 @@ export const fastAPI = {
             }, {});
             
             // Fetch document data from categorized tables
-            // console.log(`📄 Fetching documents for project: ${project.id}`);
+            // // console.log(`📄 Fetching documents for project: ${project.id}`);
             const [unpricedPODocs, designInputsDocs, clientRefDocs, otherDocs] = await Promise.all([
               api.get(`/unpriced_po_documents?project_id=eq.${project.id}&select=*&order=created_at.desc`).catch((error) => {
-                // console.log(`❌ Error fetching unpriced_po_documents for project ${project.id}:`, error.response?.status);
+                // // console.log(`❌ Error fetching unpriced_po_documents for project ${project.id}:`, error.response?.status);
                 return { data: [] };
               }),
               api.get(`/design_inputs_documents?project_id=eq.${project.id}&select=*&order=created_at.desc`).catch((error) => {
-                // console.log(`❌ Error fetching design_inputs_documents for project ${project.id}:`, error.response?.status);
+                // // console.log(`❌ Error fetching design_inputs_documents for project ${project.id}:`, error.response?.status);
                 return { data: [] };
               }),
               api.get(`/client_reference_documents?project_id=eq.${project.id}&select=*&order=created_at.desc`).catch((error) => {
-                // console.log(`❌ Error fetching client_reference_documents for project ${project.id}:`, error.response?.status);
+                // // console.log(`❌ Error fetching client_reference_documents for project ${project.id}:`, error.response?.status);
                 return { data: [] };
               }),
               api.get(`/other_documents?project_id=eq.${project.id}&select=*&order=created_at.desc`).catch((error) => {
-                // console.log(`❌ Error fetching other_documents for project ${project.id}:`, error.response?.status);
+                // // console.log(`❌ Error fetching other_documents for project ${project.id}:`, error.response?.status);
                 return { data: [] };
               })
             ]);
             
-            // console.log(`📄 Document fetch results for project ${project.id}:`, {
+            // // console.log(`📄 Document fetch results for project ${project.id}:`, {
             //   unpricedPODocs: unpricedPODocs.data?.length || 0,
             //   designInputsDocs: designInputsDocs.data?.length || 0,
             //   clientRefDocs: clientRefDocs.data?.length || 0,
@@ -528,10 +528,10 @@ export const fastAPI = {
   // Update project
   async updateProject(id: string, projectData: any) {
     try {
-      // console.log('🔍 Updating project with data:', projectData);
-      // console.log('🔍 Project ID:', id);
+      // // console.log('🔍 Updating project with data:', projectData);
+      // // console.log('🔍 Project ID:', id);
       const response = await api.patch(`/projects?id=eq.${id}`, projectData);
-      // console.log('✅ Project updated successfully:', response.data);
+      // // console.log('✅ Project updated successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error updating project:', error);
@@ -543,104 +543,104 @@ export const fastAPI = {
   // Delete project
   async deleteProject(id: string) {
     try {
-      // console.log('🗑️ Attempting to delete project:', id);
+      // // console.log('🗑️ Attempting to delete project:', id);
       
       // First get all equipment for this project
-      // console.log('🗑️ Getting equipment for project...');
+      // // console.log('🗑️ Getting equipment for project...');
       const equipmentResponse = await api.get(`/equipment?project_id=eq.${id}&select=id`);
       const equipment = equipmentResponse.data || [];
       
       // Delete equipment documents first (they reference equipment)
-      // console.log('🗑️ Deleting equipment documents...');
+      // // console.log('🗑️ Deleting equipment documents...');
       for (const eq of (equipment as any[])) {
         try {
           await api.delete(`/equipment_documents?equipment_id=eq.${eq.id}`);
         } catch (error) {
-          console.log('⚠️ No equipment documents to delete for equipment:', eq.id);
+          // console.log('⚠️ No equipment documents to delete for equipment:', eq.id);
         }
       }
       
       // Delete equipment progress images
-      // console.log('🗑️ Deleting equipment progress images...');
+      // // console.log('🗑️ Deleting equipment progress images...');
       for (const eq of (equipment as any[])) {
         try {
           await api.delete(`/equipment_progress_images?equipment_id=eq.${eq.id}`);
         } catch (error) {
-          console.log('⚠️ No progress images to delete for equipment:', eq.id);
+          // console.log('⚠️ No progress images to delete for equipment:', eq.id);
         }
       }
       
       // Now delete equipment
-      // console.log('🗑️ Deleting related equipment...');
+      // // console.log('🗑️ Deleting related equipment...');
       try {
         await api.delete(`/equipment?project_id=eq.${id}`);
       } catch (error) {
-        console.log('⚠️ No equipment to delete for project:', id);
+        // console.log('⚠️ No equipment to delete for project:', id);
       }
       
       // Delete project members
-      // console.log('🗑️ Deleting related project members...');
+      // // console.log('🗑️ Deleting related project members...');
       try {
         await api.delete(`/project_members?project_id=eq.${id}`);
       } catch (error) {
-        console.log('⚠️ No project members to delete for project:', id);
+        // console.log('⚠️ No project members to delete for project:', id);
       }
       
       // Delete invites to resolve foreign key constraint
-      // console.log('🗑️ Deleting related invites...');
+      // // console.log('🗑️ Deleting related invites...');
       try {
         await api.delete(`/invites?project_id=eq.${id}`);
       } catch (error) {
-        console.log('⚠️ No invites to delete for project:', id);
+        // console.log('⚠️ No invites to delete for project:', id);
       }
       
       // Clear user references to this project (set project_id to null)
-      // console.log('🗑️ Clearing user references to project...');
+      // // console.log('🗑️ Clearing user references to project...');
       try {
         await api.patch(`/users?project_id=eq.${id}`, { project_id: null });
-        // console.log('✅ User references cleared successfully');
+        // // console.log('✅ User references cleared successfully');
       } catch (error) {
-        console.log('⚠️ No user references to clear for project:', id);
+        // console.log('⚠️ No user references to clear for project:', id);
       }
       
       // Delete VDCR records first (they reference project)
-      // console.log('🗑️ Deleting VDCR records...');
+      // // console.log('🗑️ Deleting VDCR records...');
       try {
         await api.delete(`/vdcr_records?project_id=eq.${id}`);
       } catch (error) {
-        console.log('⚠️ No VDCR records to delete for project:', id);
+        // console.log('⚠️ No VDCR records to delete for project:', id);
       }
       
       // Delete related documents
-      // console.log('🗑️ Deleting related documents...');
+      // // console.log('🗑️ Deleting related documents...');
       try {
         await api.delete(`/unpriced_po_documents?project_id=eq.${id}`);
       } catch (error) {
-        console.log('⚠️ No unpriced PO documents to delete');
+        // console.log('⚠️ No unpriced PO documents to delete');
       }
       
       try {
         await api.delete(`/design_inputs_documents?project_id=eq.${id}`);
       } catch (error) {
-        console.log('⚠️ No design inputs documents to delete');
+        // console.log('⚠️ No design inputs documents to delete');
       }
       
       try {
         await api.delete(`/client_reference_documents?project_id=eq.${id}`);
       } catch (error) {
-        console.log('⚠️ No client reference documents to delete');
+        // console.log('⚠️ No client reference documents to delete');
       }
       
       try {
         await api.delete(`/other_documents?project_id=eq.${id}`);
       } catch (error) {
-        console.log('⚠️ No other documents to delete');
+        // console.log('⚠️ No other documents to delete');
       }
       
       // Now delete the project
-      // console.log('🗑️ Deleting project...');
+      // // console.log('🗑️ Deleting project...');
       const response = await api.delete(`/projects?id=eq.${id}`);
-      // console.log('✅ Project deleted successfully:', response.data);
+      // // console.log('✅ Project deleted successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error deleting project:', error);
@@ -842,7 +842,7 @@ export const fastAPI = {
           assignedEquipmentIds = [...teamEquipmentIds];
           assignedEquipmentIds = [...new Set(assignedEquipmentIds)]; // Remove duplicates
           
-          console.log(`✅ Found ${assignedEquipmentIds.length} assigned standalone equipment for ${normalizedEmail}`);
+          // console.log(`✅ Found ${assignedEquipmentIds.length} assigned standalone equipment for ${normalizedEmail}`);
         }
   
         if (assignedEquipmentIds.length > 0) {
@@ -1074,7 +1074,7 @@ export const fastAPI = {
       const jobNumber = equipmentData.job_number?.trim() || '';
       const manufacturingSerial = equipmentData.manufacturing_serial?.trim() || '';
       
-      // console.log('🔍 Checking uniqueness for equipment:', {
+      // // console.log('🔍 Checking uniqueness for equipment:', {
       //   tag_number: tagNumber,
       //   job_number: jobNumber,
       //   manufacturing_serial: manufacturingSerial
@@ -1088,7 +1088,7 @@ export const fastAPI = {
         manufacturingSerial || undefined
       );
       
-      // console.log('🔍 Uniqueness check result:', uniquenessCheck);
+      // // console.log('🔍 Uniqueness check result:', uniquenessCheck);
       
       if (!uniquenessCheck.isUnique) {
         const errorMessage = `Cannot create equipment. ${uniquenessCheck.conflicts.join('. ')}. Each Tag Number, Job Number, and Manufacturing Serial Number must be unique across all projects.`;
@@ -1096,9 +1096,9 @@ export const fastAPI = {
         throw new Error(errorMessage);
       }
       
-      // console.log('✅ Uniqueness validation passed, creating equipment...');
+      // // console.log('✅ Uniqueness validation passed, creating equipment...');
       const response = await api.post('/equipment', equipmentData);
-      // console.log('✅ Equipment create API response:', response.data);
+      // // console.log('✅ Equipment create API response:', response.data);
       
       // Log equipment creation
       if (response.data && Array.isArray(response.data) && response.data.length > 0) {
@@ -1254,7 +1254,7 @@ export const fastAPI = {
   // Update equipment
   async updateEquipment(id: string, equipmentData: any, currentUserId?: string) {
   try {
-    // console.log('🔧 updateEquipment called with:', { id, equipmentData, currentUserId });
+    // // console.log('🔧 updateEquipment called with:', { id, equipmentData, currentUserId });
     
     // Get current equipment data to track changes
     const currentEquipmentResponse = await api.get(`/equipment?id=eq.${id}&select=*`);
@@ -1289,7 +1289,7 @@ export const fastAPI = {
     };
     
     const response = await api.patch(`/equipment?id=eq.${id}`, updateData);
-    // console.log('✅ Equipment update API response:', response.data);
+    // // console.log('✅ Equipment update API response:', response.data);
     
     // Track changes for logging
     if (currentEquipment && response.data && Array.isArray(response.data) && response.data.length > 0) {
@@ -1734,7 +1734,7 @@ export const fastAPI = {
   async createTeamPosition(teamPositionData: any) {
     try {
       const response = await api.post('/equipment_team_positions', teamPositionData);
-      // console.log('✅ Team position create API response:', response.data);
+      // // console.log('✅ Team position create API response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error creating team position:', error);
@@ -1746,7 +1746,7 @@ export const fastAPI = {
   async createStandaloneTeamPosition(teamPositionData: any) {
     try {
       const response = await api.post('/standalone_equipment_team_positions', teamPositionData);
-      // console.log('✅ Standalone team position create API response:', response.data);
+      // // console.log('✅ Standalone team position create API response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error creating standalone team position:', error);
@@ -1781,7 +1781,7 @@ export const fastAPI = {
   async createDocument(documentData: any) {
     try {
       const response = await api.post('/equipment_documents', documentData);
-      // console.log('✅ Document create API response:', response.data);
+      // // console.log('✅ Document create API response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error creating document:', error);
@@ -1792,10 +1792,10 @@ export const fastAPI = {
   // Get documents by equipment ID
   async getDocumentsByEquipment(equipmentId: string) {
     try {
-      // console.log(`🔍 Fetching documents for equipment ID: ${equipmentId}`);
+      // // console.log(`🔍 Fetching documents for equipment ID: ${equipmentId}`);
       const response = await api.get(`/equipment_documents?equipment_id=eq.${equipmentId}&select=*&order=upload_date.desc`);
-      // console.log('✅ Documents fetch API response:', response.data);
-      // console.log(`📊 Found ${(response.data as any[])?.length || 0} documents for equipment ${equipmentId}`);
+      // // console.log('✅ Documents fetch API response:', response.data);
+      // // console.log(`📊 Found ${(response.data as any[])?.length || 0} documents for equipment ${equipmentId}`);
       
       let documents = Array.isArray(response.data) ? response.data : [];
       
@@ -1836,10 +1836,10 @@ export const fastAPI = {
   // Get all documents (for debugging)
   async getAllDocuments() {
     try {
-      // console.log('🔍 Fetching ALL documents from database...');
+      // // console.log('🔍 Fetching ALL documents from database...');
       const response = await api.get('/equipment_documents?select=*&order=created_at.desc');
-      // console.log('✅ All documents response:', response.data);
-      // console.log(`📊 Total documents in database: ${(response.data as any[])?.length || 0}`);
+      // // console.log('✅ All documents response:', response.data);
+      // // console.log(`📊 Total documents in database: ${(response.data as any[])?.length || 0}`);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error fetching all documents:', error);
@@ -1854,9 +1854,9 @@ export const fastAPI = {
       return [];
     }
     try {
-      // console.log('👥 Fetching project members for project ID:', projectId);
+      // // console.log('👥 Fetching project members for project ID:', projectId);
       const response = await api.get(`/project_members?project_id=eq.${projectId}&select=*&order=created_at.desc`);
-      // console.log('✅ Project members response:', response.data);
+      // // console.log('✅ Project members response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error fetching project members:', error);
@@ -1870,14 +1870,14 @@ export const fastAPI = {
       throw new Error('Cannot create project member for standalone equipment. Use team_positions instead.');
     }
     try {
-      // console.log('👥 Creating project member:', memberData);
+      // // console.log('👥 Creating project member:', memberData);
       const response = await api.post('/project_members', memberData, {
         headers: {
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal'
         }
       });
-      // console.log('✅ Project member created successfully');
+      // // console.log('✅ Project member created successfully');
       return response.data;
     } catch (error: any) {
       console.error('❌ Error creating project member:', error);
@@ -1888,7 +1888,7 @@ export const fastAPI = {
 
   async updateProjectMember(memberId: string, memberData: any) {
     try {
-      // console.log('👥 Updating project member:', memberId, memberData);
+      // // console.log('👥 Updating project member:', memberId, memberData);
       
       // Remove user_id from update data if it's not provided (to avoid constraint issues)
       const updateData = { ...memberData };
@@ -1902,7 +1902,7 @@ export const fastAPI = {
           'Prefer': 'return=minimal'
         }
       });
-      // console.log('✅ Project member updated successfully');
+      // // console.log('✅ Project member updated successfully');
       return response.data;
     } catch (error: any) {
       console.error('❌ Error updating project member:', error);
@@ -1912,13 +1912,13 @@ export const fastAPI = {
 
   async deleteProjectMember(memberId: string) {
     try {
-      // console.log('👥 Deleting project member:', memberId);
+      // // console.log('👥 Deleting project member:', memberId);
       const response = await api.delete(`/project_members?id=eq.${memberId}`, {
         headers: {
           'Prefer': 'return=minimal'
         }
       });
-      // console.log('✅ Project member deleted successfully');
+      // // console.log('✅ Project member deleted successfully');
       return response.data;
     } catch (error: any) {
       console.error('❌ Error deleting project member:', error);
@@ -1968,7 +1968,7 @@ export const fastAPI = {
   // Import existing documents from storage to database (PERFECT SETUP)
   async importExistingDocuments() {
     try {
-      // console.log('🔄 PERFECT: Importing existing documents from storage...');
+      // // console.log('🔄 PERFECT: Importing existing documents from storage...');
       
       // List all files in project-documents bucket
       const { data: files, error } = await supabase.storage
@@ -1983,7 +1983,7 @@ export const fastAPI = {
         return [];
       }
       
-      // console.log('📁 PERFECT: Found files in storage:', files);
+      // // console.log('📁 PERFECT: Found files in storage:', files);
       
       const importedDocs = [];
       
@@ -2012,7 +2012,7 @@ export const fastAPI = {
             // Save to database
             const savedDoc = await this.createDocument(documentData);
             importedDocs.push(savedDoc);
-            // console.log('✅ PERFECT: Imported document:', file.name);
+            // // console.log('✅ PERFECT: Imported document:', file.name);
             
           } catch (importError) {
             console.error(`❌ Error importing file ${file.name}:`, importError);
@@ -2020,7 +2020,7 @@ export const fastAPI = {
         }
       }
       
-      // console.log(`✅ PERFECT: Imported ${importedDocs.length} documents from storage`);
+      // // console.log(`✅ PERFECT: Imported ${importedDocs.length} documents from storage`);
       return importedDocs;
       
     } catch (error: any) {
@@ -2032,7 +2032,7 @@ export const fastAPI = {
   // Upload company logo to Supabase storage
   async uploadCompanyLogo(file: File, firmId: string): Promise<string> {
     try {
-      console.log('📤 Starting logo upload for firm:', firmId);
+      // console.log('📤 Starting logo upload for firm:', firmId);
       
       // Validate file type (images and PDF)
       const validTypes = [
@@ -2060,7 +2060,7 @@ export const fastAPI = {
       const filePath = `company-logos/${firmId}/${fileName}`;
       const bucket = 'project-documents';
       
-      console.log('📁 Uploading to:', filePath);
+      // console.log('📁 Uploading to:', filePath);
       
       // Use edge function for secure upload (service role key not exposed)
       const { uploadFileViaEdgeFunction } = await import('@/lib/edgeFunctions');
@@ -2070,7 +2070,7 @@ export const fastAPI = {
         file
       });
       
-      console.log('✅ Logo URL generated:', logoUrl);
+      // console.log('✅ Logo URL generated:', logoUrl);
       return logoUrl;
     } catch (error: any) {
       console.error('❌ Error uploading company logo:', error);
@@ -2081,17 +2081,17 @@ export const fastAPI = {
   // Upload file to Supabase storage (PERFECT SETUP)
   async uploadFileToStorage(file: File, equipmentId: string, bucket: string = 'project-documents'): Promise<string> {
     try {
-      // console.log('📤 PERFECT: Uploading file to Supabase storage:', file.name);
-      // console.log('📤 PERFECT: File size:', file.size, 'bytes');
-      // console.log('📤 PERFECT: Equipment ID:', equipmentId);
-      // console.log('📤 PERFECT: Bucket:', bucket);
+      // // console.log('📤 PERFECT: Uploading file to Supabase storage:', file.name);
+      // // console.log('📤 PERFECT: File size:', file.size, 'bytes');
+      // // console.log('📤 PERFECT: Equipment ID:', equipmentId);
+      // // console.log('📤 PERFECT: Bucket:', bucket);
       
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 5)}.${fileExt}`;
       const filePath = `equipment-documents/${equipmentId}/${fileName}`;
       
-      // console.log('📤 PERFECT: File path:', filePath);
-      // console.log('📤 PERFECT: Starting upload to Supabase...');
+      // // console.log('📤 PERFECT: File path:', filePath);
+      // // console.log('📤 PERFECT: Starting upload to Supabase...');
       
       // Direct upload without timeout
       const { data, error } = await supabase.storage
@@ -2101,23 +2101,23 @@ export const fastAPI = {
           upsert: false
         });
       
-      // console.log('📤 REAL: Upload completed');
-      // console.log('📤 PERFECT: Upload data:', data);
-      // console.log('📤 PERFECT: Upload error:', error);
+      // // console.log('📤 REAL: Upload completed');
+      // // console.log('📤 PERFECT: Upload data:', data);
+      // // console.log('📤 PERFECT: Upload error:', error);
       
       if (error) {
         console.error('❌ Storage upload error:', error);
         throw new Error(`Storage upload failed: ${error.message}`);
       }
       
-      // console.log('📤 PERFECT: Getting public URL...');
+      // // console.log('📤 PERFECT: Getting public URL...');
       // Get public URL
       const { data: urlData } = supabase.storage
         .from(bucket)
         .getPublicUrl(filePath);
       
       const fileUrl = urlData.publicUrl;
-      // console.log('✅ PERFECT: File uploaded to storage:', fileUrl);
+      // // console.log('✅ PERFECT: File uploaded to storage:', fileUrl);
       return fileUrl;
     } catch (error: any) {
       console.error('❌ PERFECT: Error uploading file to storage:', error);
@@ -2129,7 +2129,7 @@ export const fastAPI = {
   async deleteDocument(documentId: string) {
     try {
       const response = await api.delete(`/equipment_documents?id=eq.${documentId}`);
-      // console.log('✅ Document delete API response:', response.data);
+      // // console.log('✅ Document delete API response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error deleting document:', error);
@@ -2148,9 +2148,9 @@ export const fastAPI = {
     image_description?: string
   }) {
     try {
-      // console.log('📝 Updating progress entry:', entryId, updateData);
+      // // console.log('📝 Updating progress entry:', entryId, updateData);
       const response = await api.patch(`/equipment_progress_entries?id=eq.${entryId}`, updateData);
-      // console.log('✅ Progress entry update API response:', response.data);
+      // // console.log('✅ Progress entry update API response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error updating progress entry:', error);
@@ -2161,9 +2161,9 @@ export const fastAPI = {
   // Delete progress entry
   async deleteProgressEntry(entryId: string) {
     try {
-      // console.log('🗑️ Deleting progress entry:', entryId);
+      // // console.log('🗑️ Deleting progress entry:', entryId);
       const response = await api.delete(`/equipment_progress_entries?id=eq.${entryId}`);
-      // console.log('✅ Progress entry delete API response:', response.data);
+      // // console.log('✅ Progress entry delete API response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error deleting progress entry:', error);
@@ -2909,9 +2909,9 @@ export const fastAPI = {
   // Get all equipment activities by project (creation, updates, progress entries)
   async getEquipmentProgressEntriesByProject(projectId: string) {
     try {
-      // console.log('📋 Fetching all equipment activities for project:', projectId);
+      // // console.log('📋 Fetching all equipment activities for project:', projectId);
       const response = await api.get(`/equipment?project_id=eq.${projectId}&select=id,tag_number,type,status,progress_entries,created_at,updated_at,created_by,updated_by,created_by_user:created_by(full_name,email),updated_by_user:updated_by(full_name,email)&order=updated_at.desc`);
-      // console.log('✅ Equipment data fetched successfully:', response.data);
+      // // console.log('✅ Equipment data fetched successfully:', response.data);
       
       // Transform equipment data to comprehensive activity format
       const allActivities: any[] = [];
@@ -2990,7 +2990,7 @@ export const fastAPI = {
       // Sort by created_at descending (newest first)
       allActivities.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       
-      // console.log('✅ All equipment activities transformed successfully:', allActivities);
+      // // console.log('✅ All equipment activities transformed successfully:', allActivities);
       return allActivities;
     } catch (error: any) {
       console.error('❌ Error fetching equipment activities:', error);
@@ -3006,7 +3006,7 @@ export const fastAPI = {
     assigned_by: string;
   }) {
     try {
-      // console.log('🔧 Assigning manager to project:', data);
+      // // console.log('🔧 Assigning manager to project:', data);
       
       // Get user details first (need email for project_members table)
       const userResponse = await api.get(`/users?id=eq.${data.user_id}&select=email,full_name`);
@@ -3032,7 +3032,7 @@ export const fastAPI = {
         assigned_by: data.assigned_by
       });
 
-      // console.log('✅ Manager assigned to project successfully:', memberResponse.data);
+      // // console.log('✅ Manager assigned to project successfully:', memberResponse.data);
       return memberResponse.data;
     } catch (error: any) {
       console.error('❌ Error assigning manager to project:', error);
@@ -3047,7 +3047,7 @@ export const fastAPI = {
     role: 'project_manager' | 'vdcr_manager';
   }) {
     try {
-      // console.log('🗑️ Removing manager from project:', data);
+      // // console.log('🗑️ Removing manager from project:', data);
       
       // Get user email first (project_members table uses email, not user_id)
       const userResponse = await api.get(`/users?id=eq.${data.user_id}&select=email`);
@@ -3059,7 +3059,7 @@ export const fastAPI = {
       
       const response = await api.delete(`/project_members?email=eq.${user.email}&project_id=eq.${data.project_id}&role=eq.${data.role}`);
       
-      // console.log('✅ Manager removed from project successfully');
+      // // console.log('✅ Manager removed from project successfully');
       return response.data;
     } catch (error: any) {
       console.error('❌ Error removing manager from project:', error);
@@ -3070,11 +3070,11 @@ export const fastAPI = {
   // Get managers assigned to a project
   async getProjectManagers(projectId: string) {
     try {
-      // console.log('👥 Fetching project managers for project:', projectId);
+      // // console.log('👥 Fetching project managers for project:', projectId);
       
       const response = await api.get(`/project_members?project_id=eq.${projectId}&role=in.(project_manager,vdcr_manager)&select=*`);
       
-      // console.log('✅ Project managers fetched successfully:', response.data);
+      // // console.log('✅ Project managers fetched successfully:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error fetching project managers:', error);
@@ -3089,9 +3089,9 @@ export const fastAPI = {
   // Create VDCR record
   async createVDCRRecord(vdcrData: any) {
     try {
-      // console.log('📋 Creating VDCR record:', vdcrData);
+      // // console.log('📋 Creating VDCR record:', vdcrData);
       const response = await api.post('/vdcr_records', vdcrData);
-      // console.log('✅ VDCR record created successfully:', response.data);
+      // // console.log('✅ VDCR record created successfully:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error creating VDCR record:', error);
@@ -3102,9 +3102,9 @@ export const fastAPI = {
   // Get VDCR records by project
   async getVDCRRecordsByProject(projectId: string) {
     try {
-      // console.log('📋 Fetching VDCR records for project:', projectId);
+      // // console.log('📋 Fetching VDCR records for project:', projectId);
       const response = await api.get(`/vdcr_records?project_id=eq.${projectId}&select=*,updated_by_user:updated_by(full_name,email)&order=created_at.desc`);
-      // console.log('✅ VDCR records fetched successfully:', response.data);
+      // // console.log('✅ VDCR records fetched successfully:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error fetching VDCR records:', error);
@@ -3115,9 +3115,9 @@ export const fastAPI = {
   // Get VDCR records by status
   async getVDCRRecordsByStatus(projectId: string, status: string) {
     try {
-      // console.log('📋 Fetching VDCR records by status:', { projectId, status });
+      // // console.log('📋 Fetching VDCR records by status:', { projectId, status });
       const response = await api.get(`/vdcr_records?project_id=eq.${projectId}&status=eq.${status}&select=*&order=created_at.desc`);
-      // console.log('✅ VDCR records by status fetched successfully:', response.data);
+      // // console.log('✅ VDCR records by status fetched successfully:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error fetching VDCR records by status:', error);
@@ -3128,9 +3128,9 @@ export const fastAPI = {
   // Update VDCR record
   async updateVDCRRecord(vdcrId: string, updateData: any) {
     try {
-      // console.log('📋 Updating VDCR record:', { vdcrId, updateData });
+      // // console.log('📋 Updating VDCR record:', { vdcrId, updateData });
       const response = await api.patch(`/vdcr_records?id=eq.${vdcrId}`, updateData);
-      // console.log('✅ VDCR record updated successfully:', response.data);
+      // // console.log('✅ VDCR record updated successfully:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error updating VDCR record:', error);
@@ -3141,9 +3141,9 @@ export const fastAPI = {
   // Delete VDCR record
   async deleteVDCRRecord(vdcrId: string) {
     try {
-      // console.log('📋 Deleting VDCR record:', vdcrId);
+      // // console.log('📋 Deleting VDCR record:', vdcrId);
       const response = await api.delete(`/vdcr_records?id=eq.${vdcrId}`);
-      // console.log('✅ VDCR record deleted successfully:', response.data);
+      // // console.log('✅ VDCR record deleted successfully:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error deleting VDCR record:', error);
@@ -3158,9 +3158,9 @@ export const fastAPI = {
   // Create VDCR document
   async createVDCRDocument(documentData: any) {
     try {
-      // console.log('📄 Creating VDCR document:', documentData);
+      // // console.log('📄 Creating VDCR document:', documentData);
       const response = await api.post('/vdcr_documents', documentData);
-      // console.log('✅ VDCR document created successfully:', response.data);
+      // // console.log('✅ VDCR document created successfully:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error creating VDCR document:', error);
@@ -3171,9 +3171,9 @@ export const fastAPI = {
   // Get VDCR documents by record ID
   async getVDCRDocumentsByRecord(vdcrRecordId: string) {
     try {
-      // console.log('📄 Fetching VDCR documents for record:', vdcrRecordId);
+      // // console.log('📄 Fetching VDCR documents for record:', vdcrRecordId);
       const response = await api.get(`/vdcr_documents?vdcr_record_id=eq.${vdcrRecordId}&select=*&order=created_at.desc`);
-      // console.log('✅ VDCR documents fetched successfully:', response.data);
+      // // console.log('✅ VDCR documents fetched successfully:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error fetching VDCR documents:', error);
@@ -3239,9 +3239,9 @@ export const fastAPI = {
   // Delete VDCR document
   async deleteVDCRDocument(documentId: string) {
     try {
-      // console.log('📄 Deleting VDCR document:', documentId);
+      // // console.log('📄 Deleting VDCR document:', documentId);
       const response = await api.delete(`/vdcr_documents?id=eq.${documentId}`);
-      // console.log('✅ VDCR document deleted successfully:', response.data);
+      // // console.log('✅ VDCR document deleted successfully:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error deleting VDCR document:', error);
@@ -3263,7 +3263,7 @@ export const fastAPI = {
     invited_by: string;
   }) {
     try {
-      // console.log('📧 Creating invite record:', inviteData);
+      // // console.log('📧 Creating invite record:', inviteData);
       
       // Generate invitation token
       const invitationToken = `invite_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -3274,11 +3274,11 @@ export const fastAPI = {
       
       // Create a simple system user entry first
       let invitedByUserId = inviteData.invited_by;
-      // console.log('🔍 Creating system user entry for foreign key constraint...');
+      // // console.log('🔍 Creating system user entry for foreign key constraint...');
       
       try {
         // Create a simple system user entry using REST API
-        // console.log('🔍 Creating system user via REST API...');
+        // // console.log('🔍 Creating system user via REST API...');
         const systemUserResponse = await api.post('/users', {
           id: inviteData.invited_by,
           email: 'system@system.com',
@@ -3291,14 +3291,14 @@ export const fastAPI = {
           phone: null
         });
         
-        // console.log('✅ System user created via REST API:', systemUserResponse.data);
+        // // console.log('✅ System user created via REST API:', systemUserResponse.data);
       } catch (error: any) {
-        console.log('⚠️ System user creation failed (might already exist):', error.response?.data || error.message);
+        // console.log('⚠️ System user creation failed (might already exist):', error.response?.data || error.message);
       }
       
-      // console.log('🔍 Using provided user ID for invite:', invitedByUserId);
+      // // console.log('🔍 Using provided user ID for invite:', invitedByUserId);
       
-      // console.log('📤 Sending invite data to API:', {
+      // // console.log('📤 Sending invite data to API:', {
       //   email: inviteData.email,
       //   full_name: inviteData.full_name || null,
       //   role: inviteData.role,
@@ -3322,13 +3322,13 @@ export const fastAPI = {
         expires_at: expiresAt.toISOString()
       });
       
-      // console.log('✅ Invite created successfully!');
-      // console.log('📊 Response status:', response.status);
-      // console.log('📊 Response data:', response.data);
+      // // console.log('✅ Invite created successfully!');
+      // // console.log('📊 Response status:', response.status);
+      // // console.log('📊 Response data:', response.data);
       
       // Send email notification for the invite
       try {
-        // console.log('📧 Sending email notification for invite...');
+        // // console.log('📧 Sending email notification for invite...');
         const { sendEmailNotification } = await import('./notifications');
         
         // Get company name from localStorage or use default
@@ -3343,7 +3343,7 @@ export const fastAPI = {
           dashboard_url: dashboardUrl
         });
         
-        // console.log('✅ Email notification sent for invite');
+        // // console.log('✅ Email notification sent for invite');
       } catch (emailError) {
         console.error('❌ Error sending email notification for invite:', emailError);
         // Don't throw error here, invite was created successfully
@@ -3361,7 +3361,7 @@ export const fastAPI = {
   async getInviteByEmail(email: string) {
     try {
       const normalizedEmail = email.toLowerCase().trim();
-      console.log('🔍 Checking for pending invite (case-insensitive):', normalizedEmail);
+      // console.log('🔍 Checking for pending invite (case-insensitive):', normalizedEmail);
       
       // First try exact match with pending status
       let response = await api.get(`/invites?status=eq.pending&order=created_at.desc&limit=100`);
@@ -3379,20 +3379,20 @@ export const fastAPI = {
             const now = new Date();
             
             if (expiresAt < now) {
-              console.log('⚠️ Invite found but expired');
+              // console.log('⚠️ Invite found but expired');
               // Update status to expired
               await this.updateInviteStatus(invite.id, 'expired');
               return null;
             }
           }
           
-          console.log('✅ Valid pending invite found:', invite);
+          // console.log('✅ Valid pending invite found:', invite);
           return invite;
         }
       }
       
       // If no pending invite found, check for accepted invites (in case signup failed but invite was marked accepted)
-      console.log('🔍 No pending invite found, checking accepted invites...');
+      // console.log('🔍 No pending invite found, checking accepted invites...');
       response = await api.get(`/invites?status=eq.accepted&order=created_at.desc&limit=100`);
       
       if (response.data && Array.isArray(response.data)) {
@@ -3401,12 +3401,12 @@ export const fastAPI = {
         );
         
         if (invite) {
-          console.log('✅ Found accepted invite (user might not have been created):', invite);
+          // console.log('✅ Found accepted invite (user might not have been created):', invite);
           return invite; // Return it so role can be used
         }
       }
       
-      console.log('ℹ️ No invite found for:', normalizedEmail);
+      // console.log('ℹ️ No invite found for:', normalizedEmail);
       return null;
     } catch (error: any) {
       console.error('❌ Error fetching invite:', error);
@@ -3419,14 +3419,14 @@ export const fastAPI = {
   // Update invite status
   async updateInviteStatus(inviteId: string, status: 'pending' | 'accepted' | 'expired') {
     try {
-      // console.log('🔄 Updating invite status:', { inviteId, status });
+      // // console.log('🔄 Updating invite status:', { inviteId, status });
       
       const response = await api.patch(`/invites?id=eq.${inviteId}`, {
         status: status,
         updated_at: new Date().toISOString()
       });
       
-      // console.log('✅ Invite status updated successfully');
+      // // console.log('✅ Invite status updated successfully');
       return response.data;
     } catch (error: any) {
       console.error('❌ Error updating invite status:', error);
@@ -3438,11 +3438,11 @@ export const fastAPI = {
   // Get all invites for a firm (for future admin dashboard)
   async getInvitesByFirm(firmId: string) {
     try {
-      // console.log('📋 Fetching invites for firm:', firmId);
+      // // console.log('📋 Fetching invites for firm:', firmId);
       
       const response = await api.get(`/invites?firm_id=eq.${firmId}&order=created_at.desc`);
       
-      // console.log('✅ Invites fetched successfully:', response.data);
+      // // console.log('✅ Invites fetched successfully:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error fetching firm invites:', error);
@@ -3453,12 +3453,12 @@ export const fastAPI = {
   // Test function to check if invites table exists
   async testInvitesTable() {
     try {
-      // console.log('🔍 Testing if invites table exists...');
+      // // console.log('🔍 Testing if invites table exists...');
       
       const response = await api.get('/invites?limit=1');
       
-      // console.log('✅ Invites table exists and is accessible');
-      // console.log('📊 Test response:', response.data);
+      // // console.log('✅ Invites table exists and is accessible');
+      // // console.log('📊 Test response:', response.data);
       return true;
     } catch (error: any) {
       console.error('❌ Invites table test failed:', error);
@@ -3481,7 +3481,7 @@ export const assignProjectRole = async (data: {
   assigned_by: string; // Firm admin's user ID
 }) => {
   try {
-    // console.log('🔧 Assigning project role:', data);
+    // // console.log('🔧 Assigning project role:', data);
     
     // First create user in users table
     const userResponse = await axios.post(`${SUPABASE_URL}/rest/v1/users`, {
@@ -3500,7 +3500,7 @@ export const assignProjectRole = async (data: {
       }
     });
 
-    // console.log('✅ Project role assigned successfully:', userResponse.data);
+    // // console.log('✅ Project role assigned successfully:', userResponse.data);
     return userResponse.data;
   } catch (error: any) {
     console.error('❌ Error assigning project role:', error);
@@ -3517,7 +3517,7 @@ export const assignTeamRole = async (data: {
   assigned_by: string; // Project manager's user ID
 }) => {
   try {
-    // console.log('👥 Assigning team role:', data);
+    // // console.log('👥 Assigning team role:', data);
     
     const userResponse = await axios.post(`${SUPABASE_URL}/rest/v1/users`, {
       email: data.email,
@@ -3535,7 +3535,7 @@ export const assignTeamRole = async (data: {
       }
     });
 
-    // console.log('✅ Team role assigned successfully:', userResponse.data);
+    // // console.log('✅ Team role assigned successfully:', userResponse.data);
     return userResponse.data;
   } catch (error: any) {
     console.error('❌ Error assigning team role:', error);
@@ -3546,7 +3546,7 @@ export const assignTeamRole = async (data: {
 // Get users by project
 export const getUsersByProject = async (projectId: string) => {
   try {
-    // console.log('🔍 Fetching users for project:', projectId);
+    // // console.log('🔍 Fetching users for project:', projectId);
     
     const response = await axios.get(`${SUPABASE_URL}/rest/v1/users`, {
       params: {
@@ -3559,7 +3559,7 @@ export const getUsersByProject = async (projectId: string) => {
       }
     });
 
-    // console.log('✅ Users fetched successfully:', response.data);
+    // // console.log('✅ Users fetched successfully:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('❌ Error fetching project users:', error);
@@ -3570,7 +3570,7 @@ export const getUsersByProject = async (projectId: string) => {
 // Get users by firm (excluding project-specific users)
 export const getUsersByFirm = async (firmId: string) => {
   try {
-    // console.log('🏢 Fetching users for firm:', firmId);
+    // // console.log('🏢 Fetching users for firm:', firmId);
     
     const response = await axios.get(`${SUPABASE_URL}/rest/v1/users`, {
       params: {
@@ -3584,7 +3584,7 @@ export const getUsersByFirm = async (firmId: string) => {
       }
     });
 
-    // console.log('✅ Firm users fetched successfully:', response.data);
+    // // console.log('✅ Firm users fetched successfully:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('❌ Error fetching firm users:', error);
@@ -3595,7 +3595,7 @@ export const getUsersByFirm = async (firmId: string) => {
 // Update user role
 export const updateUserRole = async (userId: string, newRole: string) => {
   try {
-    // console.log('🔄 Updating user role:', { userId, newRole });
+    // // console.log('🔄 Updating user role:', { userId, newRole });
     
     const response = await axios.patch(`${SUPABASE_URL}/rest/v1/users`, {
       role: newRole
@@ -3611,7 +3611,7 @@ export const updateUserRole = async (userId: string, newRole: string) => {
       }
     });
 
-    // console.log('✅ User role updated successfully:', response.data);
+    // // console.log('✅ User role updated successfully:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('❌ Error updating user role:', error);
@@ -3622,7 +3622,7 @@ export const updateUserRole = async (userId: string, newRole: string) => {
 // Delete user
 export const deleteUser = async (userId: string) => {
   try {
-    // console.log('🗑️ Deleting user:', userId);
+    // // console.log('🗑️ Deleting user:', userId);
     
     const response = await axios.delete(`${SUPABASE_URL}/rest/v1/users`, {
       params: {
@@ -3634,7 +3634,7 @@ export const deleteUser = async (userId: string) => {
       }
     });
 
-    // console.log('✅ User deleted successfully');
+    // // console.log('✅ User deleted successfully');
     return response.data;
   } catch (error: any) {
     console.error('❌ Error deleting user:', error);
@@ -3645,7 +3645,7 @@ export const deleteUser = async (userId: string) => {
 // Categorized Document upload functions
 export const uploadUnpricedPODocument = async (projectId: string, documentData: any) => {
   try {
-    // console.log('📄 Uploading unpriced PO document for project:', projectId);
+    // // console.log('📄 Uploading unpriced PO document for project:', projectId);
     
     // First try to insert into separate table using api instance (has JWT interceptor for RLS)
     try {
@@ -3658,10 +3658,10 @@ export const uploadUnpricedPODocument = async (projectId: string, documentData: 
         mime_type: documentData.mimeType
       });
 
-      // console.log('✅ Unpriced PO document uploaded to separate table successfully:', response.data);
+      // // console.log('✅ Unpriced PO document uploaded to separate table successfully:', response.data);
       return response.data;
     } catch (tableError: any) {
-      // console.log('⚠️ Separate table not available, using JSONB column approach');
+      // // console.log('⚠️ Separate table not available, using JSONB column approach');
       
       // Fallback to JSONB column approach
       const documentLink = {
@@ -3693,7 +3693,7 @@ export const uploadUnpricedPODocument = async (projectId: string, documentData: 
         }
       });
       
-      // console.log('✅ Unpriced PO document uploaded to JSONB column successfully:', updateResponse.data);
+      // // console.log('✅ Unpriced PO document uploaded to JSONB column successfully:', updateResponse.data);
       return [documentLink]; // Return in same format as table approach
     }
   } catch (error: any) {
@@ -3704,7 +3704,7 @@ export const uploadUnpricedPODocument = async (projectId: string, documentData: 
 
 export const uploadDesignInputsDocument = async (projectId: string, documentData: any) => {
   try {
-    // console.log('📄 Uploading design inputs document for project:', projectId);
+    // // console.log('📄 Uploading design inputs document for project:', projectId);
     
     // First try to insert into separate table using api instance (has JWT interceptor for RLS)
     try {
@@ -3717,10 +3717,10 @@ export const uploadDesignInputsDocument = async (projectId: string, documentData
         mime_type: documentData.mimeType
       });
 
-      // console.log('✅ Design inputs document uploaded to separate table successfully:', response.data);
+      // // console.log('✅ Design inputs document uploaded to separate table successfully:', response.data);
       return response.data;
     } catch (tableError: any) {
-      // console.log('⚠️ Separate table not available, using JSONB column approach');
+      // // console.log('⚠️ Separate table not available, using JSONB column approach');
       
       // Fallback to JSONB column approach
       const documentLink = {
@@ -3752,7 +3752,7 @@ export const uploadDesignInputsDocument = async (projectId: string, documentData
         }
       });
       
-      // console.log('✅ Design inputs document uploaded to JSONB column successfully:', updateResponse.data);
+      // // console.log('✅ Design inputs document uploaded to JSONB column successfully:', updateResponse.data);
       return [documentLink]; // Return in same format as table approach
     }
   } catch (error: any) {
@@ -3763,7 +3763,7 @@ export const uploadDesignInputsDocument = async (projectId: string, documentData
 
 export const uploadClientReferenceDocument = async (projectId: string, documentData: any) => {
   try {
-    // console.log('📄 Uploading client reference document for project:', projectId);
+    // // console.log('📄 Uploading client reference document for project:', projectId);
     
     // First try to insert into separate table using api instance (has JWT interceptor for RLS)
     try {
@@ -3776,10 +3776,10 @@ export const uploadClientReferenceDocument = async (projectId: string, documentD
         mime_type: documentData.mimeType
       });
 
-      // console.log('✅ Client reference document uploaded to separate table successfully:', response.data);
+      // // console.log('✅ Client reference document uploaded to separate table successfully:', response.data);
       return response.data;
     } catch (tableError: any) {
-      console.log('⚠️ Separate table not available, using JSONB column approach');
+      // console.log('⚠️ Separate table not available, using JSONB column approach');
       
       // Fallback to JSONB column approach
       const documentLink = {
@@ -3811,7 +3811,7 @@ export const uploadClientReferenceDocument = async (projectId: string, documentD
         }
       });
       
-      // console.log('✅ Client reference document uploaded to JSONB column successfully:', updateResponse.data);
+      // // console.log('✅ Client reference document uploaded to JSONB column successfully:', updateResponse.data);
       return [documentLink]; // Return in same format as table approach
     }
   } catch (error: any) {
@@ -3822,7 +3822,7 @@ export const uploadClientReferenceDocument = async (projectId: string, documentD
 
 export const uploadOtherDocument = async (projectId: string, documentData: any) => {
   try {
-    // console.log('📄 Uploading other document for project:', projectId);
+    // // console.log('📄 Uploading other document for project:', projectId);
     
     // First try to insert into separate table using api instance (has JWT interceptor for RLS)
     try {
@@ -3835,10 +3835,10 @@ export const uploadOtherDocument = async (projectId: string, documentData: any) 
         mime_type: documentData.mimeType
       });
 
-      // console.log('✅ Other document uploaded to separate table successfully:', response.data);
+      // // console.log('✅ Other document uploaded to separate table successfully:', response.data);
       return response.data;
     } catch (tableError: any) {
-      // console.log('⚠️ Separate table not available, using JSONB column approach');
+      // // console.log('⚠️ Separate table not available, using JSONB column approach');
       
       // Fallback to JSONB column approach
       const documentLink = {
@@ -3870,7 +3870,7 @@ export const uploadOtherDocument = async (projectId: string, documentData: any) 
         }
       });
       
-      // console.log('✅ Other document uploaded to JSONB column successfully:', updateResponse.data);
+      // // console.log('✅ Other document uploaded to JSONB column successfully:', updateResponse.data);
       return [documentLink]; // Return in same format as table approach
     }
   } catch (error: any) {
@@ -3881,8 +3881,8 @@ export const uploadOtherDocument = async (projectId: string, documentData: any) 
 
 export const uploadEquipmentDocument = async (equipmentId: string, documentData: any) => {
   try {
-    // console.log('📄 Uploading equipment document for equipment:', equipmentId);
-    // console.log('📄 Document data:', documentData);
+    // // console.log('📄 Uploading equipment document for equipment:', equipmentId);
+    // // console.log('📄 Document data:', documentData);
     
     const requestData = {
       equipment_id: equipmentId,
@@ -3893,8 +3893,8 @@ export const uploadEquipmentDocument = async (equipmentId: string, documentData:
       uploaded_by: documentData.uploadedBy || null
     };
     
-    // console.log('📄 Request data for equipment_documents table:', requestData);
-    // console.log('📄 Request data types:', {
+    // // console.log('📄 Request data for equipment_documents table:', requestData);
+    // // console.log('📄 Request data types:', {
     //   equipment_id: typeof requestData.equipment_id,
     //   document_name: typeof requestData.document_name,
     //   document_url: typeof requestData.document_url,
@@ -3906,9 +3906,9 @@ export const uploadEquipmentDocument = async (equipmentId: string, documentData:
     // Insert into equipment_documents table using api instance (has JWT interceptor for RLS)
     const response = await api.post('/equipment_documents', requestData);
 
-    // console.log('✅ Equipment document uploaded successfully:', response.data);
-    // console.log('✅ Response status:', response.status);
-    // console.log('✅ Full response:', response);
+    // // console.log('✅ Equipment document uploaded successfully:', response.data);
+    // // console.log('✅ Response status:', response.status);
+    // // console.log('✅ Full response:', response);
     return response.data;
   } catch (error: any) {
     console.error('❌ Error uploading equipment document:', error);
@@ -3928,7 +3928,7 @@ export const uploadEquipmentDocument = async (equipmentId: string, documentData:
 // Get equipment documents for an equipment
 export const getEquipmentDocuments = async (equipmentId: string) => {
   try {
-    // console.log('📄 Fetching documents for equipment:', equipmentId);
+    // // console.log('📄 Fetching documents for equipment:', equipmentId);
     
     // Fetch documents first using api instance (has JWT interceptor for RLS)
     const response = await api.get('/equipment_documents', {
@@ -3973,7 +3973,7 @@ export const getEquipmentDocuments = async (equipmentId: string) => {
       uploaded_by_user: doc.uploaded_by ? usersMap[doc.uploaded_by] : null
     }));
 
-    // console.log('📄 Equipment documents fetched:', documents);
+    // // console.log('📄 Equipment documents fetched:', documents);
     return documents;
   } catch (error: any) {
     console.error('❌ Error fetching equipment documents:', error);
@@ -3986,7 +3986,7 @@ export const getEquipmentDocuments = async (equipmentId: string) => {
 // Delete equipment document
 export const deleteEquipmentDocument = async (documentId: string) => {
   try {
-    // console.log('🗑️ Deleting equipment document:', documentId);
+    // // console.log('🗑️ Deleting equipment document:', documentId);
     
     const response = await api.delete('/equipment_documents', {
       params: {
@@ -3994,7 +3994,7 @@ export const deleteEquipmentDocument = async (documentId: string) => {
       }
     });
 
-    // console.log('✅ Equipment document deleted successfully');
+    // // console.log('✅ Equipment document deleted successfully');
     return response.data;
   } catch (error: any) {
     console.error('❌ Error deleting equipment document:', error);
@@ -4009,8 +4009,8 @@ export const deleteEquipmentDocument = async (documentId: string) => {
 // Upload standalone equipment document
 export const uploadStandaloneEquipmentDocument = async (equipmentId: string, documentData: any) => {
   try {
-    // console.log('📄 Uploading standalone equipment document for equipment:', equipmentId);
-    // console.log('📄 Document data:', documentData);
+    // // console.log('📄 Uploading standalone equipment document for equipment:', equipmentId);
+    // // console.log('📄 Document data:', documentData);
     
     const requestData = {
       equipment_id: equipmentId,
@@ -4024,7 +4024,7 @@ export const uploadStandaloneEquipmentDocument = async (equipmentId: string, doc
     // Insert into standalone_equipment_documents table using api instance (has JWT interceptor for RLS)
     const response = await api.post('/standalone_equipment_documents', requestData);
 
-    // console.log('✅ Standalone equipment document uploaded successfully:', response.data);
+    // // console.log('✅ Standalone equipment document uploaded successfully:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('❌ Error uploading standalone equipment document:', error);
@@ -4037,7 +4037,7 @@ export const uploadStandaloneEquipmentDocument = async (equipmentId: string, doc
 // Get standalone equipment documents for an equipment
 export const getStandaloneEquipmentDocuments = async (equipmentId: string) => {
   try {
-    // console.log('📄 Fetching standalone equipment documents for equipment:', equipmentId);
+    // // console.log('📄 Fetching standalone equipment documents for equipment:', equipmentId);
     
     // Fetch documents with user information via foreign key join (standalone references public.users)
     // Using api instance (has JWT interceptor for RLS)
@@ -4091,7 +4091,7 @@ export const getStandaloneEquipmentDocuments = async (equipmentId: string) => {
       }
     }
 
-    // console.log('📄 Standalone equipment documents fetched:', documents);
+    // // console.log('📄 Standalone equipment documents fetched:', documents);
     return documents;
   } catch (error: any) {
     console.error('❌ Error fetching standalone equipment documents:', error);
@@ -4104,7 +4104,7 @@ export const getStandaloneEquipmentDocuments = async (equipmentId: string) => {
 // Delete standalone equipment document
 export const deleteStandaloneEquipmentDocument = async (documentId: string) => {
   try {
-    // console.log('🗑️ Deleting standalone equipment document:', documentId);
+    // // console.log('🗑️ Deleting standalone equipment document:', documentId);
     
     const response = await api.delete('/standalone_equipment_documents', {
       params: {
@@ -4112,7 +4112,7 @@ export const deleteStandaloneEquipmentDocument = async (documentId: string) => {
       }
     });
 
-    // console.log('✅ Standalone equipment document deleted successfully');
+    // // console.log('✅ Standalone equipment document deleted successfully');
     return response.data;
   } catch (error: any) {
     console.error('❌ Error deleting standalone equipment document:', error);
@@ -4123,7 +4123,7 @@ export const deleteStandaloneEquipmentDocument = async (documentId: string) => {
 // Get documents for a project
 export const getProjectDocuments = async (projectId: string) => {
   try {
-    // console.log('📄 Fetching documents for project:', projectId);
+    // // console.log('📄 Fetching documents for project:', projectId);
     
     const response = await axios.get(`${SUPABASE_URL}/rest/v1/project_documents`, {
       params: {
@@ -4137,7 +4137,7 @@ export const getProjectDocuments = async (projectId: string) => {
       }
     });
 
-    // console.log('✅ Documents fetched successfully:', response.data);
+    // // console.log('✅ Documents fetched successfully:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('❌ Error fetching project documents:', error);
@@ -4148,7 +4148,7 @@ export const getProjectDocuments = async (projectId: string) => {
 // Delete document
 export const deleteDocument = async (documentId: string) => {
   try {
-    // console.log('🗑️ Deleting document:', documentId);
+    // // console.log('🗑️ Deleting document:', documentId);
     
     const response = await axios.delete(`${SUPABASE_URL}/rest/v1/project_documents`, {
       params: {
@@ -4160,7 +4160,7 @@ export const deleteDocument = async (documentId: string) => {
       }
     });
 
-    // console.log('✅ Document deleted successfully');
+    // // console.log('✅ Document deleted successfully');
     return response.data;
   } catch (error: any) {
     console.error('❌ Error deleting document:', error);
@@ -4171,7 +4171,7 @@ export const deleteDocument = async (documentId: string) => {
 // Get document by ID
 export const getDocumentById = async (documentId: string) => {
   try {
-    // console.log('📄 Fetching document by ID:', documentId);
+    // // console.log('📄 Fetching document by ID:', documentId);
     
     const response = await axios.get(`${SUPABASE_URL}/rest/v1/project_documents`, {
       params: {
@@ -4184,7 +4184,7 @@ export const getDocumentById = async (documentId: string) => {
       }
     });
 
-    // console.log('✅ Document fetched successfully:', response.data);
+    // // console.log('✅ Document fetched successfully:', response.data);
     return response.data[0]; // Return first (and only) document
   } catch (error: any) {
     console.error('❌ Error fetching document:', error);
@@ -4195,7 +4195,7 @@ export const getDocumentById = async (documentId: string) => {
 // Update project document links
 export const updateProjectDocumentLinks = async (projectId: string, documentType: string, documentLinks: any[]) => {
   try {
-    // console.log('🔄 Updating project document links:', { projectId, documentType, documentLinks });
+    // // console.log('🔄 Updating project document links:', { projectId, documentType, documentLinks });
     
     const updateData: any = {};
     updateData[documentType] = documentLinks;
@@ -4212,7 +4212,7 @@ export const updateProjectDocumentLinks = async (projectId: string, documentType
       }
     });
 
-    // console.log('✅ Project document links updated successfully:', response.data);
+    // // console.log('✅ Project document links updated successfully:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('❌ Error updating project document links:', error);
@@ -4223,7 +4223,7 @@ export const updateProjectDocumentLinks = async (projectId: string, documentType
 // Get project document links
 export const getProjectDocumentLinks = async (projectId: string) => {
   try {
-    // console.log('📄 Fetching project document links for project:', projectId);
+    // // console.log('📄 Fetching project document links for project:', projectId);
     
     const response = await axios.get(`${SUPABASE_URL}/rest/v1/projects`, {
       params: {
@@ -4236,7 +4236,7 @@ export const getProjectDocumentLinks = async (projectId: string) => {
       }
     });
 
-    // console.log('✅ Project document links fetched successfully:', response.data);
+    // // console.log('✅ Project document links fetched successfully:', response.data);
     return response.data[0]; // Return first (and only) project
   } catch (error: any) {
     console.error('❌ Error fetching project document links:', error);
@@ -4247,9 +4247,9 @@ export const getProjectDocumentLinks = async (projectId: string) => {
 // Check if equipment_documents table exists
 export const checkEquipmentDocumentsTable = async () => {
   try {
-    // console.log('🔍 CHECKING: Checking equipment_documents table...');
+    // // console.log('🔍 CHECKING: Checking equipment_documents table...');
     const response = await api.get('/equipment_documents?limit=1');
-    // console.log('✅ CHECKING: Table exists and accessible:', response.data);
+    // // console.log('✅ CHECKING: Table exists and accessible:', response.data);
     return true;
   } catch (error: any) {
     console.error('❌ CHECKING: Table check failed:', error);
@@ -4272,8 +4272,8 @@ export const createDocument = async (documentData: {
   uploaded_by: string;
 }) => {
   try {
-    // console.log('📄 PERFECT: Creating document entry in database:', documentData);
-    // console.log('📄 PERFECT: Document data:', {
+    // // console.log('📄 PERFECT: Creating document entry in database:', documentData);
+    // // console.log('📄 PERFECT: Document data:', {
     //   equipment_id: documentData.equipment_id,
     //   document_name: documentData.document_name,
     //   document_url: documentData.document_url,
@@ -4302,8 +4302,8 @@ export const createDocument = async (documentData: {
     });
     
     const dbTime = Date.now() - dbStart;
-    // console.log('📄 PERFECT: Database insert completed in', dbTime, 'ms');
-    // console.log('✅ PERFECT: Document created in database:', response.data);
+    // // console.log('📄 PERFECT: Database insert completed in', dbTime, 'ms');
+    // // console.log('✅ PERFECT: Document created in database:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('❌ PERFECT: Error creating document:', error);

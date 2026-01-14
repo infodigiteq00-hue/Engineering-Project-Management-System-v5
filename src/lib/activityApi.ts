@@ -170,14 +170,14 @@ export const activityApi = {
       // Add user information and equipment data
       query += `&select=*,equipment:equipment_id(id,tag_number,type,name,project_id),created_by_user:created_by(full_name,email)`;
       
-      console.log('🔧 activityApi: Equipment logs query:', query);
+      // console.log('🔧 activityApi: Equipment logs query:', query);
       const response = await api.get(query);
       const logs = Array.isArray(response.data) ? response.data : [];
-      console.log('🔧 activityApi: Equipment logs fetched successfully:', {
-        count: logs.length,
-        firstLog: logs[0],
-        allLogs: logs
-      });
+      // console.log('🔧 activityApi: Equipment logs fetched successfully:', {
+      //   count: logs.length,
+      //   firstLog: logs[0],
+      //   allLogs: logs
+      // });
       return logs;
     } catch (error: any) {
       console.error('❌ activityApi: Error fetching equipment activity logs:', error);
@@ -383,7 +383,7 @@ export const activityApi = {
     createdBy: string;
   }) {
     try {
-      console.log('📝 logVDCRActivity called with:', data);
+      // console.log('📝 logVDCRActivity called with:', data);
       const logData = {
         project_id: data.projectId,
         vdcr_id: data.vdcrId || null,
@@ -396,9 +396,9 @@ export const activityApi = {
         created_by: data.createdBy
       };
 
-      console.log('📝 Sending log data to API:', logData);
+      // console.log('📝 Sending log data to API:', logData);
       const response = await api.post('/vdcr_activity_logs', logData);
-      console.log('✅ VDCR activity logged successfully:', response.data);
+      // console.log('✅ VDCR activity logged successfully:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('❌ Error logging VDCR activity:', error);
@@ -421,7 +421,7 @@ export const activityApi = {
     offset?: number;
   }) {
     try {
-      console.log('📋 Fetching VDCR activity logs for project:', projectId);
+      // console.log('📋 Fetching VDCR activity logs for project:', projectId);
       
       // Build the select query first - this is critical for PostgREST
       let selectQuery = `select=*,created_by_user:created_by(full_name,email),vdcr_record:vdcr_id(document_name,status)`;
@@ -455,14 +455,14 @@ export const activityApi = {
         query += `&offset=${filters.offset}`;
       }
       
-      console.log('📋 activityApi: VDCR logs query:', query);
+      // console.log('📋 activityApi: VDCR logs query:', query);
       const response = await api.get(query);
       const logs = Array.isArray(response.data) ? response.data : [];
-      console.log('📋 activityApi: VDCR activity logs fetched successfully:', {
-        count: logs.length,
-        firstLog: logs[0],
-        allLogs: logs
-      });
+      // console.log('📋 activityApi: VDCR activity logs fetched successfully:', {
+      //   count: logs.length,
+      //   firstLog: logs[0],
+      //   allLogs: logs
+      // });
       
       return logs;
     } catch (error: any) {
@@ -486,7 +486,7 @@ export const activityApi = {
         }
         const simpleResponse = await api.get(simpleQuery);
         const simpleLogs = Array.isArray(simpleResponse.data) ? simpleResponse.data : [];
-        console.log('✅ VDCR activity logs fetched with simplified query:', simpleLogs.length, 'logs');
+        // console.log('✅ VDCR activity logs fetched with simplified query:', simpleLogs.length, 'logs');
         return simpleLogs;
       } catch (retryError) {
         console.error('❌ Error with simplified query as well:', retryError);

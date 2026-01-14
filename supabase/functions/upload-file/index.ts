@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
       }, 401)
     }
 
-    console.log('✅ JWT validated for user:', user.id)
+    // console.log('✅ JWT validated for user:', user.id)
 
     // Get service role key from environment (set as Supabase secret)
     // Note: Supabase secrets cannot start with SUPABASE_ prefix

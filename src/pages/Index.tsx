@@ -256,10 +256,10 @@ const Index = () => {
     // If AuthContext is still loading but localStorage has data, proceed anyway
     if (authLoading) {
       if (localStorageFirmId && localStorageUserRole) {
-        console.log('⚠️ AuthContext still loading but localStorage has data, proceeding with fetch...', { localStorageFirmId, localStorageUserRole });
+        // console.log('⚠️ AuthContext still loading but localStorage has data, proceeding with fetch...', { localStorageFirmId, localStorageUserRole });
         // Continue to fetch - don't return
       } else {
-        console.log('⏳ Waiting for auth to load...', { authFirmId, authUserRole, localStorageFirmId, localStorageUserRole });
+        // console.log('⏳ Waiting for auth to load...', { authFirmId, authUserRole, localStorageFirmId, localStorageUserRole });
         return;
       }
     }
@@ -275,7 +275,7 @@ const Index = () => {
           return;
         }
         
-        console.log('🔄 Fetching projects...', { authFirmId, firmId, authUserRole, fromAuthContext: !!authFirmId, fromLocalStorage: !authFirmId });
+        // console.log('🔄 Fetching projects...', { authFirmId, firmId, authUserRole, fromAuthContext: !!authFirmId, fromLocalStorage: !authFirmId });
 
         // Fetch projects from Supabase with role-based filtering
         // Use values from AuthContext, with localStorage as fallback
@@ -299,8 +299,8 @@ const Index = () => {
     // Helper function to fetch and transform projects
     const fetchFreshProjects = async (firmId: string, userRole?: string, userId?: string, cacheKey?: string) => {
       try {
-        console.log('📡 Calling fastAPI.getProjectsByFirm...', { firmId, userRole, userId });
-        console.log('⏱️ API call started at:', new Date().toISOString());
+        // console.log('📡 Calling fastAPI.getProjectsByFirm...', { firmId, userRole, userId });
+        // console.log('⏱️ API call started at:', new Date().toISOString());
         
         let supabaseProjects;
         try {
@@ -312,8 +312,8 @@ const Index = () => {
           
           supabaseProjects = await Promise.race([apiPromise, timeoutPromise]) as any;
           
-          console.log('⏱️ API call completed at:', new Date().toISOString());
-          console.log('📦 Received projects from API:', { 
+          // console.log('⏱️ API call completed at:', new Date().toISOString());
+          // console.log('📦 Received projects from API:', { 
             isArray: Array.isArray(supabaseProjects), 
             length: supabaseProjects?.length || 0,
             firstProject: supabaseProjects?.[0],
@@ -333,7 +333,7 @@ const Index = () => {
         }
         
         if (supabaseProjects && Array.isArray(supabaseProjects) && supabaseProjects.length > 0) {
-          console.log(`✅ Processing ${supabaseProjects.length} projects...`);
+          // console.log(`✅ Processing ${supabaseProjects.length} projects...`);
           
           // Transform Supabase data to match our project structure
           const transformedProjects = await Promise.all((supabaseProjects as any[]).map(async (project: any) => {
@@ -427,11 +427,11 @@ const Index = () => {
           }));
 
           // Update state with Supabase data
-          console.log(`✅ Setting ${transformedProjects.length} projects to state...`, transformedProjects.slice(0, 2));
+          // console.log(`✅ Setting ${transformedProjects.length} projects to state...`, transformedProjects.slice(0, 2));
           setProjects(transformedProjects as any);
           setFilteredProjects(transformedProjects as any);
           setLoading(false);
-          console.log('✅ Projects state updated successfully');
+          // console.log('✅ Projects state updated successfully');
           
           // Cache the transformed projects (metadata only, without full equipment arrays)
           // Only cache active projects (not completed), limit to 24 projects max

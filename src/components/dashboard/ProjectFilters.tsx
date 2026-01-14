@@ -24,8 +24,8 @@ const ProjectFilters = ({ onFilterChange, onAddNewProject, onApplyFilters, proje
   const [showAddProjectForm, setShowAddProjectForm] = useState(false);
   
   // Debug: Log projects data
-  // console.log('🔍 ProjectFilters received projects:', projects);
-  // console.log('📊 Projects count:', projects.length);
+  // // console.log('🔍 ProjectFilters received projects:', projects);
+  // // console.log('📊 Projects count:', projects.length);
   const [filters, setFilters] = useState<ProjectFilters>({
     client: 'All Clients',
     equipmentType: 'All Equipment',
@@ -44,7 +44,7 @@ const ProjectFilters = ({ onFilterChange, onAddNewProject, onApplyFilters, proje
   };
 
   const handleAddProject = (projectData: any) => {
-    // console.log('New Project Data:', projectData);
+    // // console.log('New Project Data:', projectData);
     // Send to parent component to add to dashboard
     onAddNewProject?.(projectData);
     setShowAddProjectForm(false);
@@ -53,28 +53,28 @@ const ProjectFilters = ({ onFilterChange, onAddNewProject, onApplyFilters, proje
   // Extract unique values from projects for filter options
   const getUniqueClients = () => {
     if (!projects || projects.length === 0) {
-      // console.log('⚠️ No projects available for client filter');
+      // // console.log('⚠️ No projects available for client filter');
       return [];
     }
     const clients = projects.map(p => p.client).filter(Boolean);
-    // console.log('🔍 Available clients:', clients);
+    // // console.log('🔍 Available clients:', clients);
     return [...new Set(clients)].sort();
   };
 
   const getUniqueManagers = () => {
     if (!projects || projects.length === 0) {
-      // console.log('⚠️ No projects available for manager filter');
+      // // console.log('⚠️ No projects available for manager filter');
       return [];
     }
     const managers = projects.map(p => p.manager).filter(Boolean);
-    // console.log('👥 Available managers:', managers);
+    // // console.log('👥 Available managers:', managers);
     return [...new Set(managers)].sort();
   };
 
 
   const getUniqueEquipmentTypes = () => {
     if (!projects || projects.length === 0) {
-      // console.log('⚠️ No projects available for equipment filter');
+      // // console.log('⚠️ No projects available for equipment filter');
       return [];
     }
     const equipmentTypes = new Set<string>();
@@ -91,7 +91,7 @@ const ProjectFilters = ({ onFilterChange, onAddNewProject, onApplyFilters, proje
         });
       }
     });
-    // console.log('🔧 Available equipment types:', Array.from(equipmentTypes));
+    // // console.log('🔧 Available equipment types:', Array.from(equipmentTypes));
     return Array.from(equipmentTypes).sort();
   };
 

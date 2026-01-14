@@ -47,7 +47,7 @@ const SignUp = () => {
     }
 
     try {
-      // console.log('Starting sign up process...');
+      // // console.log('Starting sign up process...');
       
       // Create user in Supabase Auth
       const { data, error: signUpError } = await supabase.auth.signUp({
@@ -61,7 +61,7 @@ const SignUp = () => {
         }
       });
 
-      // console.log('Auth signup result:', { data, error: signUpError });
+      // // console.log('Auth signup result:', { data, error: signUpError });
 
       if (signUpError) {
         console.error('❌ Auth signup error:', signUpError);
@@ -88,22 +88,22 @@ const SignUp = () => {
       }
 
       if (data.user) {
-        // console.log('User created in auth, creating profile...');
+        // // console.log('User created in auth, creating profile...');
         
         // ⏳ CRITICAL FIX: Wait for session to be available (needed for RLS to work)
         // After signUp(), session might not be immediately available, causing RLS to fail
-        console.log('⏳ Waiting for authentication session to be available...');
+        // // console.log('⏳ Waiting for authentication session to be available...');
         let session = data.session;
         
         // If session not immediately available, wait for it (up to 2 seconds)
         if (!session) {
-          console.log('⏳ Session not immediately available, waiting...');
+          // // console.log('⏳ Session not immediately available, waiting...');
           for (let i = 0; i < 20; i++) {
             await new Promise(resolve => setTimeout(resolve, 100));
             const { data: { session: currentSession } } = await supabase.auth.getSession();
             if (currentSession) {
               session = currentSession;
-              console.log('✅ Session available after wait');
+              // // console.log('✅ Session available after wait');
               break;
             }
           }
@@ -116,10 +116,10 @@ const SignUp = () => {
           return;
         }
         
-        console.log('✅ Session confirmed, proceeding with user creation...');
+        // // console.log('✅ Session confirmed, proceeding with user creation...');
         
         // Create user record in our users table
-        // console.log('Attempting to insert user profile with data:', {
+        // // console.log('Attempting to insert user profile with data:', {
         //   id: data.user.id,
         //   email: formData.email,
         //   full_name: formData.fullName,
@@ -130,18 +130,18 @@ const SignUp = () => {
 
         // 🆕 NEW: Check invites table FIRST for pending invitations (case-insensitive)
         const normalizedEmail = formData.email.toLowerCase().trim();
-        console.log('🔍 Step 1: Checking invites table for pending invitation (normalized email):', normalizedEmail);
+        // // console.log('🔍 Step 1: Checking invites table for pending invitation (normalized email):', normalizedEmail);
         let inviteData = null;
         try {
           inviteData = await fastAPI.getInviteByEmail(normalizedEmail);
-          console.log('🔍 Invite check result:', inviteData ? {
-            id: inviteData.id,
-            email: inviteData.email,
-            role: inviteData.role,
-            status: inviteData.status,
-            firm_id: inviteData.firm_id,
-            project_id: inviteData.project_id
-          } : 'No invite found');
+          // // console.log('🔍 Invite check result:', inviteData ? {
+          //   id: inviteData.id,
+          //   email: inviteData.email,
+          //   role: inviteData.role,
+          //   status: inviteData.status,
+          //   firm_id: inviteData.firm_id,
+          //   project_id: inviteData.project_id
+          // } : 'No invite found');
         } catch (inviteError) {
           console.error('❌ Error checking invites:', inviteError);
         }
@@ -155,11 +155,11 @@ const SignUp = () => {
             setLoading(false);
             return;
           }
-          console.log('✅ Found valid invitation! Using invite data:', {
-            role: inviteData.role,
-            firm_id: inviteData.firm_id,
-            project_id: inviteData.project_id
-          });
+          // // console.log('✅ Found valid invitation! Using invite data:', {
+          //   role: inviteData.role,
+          //   firm_id: inviteData.firm_id,
+          //   project_id: inviteData.project_id
+          // });
           
           // ✅ ALWAYS use invite data (this is the source of truth)
           const userRole = inviteData.role;
@@ -175,12 +175,12 @@ const SignUp = () => {
             .maybeSingle() as unknown as Promise<any>);
 
           if (existingUserByEmail && !existingUserError) {
-            console.log('⚠️ User already exists. Existing data:', {
+            // console.log('⚠️ User already exists. Existing data:', {
               id: (existingUserByEmail as any).id,
               role: (existingUserByEmail as any).role,
               firm_id: (existingUserByEmail as any).firm_id
             });
-            console.log('✅ Will use INVITE data (not existing user data):', {
+            // console.log('✅ Will use INVITE data (not existing user data):', {
               role: userRole,
               firm_id: firmId
             });
@@ -188,7 +188,7 @@ const SignUp = () => {
             // User exists - check for ID mismatch
             if ((existingUserByEmail as any).id === data.user.id) {
               // ✅ ID matches - update with INVITE data (not existing user data)
-              console.log('✅ User exists with correct Auth ID, updating with INVITE data...');
+              // console.log('✅ User exists with correct Auth ID, updating with INVITE data...');
               const { data: updateData, error: updateError } = await supabase
                 .from('users')
                 .update({
@@ -220,11 +220,11 @@ const SignUp = () => {
                 setLoading(false);
                 return;
               }
-              console.log('✅ User updated with invite data:', updateData);
+              // console.log('✅ User updated with invite data:', updateData);
               // Continue with project_members update below
             } else {
               // ❌ ID MISMATCH: Delete old record and create new one with INVITE data
-              console.log('⚠️ ID mismatch detected in invite path. Replacing user record with INVITE data...');
+              // console.log('⚠️ ID mismatch detected in invite path. Replacing user record with INVITE data...');
               const { error: deleteError } = await supabase
                 .from('users')
                 .delete()
@@ -272,12 +272,12 @@ const SignUp = () => {
                 setLoading(false);
                 return;
               }
-              console.log('✅ User created with invite data:', profileData);
+              // console.log('✅ User created with invite data:', profileData);
               // Continue with project_members update below
             }
           } else {
             // User doesn't exist - create new user with INVITE data
-            console.log('🆕 Creating new user with invite data...');
+            // console.log('🆕 Creating new user with invite data...');
             const { data: profileData, error: profileError } = await supabase
               .from('users')
               .insert([
@@ -312,15 +312,15 @@ const SignUp = () => {
               setLoading(false);
               return;
             }
-            console.log('✅ User created with invite data:', profileData);
+            // console.log('✅ User created with invite data:', profileData);
           }
 
-          // console.log('✅ User created successfully with invite role:', profileData);
+          // // console.log('✅ User created successfully with invite role:', profileData);
 
           // Update project_members table if project_id exists
           if (projectId) {
             try {
-              // console.log('🔗 Linking user to project_members...');
+              // // console.log('🔗 Linking user to project_members...');
               const { error: linkError } = await supabase
                 .from('project_members')
                 .update({ user_id: data.user.id })
@@ -328,26 +328,26 @@ const SignUp = () => {
                 .eq('project_id', projectId);
               
               if (linkError) {
-                console.log('⚠️ Could not link to project_members:', linkError);
+                // console.log('⚠️ Could not link to project_members:', linkError);
               } else {
-                console.log('✅ User linked to project_members successfully');
+                // console.log('✅ User linked to project_members successfully');
               }
             } catch (linkError) {
-              console.log('⚠️ Error linking to project_members:', linkError);
+              // console.log('⚠️ Error linking to project_members:', linkError);
             }
           }
 
           // Mark invite as accepted
           try {
             await fastAPI.updateInviteStatus(inviteData.id, 'accepted');
-            // console.log('✅ Invite marked as accepted');
+            // // console.log('✅ Invite marked as accepted');
           } catch (updateError) {
-            console.log('⚠️ Could not update invite status:', updateError);
+            // console.log('⚠️ Could not update invite status:', updateError);
           }
 
           // Show success message and redirect
-          // console.log('Profile creation/update completed successfully!');
-          // console.log('Sign up successful!');
+          // // console.log('Profile creation/update completed successfully!');
+          // // console.log('Sign up successful!');
           setLoading(false);
           
           const roleMessage = userRole 
@@ -367,11 +367,11 @@ const SignUp = () => {
         }
 
         // 🔄 EXISTING LOGIC: If no invite found, proceed with existing checks
-        console.log('ℹ️ No invite found (or invite missing role), checking existing user/project_members tables...');
+        // console.log('ℹ️ No invite found (or invite missing role), checking existing user/project_members tables...');
         
         // Check if user was invited by checking project_members table for existing role assignment
-        console.log('🔍 Checking if user was invited and has assigned role...');
-        console.log('🔍 Searching for email:', formData.email);
+        // console.log('🔍 Checking if user was invited and has assigned role...');
+        // console.log('🔍 Searching for email:', formData.email);
         
         // First check users table
         const { data: existingUserData, error: existingUserError } = await supabase
@@ -387,8 +387,8 @@ const SignUp = () => {
           .eq('email', formData.email)
           .maybeSingle(); // Use maybeSingle to avoid errors if not found
           
-        console.log('🔍 Existing user query result:', { existingUserData, existingUserError });
-        console.log('🔍 Project member query result:', { projectMemberData, projectMemberError });
+        // console.log('🔍 Existing user query result:', { existingUserData, existingUserError });
+        // console.log('🔍 Project member query result:', { projectMemberData, projectMemberError });
 
         let userRole = null; // No default - must come from backend
         let firmId = null;
@@ -396,7 +396,7 @@ const SignUp = () => {
         let assignedBy = null;
 
         if (existingUserData && !existingUserError) {
-          console.log('✅ User exists! Found existing data:', {
+          // console.log('✅ User exists! Found existing data:', {
             id: existingUserData.id,
             role: existingUserData.role,
             firm_id: existingUserData.firm_id
@@ -409,7 +409,7 @@ const SignUp = () => {
 
         // 🔧 FIX: Check project_members even if user exists (to get firm_id if missing)
         if (projectMemberData && !projectMemberError) {
-          // console.log('✅ User was invited as project member! Found role assignment:', projectMemberData);
+          // // console.log('✅ User was invited as project member! Found role assignment:', projectMemberData);
           // Only set role/project if not already set from existingUserData
           if (!userRole) {
             userRole = projectMemberData.role;
@@ -430,7 +430,7 @@ const SignUp = () => {
 
         // Deny access if no role assigned
         if (!userRole) {
-          console.log('❌ User was not invited, denying access');
+          // console.log('❌ User was not invited, denying access');
           setError("You are not authorized to create an account. Please contact your administrator for an invitation.");
           setLoading(false);
           return;
@@ -441,7 +441,7 @@ const SignUp = () => {
           // 🔧 FIX: Check if the existing user has the correct Auth ID
           if (existingUserData.id === data.user.id) {
             // ✅ User already has correct Auth ID, just update other fields
-            // console.log('✅ User already exists with correct Auth ID, updating profile...');
+            // // console.log('✅ User already exists with correct Auth ID, updating profile...');
             const { data: updateData, error: updateError } = await supabase
               .from('users')
               .update({
@@ -474,12 +474,12 @@ const SignUp = () => {
               return;
             }
 
-            // console.log('✅ User updated successfully:', updateData);
+            // // console.log('✅ User updated successfully:', updateData);
           } else {
             // ❌ ID MISMATCH: User exists with wrong ID (auto-generated UUID instead of Auth ID)
             // This happens when users were created before the code explicitly set id: data.user.id
-            console.log('⚠️ ID mismatch detected! Existing user ID:', existingUserData.id, 'Auth ID:', data.user.id);
-            console.log('🔄 Replacing user record with correct Auth ID...');
+            // console.log('⚠️ ID mismatch detected! Existing user ID:', existingUserData.id, 'Auth ID:', data.user.id);
+            // console.log('🔄 Replacing user record with correct Auth ID...');
             
             // First, check if a user with the Auth ID already exists (shouldn't happen, but safety check)
             const { data: authIdUser, error: authIdCheckError } = await supabase
@@ -509,7 +509,7 @@ const SignUp = () => {
               return;
             }
             
-            console.log('✅ Old user record deleted. Creating new record with correct Auth ID...');
+            // console.log('✅ Old user record deleted. Creating new record with correct Auth ID...');
             
             // Create new record with correct Auth ID
             const { data: profileData, error: profileError } = await supabase
@@ -547,7 +547,7 @@ const SignUp = () => {
               return;
             }
             
-            console.log('✅ User record replaced with correct Auth ID:', profileData);
+            // console.log('✅ User record replaced with correct Auth ID:', profileData);
             
             // Also update project_members table if project_id exists
             if (projectId) {
@@ -560,17 +560,17 @@ const SignUp = () => {
                   .eq('project_id', projectId);
                 
                 if (linkError) {
-                  console.log('⚠️ Could not update project_members user_id:', linkError);
+                  // console.log('⚠️ Could not update project_members user_id:', linkError);
                 } else {
-                  console.log('✅ project_members updated with correct user_id');
+                  // console.log('✅ project_members updated with correct user_id');
                 }
               } catch (linkError) {
-                console.log('⚠️ Error updating project_members:', linkError);
+                // console.log('⚠️ Error updating project_members:', linkError);
               }
             }
           }
         } else {
-          console.log('🆕 Creating new user profile...');
+          // console.log('🆕 Creating new user profile...');
           // Create new user
           const { data: profileData, error: profileError } = await supabase
             .from('users')
@@ -607,12 +607,12 @@ const SignUp = () => {
             return;
           }
 
-          // console.log('✅ User created successfully:', profileData);
+          // // console.log('✅ User created successfully:', profileData);
         }
 
-        // console.log('Profile creation/update completed successfully!');
+        // // console.log('Profile creation/update completed successfully!');
 
-        // console.log('Sign up successful!');
+        // // console.log('Sign up successful!');
         
         // Reset loading state
         setLoading(false);

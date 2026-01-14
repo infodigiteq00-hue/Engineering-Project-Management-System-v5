@@ -31,7 +31,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Performance optimization: Only log in development mode
 const isDev = import.meta.env.DEV;
 const devLog = (...args: any[]) => {
-  if (isDev) console.log(...args);
+  if (isDev) // console.log(...args);
 };
 const devError = (...args: any[]) => {
   if (isDev) console.error(...args);
@@ -731,7 +731,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         setEditFormData(prev => {
           // Only update if the value is different
           if (prev.notes !== notesString) {
-            // console.log('🔧 useEffect: Setting notes in editFormData:', notesString);
+            // // console.log('🔧 useEffect: Setting notes in editFormData:', notesString);
             return { ...prev, notes: notesString };
           }
           return prev;
@@ -791,12 +791,12 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   useEffect(() => {
     // Always update localEquipment when equipment prop changes, even if empty
     // This ensures filtered equipment (including empty arrays) is properly reflected
-    console.log('🔄 EquipmentGrid useEffect: equipment prop changed, length:', equipment?.length || 0);
+    // console.log('🔄 EquipmentGrid useEffect: equipment prop changed, length:', equipment?.length || 0);
     
     // Handle both array and undefined/null cases
     if (equipment && Array.isArray(equipment)) {
       // PERFORMANCE: Console logs commented out - uncomment if needed for debugging
-      // console.log('🔄 Equipment data received:', equipment.length, 'items');
+      // // console.log('🔄 Equipment data received:', equipment.length, 'items');
       const transformedEquipment = transformEquipmentDataCallback(equipment);
       
       // Post-process: For standalone equipment, ensure status is 'active' (not 'pending')
@@ -809,9 +809,9 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         });
       }
       
-      // console.log('🔄 Transformed equipment:', transformedEquipment);
-      console.log('🔄 EquipmentGrid: Updating localEquipment with', transformedEquipment.length, 'items');
-      console.log('🔄 EquipmentGrid: Equipment IDs:', transformedEquipment.map(eq => eq.id));
+      // // console.log('🔄 Transformed equipment:', transformedEquipment);
+      // console.log('🔄 EquipmentGrid: Updating localEquipment with', transformedEquipment.length, 'items');
+      // console.log('🔄 EquipmentGrid: Equipment IDs:', transformedEquipment.map(eq => eq.id));
       setLocalEquipment(transformedEquipment);
 
       // OPTIMIZATION: Pre-fetch team members for all standalone equipment in background
@@ -875,19 +875,19 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       // Initialize custom fields for each equipment
       const initialCustomFields: Record<string, Array<{ name: string, value: string }>> = {};
       transformedEquipment.forEach((item) => {
-        // console.log('Equipment:', item.id, 'Custom Fields:', item.customFields);
+        // // console.log('Equipment:', item.id, 'Custom Fields:', item.customFields);
         initialCustomFields[item.id] = item.customFields || [];
       });
-      // console.log('Initial Custom Fields:', initialCustomFields);
+      // // console.log('Initial Custom Fields:', initialCustomFields);
       setCustomFields(initialCustomFields);
 
       // Initialize team custom fields for each equipment
       const initialTeamCustomFields: Record<string, Array<{ name: string, value: string }>> = {};
       transformedEquipment.forEach((item) => {
-        // console.log('Equipment:', item.id, 'Team Custom Fields:', item.teamCustomFields);
+        // // console.log('Equipment:', item.id, 'Team Custom Fields:', item.teamCustomFields);
         initialTeamCustomFields[item.id] = item.teamCustomFields || [];
       });
-      // console.log('Initial Team Custom Fields:', initialTeamCustomFields);
+      // // console.log('Initial Team Custom Fields:', initialTeamCustomFields);
       setTeamCustomFields(initialTeamCustomFields);
 
       // Debug: Check all documents in database first
@@ -907,7 +907,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       loadProjectMembers();
     } else {
       // If equipment is empty or undefined, clear localEquipment
-      console.log('🔄 EquipmentGrid: Clearing localEquipment (empty or undefined)');
+      // console.log('🔄 EquipmentGrid: Clearing localEquipment (empty or undefined)');
       setLocalEquipment([]);
     }
   }, [equipment, projectId]);
@@ -945,7 +945,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   // Listen for team member changes from Settings tab
   useEffect(() => {
     const handleTeamMemberChange = () => {
-      // console.log('🔄 EQUIPMENT GRID: Team member change detected, refreshing project members...');
+      // // console.log('🔄 EQUIPMENT GRID: Team member change detected, refreshing project members...');
       loadProjectMembers();
     };
 
@@ -1010,7 +1010,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   // Auto-remove team members when they're deleted from Settings
   useEffect(() => {
     if (projectMembers.length > 0 && localEquipment.length > 0) {
-      // console.log('🔄 Checking for removed project members...');
+      // // console.log('🔄 Checking for removed project members...');
 
       setLocalEquipment(prevEquipment =>
         prevEquipment.map(equipment => {
@@ -1022,7 +1022,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               member.name === equipment.supervisor
             );
             if (!supervisorExists) {
-              // console.log('❌ Supervisor removed from project:', equipment.supervisor);
+              // // console.log('❌ Supervisor removed from project:', equipment.supervisor);
               updatedEquipment.supervisor = '';
               updatedEquipment.supervisorEmail = '';
               updatedEquipment.supervisorPhone = '';
@@ -1035,7 +1035,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               member.name === equipment.welder
             );
             if (!welderExists) {
-              // console.log('❌ Welder removed from project:', equipment.welder);
+              // // console.log('❌ Welder removed from project:', equipment.welder);
               updatedEquipment.welder = '';
               updatedEquipment.welderEmail = '';
               updatedEquipment.welderPhone = '';
@@ -1048,7 +1048,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               member.name === equipment.engineer
             );
             if (!engineerExists) {
-              // console.log('❌ Engineer removed from project:', equipment.engineer);
+              // // console.log('❌ Engineer removed from project:', equipment.engineer);
               updatedEquipment.engineer = '';
             }
           }
@@ -1059,7 +1059,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               member.name === equipment.qcInspector
             );
             if (!qcExists) {
-              // console.log('❌ QC Inspector removed from project:', equipment.qcInspector);
+              // // console.log('❌ QC Inspector removed from project:', equipment.qcInspector);
               updatedEquipment.qcInspector = '';
               updatedEquipment.qcInspectorEmail = '';
               updatedEquipment.qcInspectorPhone = '';
@@ -1072,7 +1072,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               member.name === equipment.projectManager
             );
             if (!pmExists) {
-              // console.log('❌ Project Manager removed from project:', equipment.projectManager);
+              // // console.log('❌ Project Manager removed from project:', equipment.projectManager);
               updatedEquipment.projectManager = '';
               updatedEquipment.projectManagerEmail = '';
               updatedEquipment.projectManagerPhone = '';
@@ -1126,7 +1126,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         members = Array.isArray(projectMembers) ? projectMembers : [];
       }
 
-      // console.log('👥 Available team members fetched:', members);
+      // // console.log('👥 Available team members fetched:', members);
       setAvailableTeamMembers(members);
     } catch (error) {
       console.error('❌ Error fetching team members for suggestions:', error);
@@ -1136,9 +1136,9 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   // Fetch project-specific users for team custom fields dropdown
   const fetchProjectUsers = async () => {
     try {
-      // console.log('👥 Fetching project users for team custom fields...', projectId);
+      // // console.log('👥 Fetching project users for team custom fields...', projectId);
       const users = await fastAPI.getProjectMembers(projectId);
-      // console.log('👥 Project users fetched:', users);
+      // // console.log('👥 Project users fetched:', users);
       setAllUsers(Array.isArray(users) ? users : []);
     } catch (error) {
       console.error('❌ Error fetching project users:', error);
@@ -1190,9 +1190,9 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   // Fetch current project data
   const fetchCurrentProject = async () => {
     try {
-      // console.log('🏢 Fetching current project data...', projectId);
+      // // console.log('🏢 Fetching current project data...', projectId);
       const project = await fastAPI.getProjectById(projectId);
-      // console.log('🏢 Current project fetched:', project);
+      // // console.log('🏢 Current project fetched:', project);
       setCurrentProject(project[0] || null);
     } catch (error) {
       console.error('❌ Error fetching current project:', error);
@@ -1204,41 +1204,41 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
     if (editingEquipmentId && availableTeamMembers.length > 0) {
       const equipment = localEquipment.find(eq => eq.id === editingEquipmentId);
       if (equipment) {
-        // console.log('🔄 Auto-filling dropdowns for equipment:', equipment.id);
+        // // console.log('🔄 Auto-filling dropdowns for equipment:', equipment.id);
 
         // Set selected IDs for dropdowns based on existing data
         if (equipment.supervisor) {
           const supervisorMember = projectMembers.find(member => member.name === equipment.supervisor);
           if (supervisorMember) {
-            // console.log('👤 Found supervisor member:', supervisorMember);
+            // // console.log('👤 Found supervisor member:', supervisorMember);
             setSelectedSupervisorId(supervisorMember.id);
           }
         }
         if (equipment.welder) {
           const welderMember = projectMembers.find(member => member.name === equipment.welder);
           if (welderMember) {
-            // console.log('👤 Found welder member:', welderMember);
+            // // console.log('👤 Found welder member:', welderMember);
             setSelectedWelderId(welderMember.id);
           }
         }
         if (equipment.engineer) {
           const engineerMember = projectMembers.find(member => member.name === equipment.engineer);
           if (engineerMember) {
-            // console.log('👤 Found engineer member:', engineerMember);
+            // // console.log('👤 Found engineer member:', engineerMember);
             setSelectedEngineerId(engineerMember.id);
           }
         }
         if (equipment.qcInspector) {
           const qcMember = projectMembers.find(member => member.name === equipment.qcInspector);
           if (qcMember) {
-            // console.log('👤 Found QC Inspector member:', qcMember);
+            // // console.log('👤 Found QC Inspector member:', qcMember);
             setSelectedQcInspectorId(qcMember.id);
           }
         }
         if (equipment.projectManager) {
           const pmMember = projectMembers.find(member => member.name === equipment.projectManager);
           if (pmMember) {
-            // console.log('👤 Found Project Manager member:', pmMember);
+            // // console.log('👤 Found Project Manager member:', pmMember);
             setSelectedProjectManagerId(pmMember.id);
           }
         }
@@ -1262,12 +1262,12 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
   // Select team member from suggestions
   const selectTeamMember = (member: any) => {
-    // console.log('👤 Selected team member:', member);
+    // // console.log('👤 Selected team member:', member);
     setNewTeamName(member.full_name);
     setNewTeamEmail(member.email);
     setNewTeamPhone(member.phone || '');
     setShowTeamSuggestions(false);
-    // console.log('✅ Auto-filled fields:', {
+    // // console.log('✅ Auto-filled fields:', {
     //   name: member.full_name,
     //   email: member.email,
     //   phone: member.phone || ''
@@ -1428,24 +1428,24 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       // Update custom fields state with fresh data
       const updatedCustomFields: Record<string, Array<{ name: string, value: string }>> = {};
       transformedEquipment.forEach((item) => {
-        // console.log('🔄 Refreshing custom fields for equipment:', item.id, 'Fields:', item.customFields);
+        // // console.log('🔄 Refreshing custom fields for equipment:', item.id, 'Fields:', item.customFields);
         updatedCustomFields[item.id] = item.customFields || [];
       });
-      // console.log('🔄 Updated Custom Fields:', updatedCustomFields);
+      // // console.log('🔄 Updated Custom Fields:', updatedCustomFields);
       setCustomFields(updatedCustomFields);
 
       // Update technical sections state with fresh data
       const updatedTechnicalSections: Record<string, Array<{ name: string, customFields: Array<{ name: string, value: string }> }>> = {};
       transformedEquipment.forEach((item) => {
-        // console.log('🔄 Refreshing technical sections for equipment:', item.id, 'Sections:', item.technicalSections);
-        // console.log('🔄 Raw technical_sections from DB:', item.technicalSections);
-        // console.log('🔄 Type of technicalSections:', typeof item.technicalSections);
-        // console.log('🔄 Length of technicalSections:', item.technicalSections?.length);
-        // console.log('🔄 Detailed technical_sections:', JSON.stringify(item.technicalSections, null, 2));
+        // // console.log('🔄 Refreshing technical sections for equipment:', item.id, 'Sections:', item.technicalSections);
+        // // console.log('🔄 Raw technical_sections from DB:', item.technicalSections);
+        // // console.log('🔄 Type of technicalSections:', typeof item.technicalSections);
+        // // console.log('🔄 Length of technicalSections:', item.technicalSections?.length);
+        // // console.log('🔄 Detailed technical_sections:', JSON.stringify(item.technicalSections, null, 2));
         updatedTechnicalSections[item.id] = item.technicalSections || [];
       });
-      // console.log('🔄 Updated Technical Sections:', updatedTechnicalSections);
-      // console.log('🔄 Updated Technical Sections JSON:', JSON.stringify(updatedTechnicalSections, null, 2));
+      // // console.log('🔄 Updated Technical Sections:', updatedTechnicalSections);
+      // // console.log('🔄 Updated Technical Sections JSON:', JSON.stringify(updatedTechnicalSections, null, 2));
       setTechnicalSections(updatedTechnicalSections);
 
       // Update selected sections state with fresh data
@@ -1455,16 +1455,16 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           updatedSelectedSections[item.id] = item.technicalSections[0].name;
         }
       });
-      // console.log('🔄 Updated Selected Sections:', updatedSelectedSections);
+      // // console.log('🔄 Updated Selected Sections:', updatedSelectedSections);
       setSelectedSection(updatedSelectedSections);
 
       // Update team custom fields state with fresh data
       const updatedTeamCustomFields: Record<string, Array<{ name: string, value: string }>> = {};
       transformedEquipment.forEach((item) => {
-        // console.log('🔄 Refreshing team custom fields for equipment:', item.id, 'Fields:', item.teamCustomFields);
+        // // console.log('🔄 Refreshing team custom fields for equipment:', item.id, 'Fields:', item.teamCustomFields);
         updatedTeamCustomFields[item.id] = item.teamCustomFields || [];
       });
-      // console.log('🔄 Updated Team Custom Fields:', updatedTeamCustomFields);
+      // // console.log('🔄 Updated Team Custom Fields:', updatedTeamCustomFields);
       setTeamCustomFields(updatedTeamCustomFields);
 
       devLog('✅ refreshEquipmentData: Completed successfully');
@@ -1520,7 +1520,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
     } else {
       // For filtered users, just ensure localEquipment is synced with the filtered equipment prop
       // The equipment prop is already filtered, so we don't need to fetch from database
-      console.log('🔄 EquipmentGrid: Skipping refreshEquipmentData for filtered user, using filtered equipment prop');
+      // console.log('🔄 EquipmentGrid: Skipping refreshEquipmentData for filtered user, using filtered equipment prop');
     }
   }, [projectId, refreshEquipmentData]);
   
@@ -1617,7 +1617,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   // Fetch equipment documents from database
   const fetchEquipmentDocuments = async (equipmentId: string) => {
     try {
-      // console.log('📄 Fetching documents for equipment:', equipmentId);
+      // // console.log('📄 Fetching documents for equipment:', equipmentId);
       setDocumentsLoading(prev => ({ ...prev, [equipmentId]: true }));
 
       // Use appropriate API based on whether it's standalone or project equipment
@@ -1626,7 +1626,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         : await getEquipmentDocuments(equipmentId);
 
       if (equipmentDocs && Array.isArray(equipmentDocs) && equipmentDocs.length > 0) {
-        // console.log('📄 Found equipment documents:', equipmentDocs);
+        // // console.log('📄 Found equipment documents:', equipmentDocs);
 
         // Transform database documents to match our state format
         const transformedDocs = Array.isArray(equipmentDocs) ? equipmentDocs.map((doc: any) => ({
@@ -1644,7 +1644,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           [equipmentId]: transformedDocs
         }));
       } else {
-        // console.log('📄 No documents found for equipment:', equipmentId);
+        // // console.log('📄 No documents found for equipment:', equipmentId);
         setDocuments(prev => ({
           ...prev,
           [equipmentId]: []
@@ -1664,7 +1664,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   // Fetch documents for all equipment when component mounts
   useEffect(() => {
     if (equipment && equipment.length > 0) {
-      // console.log('📄 Fetching documents for all equipment...');
+      // // console.log('📄 Fetching documents for all equipment...');
       equipment.forEach((item) => {
         fetchEquipmentDocuments(item.id);
       });
@@ -1680,7 +1680,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
   // Function to handle docs tab click and fetch documents
   const handleDocsTabClick = (equipmentId: string) => {
-    // console.log('📄 Docs tab clicked for equipment:', equipmentId);
+    // // console.log('📄 Docs tab clicked for equipment:', equipmentId);
     // Fetch documents if not already loaded
     if (!documents[equipmentId] || documents[equipmentId].length === 0) {
       fetchEquipmentDocuments(equipmentId);
@@ -1720,7 +1720,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           return 'nearing-completion';
         }
       } catch (error) {
-        console.log('Error parsing PO-CDD date:', error);
+        // console.log('Error parsing PO-CDD date:', error);
       }
     }
 
@@ -1765,7 +1765,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         return `${daysDiff} days remaining`;
       }
     } catch (error) {
-      // console.log('Error parsing PO-CDD date:', error);
+      // // console.log('Error parsing PO-CDD date:', error);
       return null;
     }
   };
@@ -1774,7 +1774,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
     setEditingEquipmentId(equipment.id);
     // PERFORMANCE: Console logs commented out for production
     // Debug: Log equipment data to see what we're working with
-    // console.log('🔧 handleEditEquipment - Equipment data:', {
+    // // console.log('🔧 handleEditEquipment - Equipment data:', {
     //   id: equipment.id,
     //   updated_at: equipment.updated_at,
     //   nextMilestoneDate: equipment.nextMilestoneDate,
@@ -1808,10 +1808,10 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       notes: (equipment.notes !== null && equipment.notes !== undefined) ? String(equipment.notes) : ''
     };
     // PERFORMANCE: Console logs commented out for production
-    // console.log('🔧 Setting editFormData:', formData);
-    // console.log('🔧 Notes in formData:', formData.notes);
-    // console.log('🔧 Notes type:', typeof formData.notes);
-    // console.log('🔧 equipment.customFields:', equipment.customFields);
+    // // console.log('🔧 Setting editFormData:', formData);
+    // // console.log('🔧 Notes in formData:', formData.notes);
+    // // console.log('🔧 Notes type:', typeof formData.notes);
+    // // console.log('🔧 equipment.customFields:', equipment.customFields);
 
     // Reset progress entry form fields for new entries
     setNewProgressType('general');
@@ -1834,7 +1834,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
     // Initialize overview state variables for date inputs
     // For standalone equipment, prioritize last_update (DATE column) over updated_at (timestamp)
     // last_update is already in YYYY-MM-DD format from the database
-    console.log('🔧 handleEditEquipment - Initializing date for equipment:', {
+    // console.log('🔧 handleEditEquipment - Initializing date for equipment:', {
       id: equipment.id,
       last_update: (equipment as any).last_update,
       updated_at: equipment.updated_at,
@@ -1848,7 +1848,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       // Use last_update directly if available (already in YYYY-MM-DD format)
       const rawDate = String((equipment as any).last_update);
       dateOnly = rawDate.split('T')[0].split(' ')[0]; // Handle both datetime and date strings
-      console.log('✅ Using last_update:', dateOnly, 'from raw:', rawDate);
+      // console.log('✅ Using last_update:', dateOnly, 'from raw:', rawDate);
     } 
     // Second priority: updated_at timestamp
     else if (equipment.updated_at) {
@@ -1859,7 +1859,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           const month = String(updatedDate.getMonth() + 1).padStart(2, '0');
           const day = String(updatedDate.getDate()).padStart(2, '0');
           dateOnly = `${year}-${month}-${day}`;
-          console.log('✅ Using updated_at:', dateOnly);
+          // console.log('✅ Using updated_at:', dateOnly);
         }
       } catch (error) {
         console.error('Error parsing updated_at:', error, 'Value:', equipment.updated_at);
@@ -1874,7 +1874,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
           const day = String(parsedDate.getDate()).padStart(2, '0');
           dateOnly = `${year}-${month}-${day}`;
-          console.log('✅ Using lastUpdate:', dateOnly);
+          // console.log('✅ Using lastUpdate:', dateOnly);
         }
       } catch (error) {
         console.error('Error parsing lastUpdate:', error, 'Value:', equipment.lastUpdate);
@@ -1883,7 +1883,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
     
     // Always set the date if we found one, or clear it if we didn't
     if (dateOnly) {
-      console.log('📅 handleEditEquipment - Setting overviewLastUpdateRaw for', equipment.id, ':', dateOnly);
+      // console.log('📅 handleEditEquipment - Setting overviewLastUpdateRaw for', equipment.id, ':', dateOnly);
       setOverviewLastUpdateRaw(prev => {
         // Force update to ensure the date is set
         return { ...prev, [equipment.id]: dateOnly };
@@ -1917,7 +1917,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
     }
 
     // Fetch documents for this equipment when entering edit mode
-    // console.log('📄 Fetching documents for equipment in edit mode:', equipment.id);
+    // // console.log('📄 Fetching documents for equipment in edit mode:', equipment.id);
     fetchEquipmentDocuments(equipment.id);
   };
 
@@ -1926,7 +1926,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       setLoadingStates(prev => ({ ...prev, [`complete-${equipment.id}`]: true }));
 
       try {
-        // console.log('✅ Marking equipment as completed:', equipment.id);
+        // // console.log('✅ Marking equipment as completed:', equipment.id);
 
         // Prepare completion data with proper field mapping
         const todayDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
@@ -2016,7 +2016,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       }
 
       // Call backend API to update equipment phase
-      // console.log('🔄 Sending phase data to API:', phaseData);
+      // // console.log('🔄 Sending phase data to API:', phaseData);
       if (projectId === 'standalone') {
         await fastAPI.updateStandaloneEquipment(equipmentId, phaseData);
       } else {
@@ -2037,7 +2037,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           : eq
       ));
 
-      // console.log(`✅ Equipment ${equipmentId} moved to ${newPhase} phase with ${newProgress}% progress`);
+      // // console.log(`✅ Equipment ${equipmentId} moved to ${newPhase} phase with ${newProgress}% progress`);
 
       // Refresh activity logs if callback provided
       if (onActivityUpdate) {
@@ -2132,7 +2132,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
     try {
       // Save progress image if uploaded (description is REQUIRED)
       if (newProgressImage && imageDescription?.trim()) {
-        // console.log('📸 Saving progress image with equipment data...');
+        // // console.log('📸 Saving progress image with equipment data...');
 
         // Convert image to base64 for storage
         const reader = new FileReader();
@@ -2188,7 +2188,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             } else {
               await fastAPI.createProgressImage(progressImageData);
             }
-            // console.log('✅ Progress image saved to database');
+            // // console.log('✅ Progress image saved to database');
             
             // Get equipment info for logging
             const currentEquipment = localEquipment.find(eq => eq.id === editingEquipmentId);
@@ -2202,7 +2202,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                   currentEquipment.tagNumber || 'Unknown',
                   finalDescription || undefined
                 );
-                // console.log('✅ Activity logged: Progress image uploaded');
+                // // console.log('✅ Activity logged: Progress image uploaded');
                 
                 // Refresh activity logs if callback provided
                 if (onActivityUpdate) {
@@ -2236,9 +2236,9 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           variant: 'destructive' 
         });
       }
-      // console.log('💾 Saving equipment updates:', editFormData);
-      // console.log('💾 editFormData.customFields:', editFormData.customFields);
-      // console.log('💾 technicalSections[editingEquipmentId]:', technicalSections[editingEquipmentId]);
+      // // console.log('💾 Saving equipment updates:', editFormData);
+      // // console.log('💾 editFormData.customFields:', editFormData.customFields);
+      // // console.log('💾 technicalSections[editingEquipmentId]:', technicalSections[editingEquipmentId]);
 
       // Prepare equipment data for API call with proper field mapping
       // Only include fields that exist in the database schema
@@ -2276,7 +2276,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         const dateOnly = lastUpdateValue.split('T')[0];
         if (dateOnly && dateOnly.trim() !== '') {
           equipmentData.last_update = dateOnly;
-          console.log('💾 Saving last_update:', dateOnly);
+          // console.log('💾 Saving last_update:', dateOnly);
         }
       } else if (editFormData.lastUpdate && editFormData.lastUpdate.trim() !== '') {
         // Fallback to editFormData.lastUpdate if overviewLastUpdateRaw is not set
@@ -2289,7 +2289,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
             const day = String(parsedDate.getDate()).padStart(2, '0');
             equipmentData.last_update = `${year}-${month}-${day}`;
-            console.log('💾 Saving last_update (from editFormData):', equipmentData.last_update);
+            // console.log('💾 Saving last_update (from editFormData):', equipmentData.last_update);
           } else {
             // If it's already in YYYY-MM-DD format, use it directly
             equipmentData.last_update = dateValue.split('T')[0];
@@ -2380,9 +2380,9 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       }
 
       // Call backend API to update equipment
-      // console.log('🔧 Sending equipment data to API:', equipmentData);
-      // console.log('🔧 Custom fields in data:', equipmentData.custom_fields);
-      // console.log('🔧 Technical sections in data:', equipmentData.technical_sections);
+      // // console.log('🔧 Sending equipment data to API:', equipmentData);
+      // // console.log('🔧 Custom fields in data:', equipmentData.custom_fields);
+      // // console.log('🔧 Technical sections in data:', equipmentData.technical_sections);
       // Check if this is standalone equipment
       if (projectId === 'standalone') {
         await fastAPI.updateStandaloneEquipment(editingEquipmentId, equipmentData, user?.id);
@@ -2449,7 +2449,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   const updateEquipmentData = (equipmentId: string, updates: Partial<Equipment>) => {
     // This would typically update the parent state
     // For now, we'll just log the update
-    // console.log(`Updating equipment ${equipmentId}:`, updates);
+    // // console.log(`Updating equipment ${equipmentId}:`, updates);
 
     // In a real implementation, you would call a prop function like:
     // onEquipmentUpdate(equipmentId, updates);
@@ -2466,8 +2466,8 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       return;
     }
 
-    // console.log('🚀 Starting addProgressEntry for equipment:', equipmentId);
-    // console.log('📝 Current form data:', {
+    // // console.log('🚀 Starting addProgressEntry for equipment:', equipmentId);
+    // // console.log('📝 Current form data:', {
     //   type: newProgressType,
     //   comment: newProgressEntry,
     //   hasImage: !!newProgressImage,
@@ -2482,7 +2482,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         if (typeof newProgressImage === 'string') {
           // It's already a base64 string (existing image)
           imageBase64 = newProgressImage;
-          // console.log('🖼️ Using existing base64 image, length:', imageBase64.length);
+          // // console.log('🖼️ Using existing base64 image, length:', imageBase64.length);
         } else {
           // It's a File object (new upload), convert to base64
           imageBase64 = await new Promise<string>((resolve, reject) => {
@@ -2493,7 +2493,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             reader.onerror = reject;
             reader.readAsDataURL(newProgressImage);
           });
-          // console.log('🖼️ New image converted to base64, length:', imageBase64.length);
+          // // console.log('🖼️ New image converted to base64, length:', imageBase64.length);
         }
       } catch (error) {
         console.error('❌ Error converting image:', error);
@@ -2517,7 +2517,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           reader.readAsDataURL(audioBlob);
         });
         audioDuration = recordingDuration;
-        // console.log('🎵 Audio converted to base64, length:', audioBase64.length, 'duration:', audioDuration);
+        // // console.log('🎵 Audio converted to base64, length:', audioBase64.length, 'duration:', audioDuration);
       } catch (error) {
         console.error('❌ Error converting audio:', error);
         toast({ title: 'Error', description: 'Error processing audio', variant: 'destructive' });
@@ -2533,15 +2533,15 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       return;
     }
 
-    // console.log('🔍 Found equipment:', currentEquipment.name || currentEquipment.type);
-    // console.log('📋 Current progress entries:', currentEquipment.progressEntries?.length || 0);
+    // // console.log('🔍 Found equipment:', currentEquipment.name || currentEquipment.type);
+    // // console.log('📋 Current progress entries:', currentEquipment.progressEntries?.length || 0);
 
     let newProgressEntries;
     let newEntry: ProgressEntry | null = null;
 
     if (editingProgressEntryId) {
       // Update existing entry
-      // console.log('🔄 Updating existing entry:', editingProgressEntryId);
+      // // console.log('🔄 Updating existing entry:', editingProgressEntryId);
       newProgressEntries = (currentEquipment.progressEntries || []).map(entry =>
         entry.id === editingProgressEntryId
           ? {
@@ -2566,7 +2566,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       );
     } else {
       // Add new entry
-      // console.log('➕ Creating new entry');
+      // // console.log('➕ Creating new entry');
       newEntry = {
         id: `progress-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         type: newProgressType,
@@ -2579,12 +2579,12 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         uploadDate: new Date().toISOString()
       };
 
-      // console.log('📝 New entry created:', newEntry);
+      // // console.log('📝 New entry created:', newEntry);
       newProgressEntries = [...(currentEquipment.progressEntries || []), newEntry];
     }
 
-    // console.log('📋 Final progress entries array:', newProgressEntries);
-    // console.log('📊 Total entries:', newProgressEntries.length);
+    // // console.log('📋 Final progress entries array:', newProgressEntries);
+    // // console.log('📊 Total entries:', newProgressEntries.length);
 
     // Update local state first
     setLocalEquipment(prev => {
@@ -2593,13 +2593,13 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           ? { ...eq, progressEntries: newProgressEntries }
           : eq
       );
-      // console.log('🔄 Updated localEquipment state');
+      // // console.log('🔄 Updated localEquipment state');
       return updated;
     });
 
     // Update database - save to equipment_progress_entries table
     try {
-      // console.log('💾 Saving progress entry to database...');
+      // // console.log('💾 Saving progress entry to database...');
       
       if (!editingProgressEntryId) {
         // Create new progress entry - use appropriate table based on equipment type
@@ -2617,7 +2617,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         const createdEntry = projectId === 'standalone'
           ? await fastAPI.createStandaloneProgressEntry(entryData)
           : await fastAPI.createProgressEntry(entryData);
-        // console.log('✅ Progress entry created in database:', createdEntry);
+        // // console.log('✅ Progress entry created in database:', createdEntry);
         
         // Log activity - Progress Entry Added
         try {
@@ -2629,7 +2629,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             newProgressType,
             newProgressEntry
           );
-          // console.log('✅ Activity logged: Progress entry added');
+          // // console.log('✅ Activity logged: Progress entry added');
           
           // Refresh activity logs if callback provided
           if (onActivityUpdate) {
@@ -2642,7 +2642,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         // Update the local entry with the real database ID
         if (createdEntry && createdEntry[0] && createdEntry[0].id && newEntry) {
           const realId = createdEntry[0].id;
-          // console.log('🔄 Updating local entry with real database ID:', realId);
+          // // console.log('🔄 Updating local entry with real database ID:', realId);
           
           // Update the local entry with the real ID
           setLocalEquipment(prev => {
@@ -2676,7 +2676,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         } else {
           await fastAPI.updateProgressEntry(editingProgressEntryId, updateData);
         }
-        // console.log('✅ Progress entry updated in database');
+        // // console.log('✅ Progress entry updated in database');
         
         // Log activity - Progress Entry Updated
         try {
@@ -2690,7 +2690,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             !!audioBase64, // hasAudio
             !!imageBase64  // hasImage
           );
-          // console.log('✅ Activity logged: Progress entry updated');
+          // // console.log('✅ Activity logged: Progress entry updated');
           
           // Refresh activity logs if callback provided
           if (onActivityUpdate) {
@@ -2750,7 +2750,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   };
 
   const editProgressEntry = (equipmentId: string, entryId: string) => {
-    // console.log('✏️ Edit progress entry clicked:', entryId, 'for equipment:', equipmentId);
+    // // console.log('✏️ Edit progress entry clicked:', entryId, 'for equipment:', equipmentId);
 
     const targetEquipment = localEquipment.find(eq => eq.id === equipmentId);
     if (!targetEquipment) {
@@ -2766,7 +2766,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       return;
     }
 
-    // console.log('📝 Found entry to edit:', entry);
+    // // console.log('📝 Found entry to edit:', entry);
 
     // Switch to edit mode for this equipment's progress entry only
     setEditingProgressEntryForEquipment(equipmentId);
@@ -2783,7 +2783,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       // If it's already a base64 string or URL, use it directly
       // The form handles both File objects and string URLs
       setNewProgressImage(existingImageUrl as any);
-      // console.log('🖼️ Preloaded existing image');
+      // // console.log('🖼️ Preloaded existing image');
     } else {
       setNewProgressImage(null);
     }
@@ -2806,7 +2806,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         // Set audio chunks and duration
         setAudioChunks([audioBlob]);
         setRecordingDuration(existingAudioDuration);
-        // console.log('🔊 Preloaded existing audio, duration:', existingAudioDuration);
+        // // console.log('🔊 Preloaded existing audio, duration:', existingAudioDuration);
       } catch (error) {
         console.error('❌ Error loading existing audio:', error);
         // If loading fails, just reset audio
@@ -2819,7 +2819,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       setRecordingDuration(0);
     }
 
-    // console.log('🔄 Form auto-filled with entry data:', {
+    // // console.log('🔄 Form auto-filled with entry data:', {
     //   type: (entry as any).entry_type || entry.type,
     //   comment: (entry as any).entry_text || entry.comment,
     //   description: (entry as any).image_description || entry.imageDescription,
@@ -2830,7 +2830,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   };
 
   const deleteProgressEntry = async (equipmentId: string, entryId: string) => {
-    // console.log('🗑️ Deleting progress entry:', entryId, 'from equipment:', equipmentId);
+    // // console.log('🗑️ Deleting progress entry:', entryId, 'from equipment:', equipmentId);
 
     const currentEquipment = localEquipment.find(eq => eq.id === equipmentId);
     if (!currentEquipment) {
@@ -2845,7 +2845,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
     const entryText = entryToDelete ? ((entryToDelete as any).entry_text || entryToDelete.comment || '') : '';
 
     const updatedProgressEntries = (currentEquipment.progressEntries || []).filter(entry => entry.id !== entryId);
-    // console.log('📋 Progress entries after deletion:', updatedProgressEntries.length);
+    // // console.log('📋 Progress entries after deletion:', updatedProgressEntries.length);
 
     // Update local state first
     setLocalEquipment(prev => prev.map(eq =>
@@ -2856,11 +2856,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
     // Update database - use appropriate table based on equipment type
     try {
-      // console.log('🔄 Deleting progress entry from database...');
+      // // console.log('🔄 Deleting progress entry from database...');
       const result = projectId === 'standalone'
         ? await fastAPI.deleteStandaloneProgressEntry(entryId)
         : await fastAPI.deleteProgressEntry(entryId);
-      // console.log('✅ Progress entry deleted successfully:', result);
+      // // console.log('✅ Progress entry deleted successfully:', result);
 
       // Log activity - Progress Entry Deleted
       try {
@@ -2872,7 +2872,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           entryType,
           entryText
         );
-        // console.log('✅ Activity logged: Progress entry deleted');
+        // // console.log('✅ Activity logged: Progress entry deleted');
         
         // Refresh activity logs if callback provided
         if (onActivityUpdate) {
@@ -2893,7 +2893,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
       // Check if it's a timeout error
       if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-        // console.log('⏰ Request timed out, but local state updated');
+        // // console.log('⏰ Request timed out, but local state updated');
         // Don't revert local state for timeout - user sees the change
         toast({
           title: "Warning",
@@ -2928,7 +2928,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
     if (!newTeamPosition?.trim() || !newTeamName?.trim()) return;
 
     try {
-      // console.log('👥 Adding team member to project_members table...');
+      // // console.log('👥 Adding team member to project_members table...');
 
       // Create member data for project_members table
         const memberData = {
@@ -2947,14 +2947,14 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
       // Save to project_members table
         const createdMember = await fastAPI.createProjectMember(memberData);
-        // console.log('✅ Team member created in project_members table:', createdMember);
+        // // console.log('✅ Team member created in project_members table:', createdMember);
 
       // Get equipment info for logging
       const currentEquipment = localEquipment.find(eq => eq.id === equipmentId);
       if (currentEquipment) {
         // Log team member addition activity
         try {
-          // console.log('📝 Logging team member addition activity...', {
+          // // console.log('📝 Logging team member addition activity...', {
           //   projectId,
           //   equipmentId,
           //   equipmentType: currentEquipment.type || 'Equipment',
@@ -2971,11 +2971,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             newTeamName?.trim() || 'Unknown',
             newTeamPosition?.trim() || newTeamRole || 'viewer'
           );
-          // console.log('✅ Activity logged: Team member added');
+          // // console.log('✅ Activity logged: Team member added');
           
           // Refresh activity logs if callback provided
           if (onActivityUpdate) {
-            // console.log('🔄 Refreshing activity logs via callback...');
+            // // console.log('🔄 Refreshing activity logs via callback...');
             onActivityUpdate();
           }
         } catch (logError) {
@@ -2991,7 +2991,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           const firmId = localStorage.getItem('firmId');
           const currentUserId = user?.id || localStorage.getItem('userId');
 
-          // console.log('📧 Creating invite for equipment team member...');
+          // // console.log('📧 Creating invite for equipment team member...');
           await fastAPI.createInvite({
             email: newTeamEmail?.trim(),
             full_name: newTeamName?.trim(),
@@ -3000,7 +3000,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             project_id: projectId,
             invited_by: currentUserId || 'system'
           });
-          // console.log('✅ Invite created for equipment team member');
+          // // console.log('✅ Invite created for equipment team member');
         } catch (inviteError) {
           console.error('❌ Error creating invite (member still created):', inviteError);
         }
@@ -3017,10 +3017,10 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
       // Notify parent component to refresh Settings tab
       if (onUserAdded) {
-        // console.log('🔄 Calling onUserAdded callback to refresh Settings tab...');
+        // // console.log('🔄 Calling onUserAdded callback to refresh Settings tab...');
         onUserAdded();
       } else {
-        console.log('⚠️ onUserAdded callback not provided');
+        // console.log('⚠️ onUserAdded callback not provided');
       }
 
       // Clear form
@@ -3064,7 +3064,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       value: newCustomFieldValue?.trim()
     };
 
-    // console.log('🔧 Adding custom field:', newField);
+    // // console.log('🔧 Adding custom field:', newField);
 
     // Update editFormData directly
     setEditFormData(prev => {
@@ -3074,7 +3074,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         ...prev,
         customFields: updatedCustomFields
       };
-      // console.log('🔧 Updated editFormData:', newData);
+      // // console.log('🔧 Updated editFormData:', newData);
       return newData;
     });
 
@@ -3157,11 +3157,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       const currentSections = technicalSections[editingEquipmentId] || [];
       const updatedSections = [...currentSections, newSection];
 
-      // console.log('💾 Saving new section to database:', editingEquipmentId, sectionName);
+      // // console.log('💾 Saving new section to database:', editingEquipmentId, sectionName);
       await updateEquipment(editingEquipmentId, {
         technical_sections: updatedSections
       });
-      // console.log('✅ Section saved successfully');
+      // // console.log('✅ Section saved successfully');
 
       toast({
         title: "Success",
@@ -3180,7 +3180,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   const handleEditSection = async (newSectionName: string) => {
     if (!editingEquipmentId || !editingSectionOldName) return;
 
-    // console.log('🔄 handleEditSection: Starting section name update:', editingSectionOldName, '->', newSectionName);
+    // // console.log('🔄 handleEditSection: Starting section name update:', editingSectionOldName, '->', newSectionName);
 
     // Update local state
     setTechnicalSections(prev => ({
@@ -3208,23 +3208,23 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           : section
       );
 
-      // console.log('💾 Updating section name in database:', editingEquipmentId, editingSectionOldName, '->', newSectionName);
+      // // console.log('💾 Updating section name in database:', editingEquipmentId, editingSectionOldName, '->', newSectionName);
       await updateEquipment(editingEquipmentId, {
         technical_sections: updatedSections
       });
-      // console.log('✅ Section name updated successfully');
+      // // console.log('✅ Section name updated successfully');
 
       // Refresh equipment data to ensure consistency
-      // console.log('🔄 Calling refreshEquipmentData after section name update');
+      // // console.log('🔄 Calling refreshEquipmentData after section name update');
       await refreshEquipmentData();
-      // console.log('✅ refreshEquipmentData completed');
+      // // console.log('✅ refreshEquipmentData completed');
 
       toast({
         title: "Success",
         description: "Section name updated successfully",
       });
 
-      // console.log('✅ handleEditSection: Section name update completed successfully');
+      // // console.log('✅ handleEditSection: Section name update completed successfully');
     } catch (error) {
       console.error('❌ handleEditSection: Error updating section name:', error);
       toast({
@@ -3243,15 +3243,15 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   const handleDeleteSection = async (sectionName: string) => {
     if (!editingEquipmentId || !sectionName) return;
 
-    // console.log('🔄 handleDeleteSection: Starting section deletion:', sectionName);
-    // console.log('📊 Current technicalSections before deletion:', technicalSections[editingEquipmentId]);
+    // // console.log('🔄 handleDeleteSection: Starting section deletion:', sectionName);
+    // // console.log('📊 Current technicalSections before deletion:', technicalSections[editingEquipmentId]);
 
     // Update local state - remove the section
     const updatedSections = (technicalSections[editingEquipmentId] || []).filter(section =>
       section.name !== sectionName
     );
 
-    // console.log('📊 Updated sections after filtering:', updatedSections);
+    // // console.log('📊 Updated sections after filtering:', updatedSections);
 
     setTechnicalSections(prev => ({
       ...prev,
@@ -3268,25 +3268,25 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
     try {
       // Update in database - use the already filtered sections
-      // console.log('💾 Deleting section in database:', editingEquipmentId, sectionName);
-      // console.log('📊 Sections to save to database:', updatedSections);
+      // // console.log('💾 Deleting section in database:', editingEquipmentId, sectionName);
+      // // console.log('📊 Sections to save to database:', updatedSections);
 
       await updateEquipment(editingEquipmentId, {
         technical_sections: updatedSections
       });
-      // console.log('✅ Section deleted successfully from database');
+      // // console.log('✅ Section deleted successfully from database');
 
       // Refresh equipment data to ensure consistency
-      // console.log('🔄 Calling refreshEquipmentData after section deletion');
+      // // console.log('🔄 Calling refreshEquipmentData after section deletion');
       await refreshEquipmentData();
-      // console.log('✅ refreshEquipmentData completed');
+      // // console.log('✅ refreshEquipmentData completed');
 
       toast({
         title: "Success",
         description: "Section deleted successfully",
       });
 
-      // console.log('✅ handleDeleteSection: Section deletion completed successfully');
+      // // console.log('✅ handleDeleteSection: Section deletion completed successfully');
     } catch (error) {
       console.error('❌ handleDeleteSection: Error deleting section:', error);
       toast({
@@ -3455,8 +3455,8 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
   const handleDocumentUpload = async (equipmentId: string, files: File[]) => {
     try {
-      // console.log('🚀 MANUAL: Starting document upload for equipment:', equipmentId);
-      // console.log('🚀 MANUAL: Files to upload:', files);
+      // // console.log('🚀 MANUAL: Starting document upload for equipment:', equipmentId);
+      // // console.log('🚀 MANUAL: Files to upload:', files);
 
       // Get user data
       const userData = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -3465,9 +3465,9 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       // Upload files to storage and database
       for (const file of files) {
         try {
-          // console.log('🚀 MANUAL: Processing file:', file.name);
-          // console.log('🚀 MANUAL: File size:', file.size, 'bytes');
-          // console.log('🚀 MANUAL: File type:', file.type);
+          // // console.log('🚀 MANUAL: Processing file:', file.name);
+          // // console.log('🚀 MANUAL: File size:', file.size, 'bytes');
+          // // console.log('🚀 MANUAL: File type:', file.type);
 
           // Upload to Supabase storage - use different paths for standalone vs project equipment
           const isStandalone = projectId === 'standalone';
@@ -3476,9 +3476,9 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             : `equipment/${equipmentId}/${Date.now()}_${file.name}`;
           const storageBucket = isStandalone ? 'standalone-equipment-documents' : 'project-documents';
           
-          // console.log('🚀 MANUAL: Uploading to storage path:', filePath);
-          // console.log('🚀 MANUAL: Storage bucket:', storageBucket);
-          // console.log('🚀 MANUAL: Is standalone:', isStandalone);
+          // // console.log('🚀 MANUAL: Uploading to storage path:', filePath);
+          // // console.log('🚀 MANUAL: Storage bucket:', storageBucket);
+          // // console.log('🚀 MANUAL: Is standalone:', isStandalone);
 
           // Use edge function for secure upload (service role key not exposed)
           const { uploadFileViaEdgeFunction } = await import('@/lib/edgeFunctions');
@@ -3487,7 +3487,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             filePath,
             file
           });
-          // console.log('🚀 MANUAL: Got public URL:', publicUrl);
+          // // console.log('🚀 MANUAL: Got public URL:', publicUrl);
 
           // Create document entry in database
           const documentData = {
@@ -3500,12 +3500,12 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             equipmentTagNumber: 'Manual'
           };
 
-          // console.log('🚀 MANUAL: Creating document entry:', documentData);
+          // // console.log('🚀 MANUAL: Creating document entry:', documentData);
           // Use correct upload function based on equipment type
           const uploadedDoc = isStandalone 
             ? await uploadStandaloneEquipmentDocument(equipmentId, documentData)
             : await uploadEquipmentDocument(equipmentId, documentData);
-          // console.log('🚀 MANUAL: Document created:', uploadedDoc);
+          // // console.log('🚀 MANUAL: Document created:', uploadedDoc);
 
           // Get equipment info for logging
           const currentEquipment = localEquipment.find(eq => eq.id === equipmentId);
@@ -3520,7 +3520,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                 documentData.equipmentType || 'Manual Upload',
                 documentData.name
               );
-              // console.log('✅ Activity logged: Document uploaded');
+              // // console.log('✅ Activity logged: Document uploaded');
               
               // Refresh activity logs if callback provided
               if (onActivityUpdate) {
@@ -3541,22 +3541,22 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             uploadDate: new Date().toISOString()
           };
 
-          // console.log('🚀 MANUAL: Adding new document to state:', newDocument);
+          // // console.log('🚀 MANUAL: Adding new document to state:', newDocument);
           setDocuments(prev => {
             const currentDocs = prev[equipmentId] || [];
             const updatedDocs = [...currentDocs, newDocument];
-            // console.log('🚀 MANUAL: Updated documents array:', updatedDocs);
+            // // console.log('🚀 MANUAL: Updated documents array:', updatedDocs);
             return {
               ...prev,
               [equipmentId]: updatedDocs
             };
           });
 
-          // console.log('🚀 MANUAL: Local state updated with new document');
+          // // console.log('🚀 MANUAL: Local state updated with new document');
 
           // Force immediate UI refresh
           setTimeout(() => {
-            // console.log('🚀 MANUAL: Immediate UI refresh...');
+            // // console.log('🚀 MANUAL: Immediate UI refresh...');
             setDocuments(prev => ({ ...prev }));
           }, 50);
 
@@ -3573,21 +3573,21 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
       // Force reload documents from database
       try {
-        // console.log('🚀 MANUAL: Force reloading documents...');
+        // // console.log('🚀 MANUAL: Force reloading documents...');
         await fetchEquipmentDocuments(equipmentId);
-        // console.log('🚀 MANUAL: Documents reloaded successfully');
+        // // console.log('🚀 MANUAL: Documents reloaded successfully');
 
         // Force UI refresh multiple times
         setTimeout(() => {
-          // console.log('🚀 MANUAL: Forcing UI refresh with timeout...');
+          // // console.log('🚀 MANUAL: Forcing UI refresh with timeout...');
           setDocuments(prev => ({ ...prev }));
-          // console.log('🚀 MANUAL: UI refresh triggered');
+          // // console.log('🚀 MANUAL: UI refresh triggered');
         }, 100);
 
         setTimeout(() => {
-          console.log('🚀 MANUAL: Second UI refresh...');
+          // console.log('🚀 MANUAL: Second UI refresh...');
           setDocuments(prev => ({ ...prev }));
-          console.log('🚀 MANUAL: Second UI refresh triggered');
+          // console.log('🚀 MANUAL: Second UI refresh triggered');
         }, 500);
 
       } catch (reloadError) {
@@ -3638,7 +3638,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         const documents = Array.isArray(documentsResponse) ? documentsResponse : [];
         const documentToDelete = documents.find((doc: any) => doc.id === documentId);
         
-        // console.log('🗑️ Deleting document:', documentId);
+        // // console.log('🗑️ Deleting document:', documentId);
         // Use correct delete function based on equipment type
         if (isStandalone) {
           await deleteStandaloneEquipmentDocument(documentId);
@@ -3657,7 +3657,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               documentToDelete.document_type || 'Document',
               documentToDelete.document_name || documentToDelete.name || 'Unknown'
             );
-            // console.log('✅ Activity logged: Document deleted');
+            // // console.log('✅ Activity logged: Document deleted');
             
             // Refresh activity logs if callback provided
             if (onActivityUpdate) {
@@ -3671,7 +3671,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         // Reload documents from database
         await fetchEquipmentDocuments(equipmentId);
 
-        // console.log('✅ Document deleted successfully');
+        // // console.log('✅ Document deleted successfully');
         toast({ title: 'Success', description: 'Document deleted successfully!' });
       } catch (error) {
         console.error('❌ Error deleting document:', error);
@@ -3870,7 +3870,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
             // Upload equipment documents if any
             if (equipmentId && unit.documents && unit.documents.length > 0) {
-              console.log(`📄 Uploading ${unit.documents.length} equipment document(s) for equipment: ${equipmentType} - ${unit.tagNumber}`);
+              // console.log(`📄 Uploading ${unit.documents.length} equipment document(s) for equipment: ${equipmentType} - ${unit.tagNumber}`);
               
               for (let i = 0; i < unit.documents.length; i++) {
                 const file = unit.documents[i];
@@ -3898,7 +3898,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                     };
                     
                     await uploadStandaloneEquipmentDocument(equipmentId, documentData);
-                    console.log(`✅ Equipment document ${i + 1} uploaded successfully: ${file.name}`);
+                    // console.log(`✅ Equipment document ${i + 1} uploaded successfully: ${file.name}`);
                 } catch (docError: any) {
                   console.error(`❌ Error uploading equipment document ${i + 1} (${file.name}):`, docError);
                   // Continue with other documents even if one fails
@@ -3936,7 +3936,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               };
               
               await uploadStandaloneEquipmentDocument(equipmentId, documentData);
-              console.log(`✅ ${documentType} uploaded successfully for equipment ${equipmentId}: ${file.name}`);
+              // console.log(`✅ ${documentType} uploaded successfully for equipment ${equipmentId}: ${file.name}`);
               return true;
           } catch (error: any) {
             console.error(`❌ Error uploading ${documentType} (${file.name}) for equipment ${equipmentId}:`, error);
@@ -4047,7 +4047,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               assigned_by: user?.id || null
             };
             
-            console.log('👥 Adding Equipment Manager to standalone equipment:', { equipmentId, data: teamPositionData });
+            // console.log('👥 Adding Equipment Manager to standalone equipment:', { equipmentId, data: teamPositionData });
             
             // Use REST API directly to avoid hanging issues with Supabase client
             const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -4082,7 +4082,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               }
               
               const createdData = await response.json();
-              console.log('✅ Equipment Manager added to standalone equipment team:', equipmentManagerName, createdData);
+              // console.log('✅ Equipment Manager added to standalone equipment team:', equipmentManagerName, createdData);
             } catch (fetchError: any) {
               clearTimeout(timeoutId);
               if (fetchError.name === 'AbortError') {
@@ -4145,11 +4145,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           // This ensures team members show up in the equipment card even if not viewing that equipment
           for (const equipmentId of createdEquipmentIds) {
             if (allEquipmentTeamMembers[equipmentId] && allEquipmentTeamMembers[equipmentId].length > 0) {
-              console.log('✅ Team members already in state for equipment:', equipmentId);
+              // console.log('✅ Team members already in state for equipment:', equipmentId);
             } else {
               // Fetch team members for this equipment to populate allEquipmentTeamMembers
               try {
-                console.log('🔄 Fetching team members for equipment card:', equipmentId);
+                // console.log('🔄 Fetching team members for equipment card:', equipmentId);
                 const { DatabaseService } = await import('@/lib/database');
                 const teamData = await DatabaseService.getStandaloneTeamPositions(equipmentId);
                 
@@ -4196,7 +4196,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                     ...prev,
                     [equipmentId]: transformedMembers
                   }));
-                  console.log('✅ Team members added to allEquipmentTeamMembers for equipment:', equipmentId);
+                  // console.log('✅ Team members added to allEquipmentTeamMembers for equipment:', equipmentId);
                 }
               } catch (fetchError) {
                 console.error('❌ Error fetching team members for equipment card (non-fatal):', fetchError);
@@ -4207,7 +4207,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           // If we're viewing one of the newly created equipment, refresh team members for settings tab
           if (viewingEquipmentId && createdEquipmentIds.includes(viewingEquipmentId)) {
             try {
-              console.log('🔄 Refreshing team members for viewed equipment (settings tab)...');
+              // console.log('🔄 Refreshing team members for viewed equipment (settings tab)...');
               await fetchEquipmentTeamMembers();
             } catch (fetchError) {
               console.error('❌ Error fetching team members (non-fatal):', fetchError);
@@ -4218,7 +4218,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           // Notify parent component to refresh Settings tab (similar to project add form)
           if (onUserAdded) {
             try {
-              console.log('🔄 Calling onUserAdded callback to refresh Settings tab...');
+              // console.log('🔄 Calling onUserAdded callback to refresh Settings tab...');
               onUserAdded();
             } catch (callbackError) {
               console.error('❌ Error in onUserAdded callback (non-fatal):', callbackError);
@@ -4233,18 +4233,18 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
       // Refresh equipment data - CRITICAL: Must complete to show new equipment on frontend
       // Add a small delay to ensure database transaction is committed
-      console.log('⏳ Waiting 500ms for database transaction to commit...');
+      // console.log('⏳ Waiting 500ms for database transaction to commit...');
       await new Promise(resolve => setTimeout(resolve, 500));
       
       try {
-        console.log('🔄 Refreshing equipment data to show new equipment on frontend...');
+        // console.log('🔄 Refreshing equipment data to show new equipment on frontend...');
       await refreshEquipmentData();
-        console.log('✅ Equipment data refreshed - new equipment should now be visible');
+        // console.log('✅ Equipment data refreshed - new equipment should now be visible');
         
         // After equipment data is refreshed, fetch team members for all newly created equipment
         // This ensures team members show up in equipment cards and settings tab
         if (createdEquipmentIds.length > 0) {
-          console.log('🔄 Fetching team members for all newly created equipment...');
+          // console.log('🔄 Fetching team members for all newly created equipment...');
           for (const equipmentId of createdEquipmentIds) {
             try {
               const { DatabaseService } = await import('@/lib/database');
@@ -4271,13 +4271,13 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                   ...prev,
                   [equipmentId]: transformedMembers
                 }));
-                console.log('✅ Team members fetched and added to state for equipment:', equipmentId);
+                // console.log('✅ Team members fetched and added to state for equipment:', equipmentId);
                 
                 // If we're viewing this equipment, also update teamMembers for settings tab
                 if (viewingEquipmentId === equipmentId) {
                   setTeamMembers(transformedMembers);
                   setTeamMembersLoading(false);
-                  console.log('✅ Team members updated for settings tab');
+                  // console.log('✅ Team members updated for settings tab');
                 }
               }
             } catch (teamFetchError) {
@@ -4287,17 +4287,17 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         }
         
         // Force a re-render by updating state again (in case React didn't detect the change)
-        console.log('🔄 Forcing UI update...');
+        // console.log('🔄 Forcing UI update...');
         await new Promise(resolve => setTimeout(resolve, 100));
         
       } catch (refreshError) {
         console.error('❌ Error refreshing equipment data:', refreshError);
         // Try one more time after a longer delay
         try {
-          console.log('🔄 Retrying equipment data refresh after 2 seconds...');
+          // console.log('🔄 Retrying equipment data refresh after 2 seconds...');
           await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
           await refreshEquipmentData();
-          console.log('✅ Equipment data refreshed on retry');
+          // console.log('✅ Equipment data refreshed on retry');
         } catch (retryError) {
           console.error('❌ Retry also failed, but equipment was created successfully:', retryError);
           console.error('⚠️ You may need to manually refresh the page to see the new equipment');
@@ -4333,9 +4333,9 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             });
             
             if (emailResult.success) {
-              console.log('✅ Email invitation sent to Equipment Manager');
+              // console.log('✅ Email invitation sent to Equipment Manager');
             } else {
-              console.log('⚠️ Email invitation failed:', emailResult.message);
+              // console.log('⚠️ Email invitation failed:', emailResult.message);
             }
           } catch (emailError) {
             console.error('❌ Error sending email invitation (non-fatal):', emailError);
@@ -4352,7 +4352,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               project_id: null, // No project_id for standalone equipment
               invited_by: currentUserId || 'system'
             });
-            console.log('✅ Invite created for Equipment Manager');
+            // console.log('✅ Invite created for Equipment Manager');
           } catch (inviteError) {
             console.error('❌ Error creating invite (equipment still created):', inviteError);
             // Don't fail the whole operation if invite creation fails
@@ -4360,18 +4360,18 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         }
       }
       
-      console.log('✅ All operations completed, closing form and showing success message');
+      // console.log('✅ All operations completed, closing form and showing success message');
       
       // Close form and show success - do this synchronously to ensure it happens
       setShowAddEquipmentForm(false);
-      console.log('✅ Form closed');
+      // console.log('✅ Form closed');
 
       // Show success toast
       toast({ 
         title: 'Success', 
         description: 'Standalone equipment added successfully!' 
       });
-      console.log('✅ Success toast shown');
+      // console.log('✅ Success toast shown');
       
       // Function completed successfully
       return;
@@ -4404,7 +4404,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   };
 
   const handleAddEquipment = async (newEquipment: any) => {
-    // console.log('New equipment added:', newEquipment);
+    // // console.log('New equipment added:', newEquipment);
 
     try {
       // Note: Global uniqueness check is now handled in the API (fastAPI.createEquipment)
@@ -4469,8 +4469,8 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         }
       });
 
-      // console.log('🔧 Creating equipment with data:', equipmentData);
-      // console.log('🔍 Unique identifiers being validated:', {
+      // // console.log('🔧 Creating equipment with data:', equipmentData);
+      // // console.log('🔍 Unique identifiers being validated:', {
       //   tag_number: tagNumber,
       //   job_number: jobNumber,
       //   manufacturing_serial: manufacturingSerial
@@ -4481,7 +4481,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       const createdEquipment = isStandalone 
         ? await fastAPI.createStandaloneEquipment(equipmentData)
         : await fastAPI.createEquipment(equipmentData);
-      // console.log('✅ Equipment created successfully:', createdEquipment);
+      // // console.log('✅ Equipment created successfully:', createdEquipment);
 
       // Refresh equipment data from database to ensure consistency
       await refreshEquipmentData();
@@ -4654,7 +4654,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   };
 
   const addTeamMember = async () => {
-    console.log('addTeamMember called', { 
+    // console.log('addTeamMember called', { 
       newMember, 
       viewingEquipmentId,
       allFieldsValid: !!(newMember.name && newMember.email && newMember.position && newMember.role && viewingEquipmentId)
@@ -4701,7 +4701,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             if (existingMember) {
               // 🆕 Preserve existing user's role from their user record
               actualUserRole = existingMember.role || existingMember.access_level || dbRole;
-              console.log('✅ Found existing member, preserving role:', actualUserRole);
+              // console.log('✅ Found existing member, preserving role:', actualUserRole);
             }
           }
         } catch (error) {
@@ -4746,15 +4746,15 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             role: dbStoredRole // Store as editor/viewer for DB, but actual role is in user record
         };
 
-        console.log('📤 Creating standalone team position with data:', teamPositionData);
-          console.log('🔍 Equipment ID being used:', viewingEquipmentId);
-          console.log('🔍 Equipment ID type:', typeof viewingEquipmentId);
+        // console.log('📤 Creating standalone team position with data:', teamPositionData);
+          // console.log('🔍 Equipment ID being used:', viewingEquipmentId);
+          // console.log('🔍 Equipment ID type:', typeof viewingEquipmentId);
         const result = await fastAPI.createStandaloneTeamPosition(teamPositionData);
-        console.log('✅ Team position created successfully:', result);
+        // console.log('✅ Team position created successfully:', result);
         } else {
           // For project equipment, use the existing project team member logic (DO NOT MODIFY)
           // This section should remain untouched for projects
-          console.log('⏭️ Skipping standalone team position creation - this is project equipment');
+          // console.log('⏭️ Skipping standalone team position creation - this is project equipment');
         }
         
         // 🆕 Send email invitation to the new team member (only for standalone equipment)
@@ -4769,7 +4769,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           
           // 🆕 Create invite for the new team member FIRST (before sending email)
           try {
-            console.log('📧 Creating invite for standalone equipment team member...');
+            // console.log('📧 Creating invite for standalone equipment team member...');
             await fastAPI.createInvite({
               email: newMember.email.trim(),
               full_name: newMember.name,
@@ -4778,7 +4778,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               project_id: null, // No project_id for standalone equipment
               invited_by: currentUserId || 'system'
             });
-            console.log('✅ Invite created for standalone equipment team member');
+            // console.log('✅ Invite created for standalone equipment team member');
           } catch (inviteError) {
             console.error('❌ Error creating invite (member still created):', inviteError);
             // Don't fail the whole operation if invite creation fails
@@ -4786,7 +4786,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           
           // Send email notification AFTER invite is created
           try {
-            console.log('📧 Sending email invitation to:', newMember.email.trim());
+            // console.log('📧 Sending email invitation to:', newMember.email.trim());
             const emailResult = await sendProjectTeamEmailNotification({
               project_name: equipmentName,
               team_member_name: newMember.name,
@@ -4798,9 +4798,9 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             });
             
             if (emailResult.success) {
-              console.log('✅ Email invitation sent successfully');
+              // console.log('✅ Email invitation sent successfully');
             } else {
-              console.log('⚠️ Email invitation failed:', emailResult.message);
+              // console.log('⚠️ Email invitation failed:', emailResult.message);
             }
           } catch (emailError) {
             console.error('❌ Error sending email invitation (non-fatal):', emailError);
@@ -4822,7 +4822,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               newMember.name, // memberName
               newMember.position || newMember.role || 'viewer' // role
             );
-            console.log('✅ Activity logged successfully');
+            // console.log('✅ Activity logged successfully');
           } catch (logError) {
             console.error('⚠️ Error logging activity (non-fatal):', logError);
             // Don't fail the whole operation if logging fails
@@ -4831,14 +4831,14 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
         // Only refresh team members for standalone equipment
         if (projectId === 'standalone') {
-        console.log('🔄 Refreshing team members list...');
+        // console.log('🔄 Refreshing team members list...');
         await fetchEquipmentTeamMembers();
-        console.log('✅ Team members list refreshed');
+        // console.log('✅ Team members list refreshed');
         }
         
         // Double-check: fetch again after a short delay to ensure we have the latest data
         setTimeout(async () => {
-          console.log('🔄 Second refresh of team members list...');
+          // console.log('🔄 Second refresh of team members list...');
           await fetchEquipmentTeamMembers();
         }, 1000);
         
@@ -4851,7 +4851,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         setSelectedExistingMemberEmail("");
         setIsExistingMemberMode(false);
         
-        console.log('✅ Showing success toast');
+        // console.log('✅ Showing success toast');
         toast({ title: 'Success', description: 'Team member added successfully!' });
       } catch (error: any) {
         console.error('❌ Error adding team member:', error);
@@ -4897,7 +4897,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   };
 
   const updateTeamMember = async () => {
-    console.log('🔄 updateTeamMember called', { 
+    // console.log('🔄 updateTeamMember called', { 
       selectedMember: selectedMember?.id, 
       newMember: { name: newMember.name, email: newMember.email, role: newMember.role },
       viewingEquipmentId,
@@ -4933,7 +4933,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         };
         
         const dbRole = roleMapping[newMember.role] || 'viewer';
-      console.log('🔍 Role mapping:', { displayRole: newMember.role, dbRole });
+      // console.log('🔍 Role mapping:', { displayRole: newMember.role, dbRole });
       
       // For standalone equipment, update standalone_equipment_team_positions table
       if (projectId === 'standalone' && selectedMember.id) {
@@ -4947,11 +4947,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           updated_at: new Date().toISOString()
         };
         
-        console.log('📤 Updating standalone team position:', { id: selectedMember.id, data: teamPositionData });
+        // console.log('📤 Updating standalone team position:', { id: selectedMember.id, data: teamPositionData });
         
         // Use fastAPI.updateStandaloneTeamPosition (uses api instance with JWT interceptor for RLS)
         const updatedData = await fastAPI.updateStandaloneTeamPosition(selectedMember.id, teamPositionData);
-        console.log('✅ Standalone team position updated successfully:', updatedData);
+        // console.log('✅ Standalone team position updated successfully:', updatedData);
       } else {
         // For project equipment, use the existing update logic
         const memberData = {
@@ -4972,16 +4972,16 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         await fastAPI.updateProjectMember(selectedMember.id, memberData);
       }
       
-      console.log('🔄 Refreshing team members list after update...');
+      // console.log('🔄 Refreshing team members list after update...');
         await fetchEquipmentTeamMembers();
-      console.log('✅ Team members list refreshed');
+      // console.log('✅ Team members list refreshed');
         
-      console.log('🔄 Closing edit modal and resetting form...');
+      // console.log('🔄 Closing edit modal and resetting form...');
         setShowEditMember(false);
         setSelectedMember(null);
         setNewMember({ name: "", email: "", phone: "", position: "", role: "", permissions: [], equipmentAssignments: [], dataAccess: [], accessLevel: "viewer" });
         
-      console.log('✅ Showing success toast');
+      // console.log('✅ Showing success toast');
         toast({ title: 'Success', description: 'Team member updated successfully!' });
       } catch (error) {
       console.error('❌ Error updating team member:', error);
@@ -4992,11 +4992,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
   const removeTeamMember = async (memberId: string) => {
     if (window.confirm("Are you sure you want to remove this team member?")) {
       try {
-        console.log('🗑️ Removing team member:', memberId);
+        // console.log('🗑️ Removing team member:', memberId);
         
         // For standalone equipment, delete from standalone_equipment_team_positions table
         if (projectId === 'standalone' && memberId) {
-          console.log('🗑️ Deleting from standalone_equipment_team_positions table');
+          // console.log('🗑️ Deleting from standalone_equipment_team_positions table');
           
           // Use REST API directly to avoid hanging issues with Supabase client
           const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -5030,7 +5030,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             }
             
             const deletedData = await response.json();
-            console.log('✅ Team member removed successfully:', deletedData);
+            // console.log('✅ Team member removed successfully:', deletedData);
           } catch (fetchError: any) {
             clearTimeout(timeoutId);
             if (fetchError.name === 'AbortError') {
@@ -5041,13 +5041,13 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           }
         } else if (memberId) {
           // For project equipment, use the existing delete logic
-          console.log('🗑️ Deleting from project_members table');
+          // console.log('🗑️ Deleting from project_members table');
           await fastAPI.deleteProjectMember(memberId);
         }
         
-        console.log('🔄 Refreshing team members list...');
+        // console.log('🔄 Refreshing team members list...');
         await fetchEquipmentTeamMembers();
-        console.log('✅ Team members list refreshed');
+        // console.log('✅ Team members list refreshed');
         
         toast({ title: 'Success', description: 'Team member removed successfully!' });
       } catch (error: any) {
@@ -6767,7 +6767,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log('Add Team Member button clicked', { 
+                        // console.log('Add Team Member button clicked', { 
                           newMember, 
                           viewingEquipmentId,
                           allFieldsValid: !!(newMember.name && newMember.email && newMember.position && newMember.role && viewingEquipmentId)
@@ -8452,7 +8452,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                                                           await updateEquipment(item.id, {
                                                             technical_sections: updatedSections
                                                           });
-                                                          // console.log('✅ Field name saved to database, refreshing data...');
+                                                          // // console.log('✅ Field name saved to database, refreshing data...');
                                                           await refreshEquipmentData();
                                                         } catch (error) {
                                                           console.error('Error saving field name change:', error);
@@ -8483,7 +8483,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                                                           await updateEquipment(item.id, {
                                                             technical_sections: updatedSections
                                                           });
-                                                          // console.log('✅ Field value saved to database, refreshing data...');
+                                                          // // console.log('✅ Field value saved to database, refreshing data...');
                                                           await refreshEquipmentData();
                                                         } catch (error) {
                                                           console.error('Error saving field value change:', error);
@@ -8514,11 +8514,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
                                                       // Save to database
                                                       try {
-                                                        // console.log('🗑️ Deleting custom field from database:', item.id, updatedSections);
+                                                        // // console.log('🗑️ Deleting custom field from database:', item.id, updatedSections);
                                                         await updateEquipment(item.id, {
                                                           technical_sections: updatedSections
                                                         });
-                                                        // console.log('✅ Custom field deleted successfully');
+                                                        // // console.log('✅ Custom field deleted successfully');
                                                         toast({
                                                           title: "Success",
                                                           description: "Custom field deleted successfully",
@@ -8827,11 +8827,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
                                       // Save to database
                                       try {
-                                        // console.log('💾 Saving team custom field to database:', item.id, updatedTeamFields);
+                                        // // console.log('💾 Saving team custom field to database:', item.id, updatedTeamFields);
                                         await updateEquipment(item.id, {
                                           team_custom_fields: updatedTeamFields
                                         });
-                                        // console.log('✅ Team custom field saved successfully');
+                                        // // console.log('✅ Team custom field saved successfully');
                                         toast({
                                           title: "Success",
                                           description: "Team custom field added successfully",
@@ -8876,8 +8876,8 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                           {(() => {
                             const teamFields = teamCustomFields[item.id] || [];
                             
-                            // console.log('🔍 Team tab - projectMembers:', projectMembers);
-                            // console.log('🔍 Team tab - equipment ID:', item.id);
+                            // // console.log('🔍 Team tab - projectMembers:', projectMembers);
+                            // // console.log('🔍 Team tab - equipment ID:', item.id);
 
                             // For standalone equipment, get team members from standalone_equipment_team_positions
                             let assignedMembers: any[] = [];
@@ -8922,7 +8922,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                                           ...prev,
                                           [item.id]: transformedMembers
                                         }));
-                                        console.log('✅ Fetched team members on-demand for equipment card:', item.id);
+                                        // console.log('✅ Fetched team members on-demand for equipment card:', item.id);
                                       }
                                     } catch (error) {
                                       console.error('❌ Error fetching team members on-demand (non-fatal):', error);
@@ -8933,14 +8933,14 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                             } else {
                               // For project equipment, use projectMembers
                               assignedMembers = projectMembers.filter(member => {
-                              // console.log('🔍 Checking member:', member.name, 'equipment_assignments:', member.equipment_assignments);
+                              // // console.log('🔍 Checking member:', member.name, 'equipment_assignments:', member.equipment_assignments);
                               return member.equipment_assignments &&
                                 (member.equipment_assignments.includes(item.id) ||
                                  member.equipment_assignments.includes("All Equipment"));
                             });
                             }
                             
-                            // console.log('🔍 Team tab - assignedMembers:', assignedMembers);
+                            // // console.log('🔍 Team tab - assignedMembers:', assignedMembers);
 
                             // Create combined list of custom fields and project members
                             const allTeamItems = [
@@ -9041,11 +9041,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
                                           // Save to database
                                           try {
-                                            // console.log('🗑️ Deleting team custom field from database:', item.id, updatedFields);
+                                            // // console.log('🗑️ Deleting team custom field from database:', item.id, updatedFields);
                                             await updateEquipment(item.id, {
                                               team_custom_fields: updatedFields
                                             });
-                                            // console.log('✅ Team custom field deleted successfully');
+                                            // // console.log('✅ Team custom field deleted successfully');
                                             toast({
                                               title: "Success",
                                               description: "Team custom field deleted successfully",
@@ -9386,7 +9386,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    // console.log('➕ Add Entry button clicked for equipment:', item.id);
+                                    // // console.log('➕ Add Entry button clicked for equipment:', item.id);
                                     setAddingProgressEntryForEquipment(item.id);
                                     setNewProgressType('general');
                                     setNewProgressEntry('');
@@ -9403,7 +9403,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                                     setImageAudioChunks([]);
                                     setImageRecordingDuration(0);
                                     setIsImageRecording(false);
-                                    // console.log('🔄 Form reset for new entry');
+                                    // // console.log('🔄 Form reset for new entry');
                                   }}
                                   className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm h-7 sm:h-6 px-2 sm:px-3 whitespace-nowrap"
                                 >
@@ -9622,12 +9622,12 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                                   multiple
                                   accept=".pdf,.doc,.docx,.xls,.xlsx,.dwg,.dxf,.jpg,.jpeg,.png"
                                   onChange={(e) => {
-                                    // console.log('🚀 SIMPLE: File input changed!');
-                                    // console.log('🚀 SIMPLE: Files:', e.target.files);
+                                    // // console.log('🚀 SIMPLE: File input changed!');
+                                    // // console.log('🚀 SIMPLE: Files:', e.target.files);
                                     const files = Array.from(e.target.files || []);
-                                    // console.log('🚀 SIMPLE: Files array:', files);
+                                    // // console.log('🚀 SIMPLE: Files array:', files);
                                     if (files.length > 0) {
-                                      // console.log('🚀 SIMPLE: Starting upload...');
+                                      // // console.log('🚀 SIMPLE: Starting upload...');
                                       handleDocumentUpload(item.id, files);
                                     }
                                   }}
@@ -9706,11 +9706,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                               <div className="text-xs font-medium text-gray-700">Upload New Documents:</div>
                               <div className="h-36 overflow-y-auto border border-gray-200 rounded bg-gray-50 p-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                 {(() => {
-                                  // console.log('📄 EDIT MODE: Checking documents for equipment:', item.id);
-                                  // console.log('📄 EDIT MODE: Documents state:', documents);
-                                  // console.log('📄 EDIT MODE: Documents for this equipment:', documents[item.id]);
-                                  // console.log('📄 EDIT MODE: Documents length:', documents[item.id]?.length || 0);
-                                  // console.log('📄 EDIT MODE: Documents loading:', documentsLoading[item.id]);
+                                  // // console.log('📄 EDIT MODE: Checking documents for equipment:', item.id);
+                                  // // console.log('📄 EDIT MODE: Documents state:', documents);
+                                  // // console.log('📄 EDIT MODE: Documents for this equipment:', documents[item.id]);
+                                  // // console.log('📄 EDIT MODE: Documents length:', documents[item.id]?.length || 0);
+                                  // // console.log('📄 EDIT MODE: Documents loading:', documentsLoading[item.id]);
                                   return null;
                                 })()}
                                 {documentsLoading[item.id] ? (
@@ -9734,7 +9734,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    // console.log('➕ Add Document button clicked for equipment:', item.id);
+                                    // // console.log('➕ Add Document button clicked for equipment:', item.id);
                                     setEditingEquipmentId(item.id);
                                   }}
                                   className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm h-7 sm:h-6 px-2 sm:px-3 whitespace-nowrap"
@@ -9746,11 +9746,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                             </div>
                             <div className="max-h-[200px] sm:h-36 overflow-y-auto border border-gray-200 rounded bg-gray-50 p-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                               {(() => {
-                                // console.log('📄 PERFECT: Rendering documents for equipment:', item.id);
-                                // console.log('📄 PERFECT: Documents state:', documents);
-                                // console.log('📄 PERFECT: Documents for this equipment:', documents[item.id]);
-                                // console.log('📄 PERFECT: Documents length:', documents[item.id]?.length || 0);
-                                // console.log('📄 PERFECT: Documents loading:', documentsLoading[item.id]);
+                                // // console.log('📄 PERFECT: Rendering documents for equipment:', item.id);
+                                // // console.log('📄 PERFECT: Documents state:', documents);
+                                // // console.log('📄 PERFECT: Documents for this equipment:', documents[item.id]);
+                                // // console.log('📄 PERFECT: Documents length:', documents[item.id]?.length || 0);
+                                // // console.log('📄 PERFECT: Documents loading:', documentsLoading[item.id]);
                                 return null;
                               })()}
                               {documentsLoading[item.id] ? (
@@ -9944,7 +9944,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                                   customFields: item.customFields || [],
                                   certificationTitle: item.certificationTitle || ''
                                 };
-                                // console.log('🔧 Setting editFormData with custom fields:', formData);
+                                // // console.log('🔧 Setting editFormData with custom fields:', formData);
                                 setEditFormData(formData);
                               }}
                             >
@@ -10554,9 +10554,9 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                       access_level: 'viewer'
                     };
 
-                    // console.log('👥 Adding new user to database:', newUserDataForDB);
+                    // // console.log('👥 Adding new user to database:', newUserDataForDB);
                     const createdUser = await fastAPI.createProjectMember(newUserDataForDB);
-                    // console.log('👥 User created successfully:', createdUser);
+                    // // console.log('👥 User created successfully:', createdUser);
 
                     // Refresh the users list to include the new user
                     await fetchProjectUsers();

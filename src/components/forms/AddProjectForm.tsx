@@ -206,7 +206,7 @@ const AddProjectForm = ({ onClose, onSubmit, editData, isEditMode }: AddProjectF
           
           // Set custom equipment types
           if (customTypes.length > 0) {
-            // console.log('🔧 Found custom equipment types in edit mode:', customTypes);
+            // // console.log('🔧 Found custom equipment types in edit mode:', customTypes);
             setCustomEquipmentType(customTypes);
           }
           
@@ -220,7 +220,7 @@ const AddProjectForm = ({ onClose, onSubmit, editData, isEditMode }: AddProjectF
                   const documents = await fastAPI.getDocumentsByEquipment(equipment.id);
                   const documentsArray = Array.isArray(documents) ? documents : [];
                   documentsMap[equipment.id] = documentsArray;
-                  // console.log(`✅ Loaded ${documentsArray.length} documents for equipment ${equipment.id}`);
+                  // // console.log(`✅ Loaded ${documentsArray.length} documents for equipment ${equipment.id}`);
                 } catch (error) {
                   // console.error(`❌ Error loading documents for equipment ${equipment.id}:`, error);
                   documentsMap[equipment.id] = [];
@@ -270,7 +270,7 @@ const AddProjectForm = ({ onClose, onSubmit, editData, isEditMode }: AddProjectF
   
   // Force re-render when editingEntries changes
   useEffect(() => {
-    console.log('🔧 EditingEntries changed:', editingEntries);
+    // console.log('🔧 EditingEntries changed:', editingEntries);
   }, [editingEntries]);
   
   // Special state for Project Manager edit form
@@ -361,7 +361,7 @@ const AddProjectForm = ({ onClose, onSubmit, editData, isEditMode }: AddProjectF
           }));
           
           // Debug: Log suggestions data
-          // console.log('🔍 Suggestions populated:', {
+          // // console.log('🔍 Suggestions populated:', {
           //   clientName: uniqueClients,
           //   projectManager: uniqueManagers,
           //   plantLocation: uniqueLocations,
@@ -372,11 +372,11 @@ const AddProjectForm = ({ onClose, onSubmit, editData, isEditMode }: AddProjectF
           // });
           
           // Load contact details from database
-          // console.log('📞 Loading contact details from database...');
-          // console.log('📞 This should execute after suggestions are populated');
+          // // console.log('📞 Loading contact details from database...');
+          // // console.log('📞 This should execute after suggestions are populated');
           
             try {
-              // console.log('📞 Executing project_members query...');
+              // // console.log('📞 Executing project_members query...');
               // Fetch project members with project_manager or vdcr_manager role
               const { data: projectMembers, error } = await supabase
                 .from('project_members')
@@ -384,56 +384,56 @@ const AddProjectForm = ({ onClose, onSubmit, editData, isEditMode }: AddProjectF
                 .in('role', ['project_manager', 'vdcr_manager'])
                 .eq('status', 'active');
               
-              // console.log('📞 Project members query result:', { projectMembers, error });
+              // // console.log('📞 Project members query result:', { projectMembers, error });
               
               if (error) {
                 console.error('❌ Error fetching project members:', error);
                 console.error('❌ Error details:', error.message, error.details, error.hint);
               } else {
-                console.log('📞 Fetched project members from database:', projectMembers);
-                // console.log('📞 Project members count:', projectMembers?.length || 0);
+                // console.log('📞 Fetched project members from database:', projectMembers);
+                // // console.log('📞 Project members count:', projectMembers?.length || 0);
                 
                 // if (!projectMembers || projectMembers.length === 0) {
-                //   console.log('⚠️ No project members found with project_manager or vdcr_manager role');
-                //   console.log('📞 This might be why contacts are empty');
+                //   // console.log('⚠️ No project members found with project_manager or vdcr_manager role');
+                //   // console.log('📞 This might be why contacts are empty');
                 // }
                 
                 const projectManagerContacts: Record<string, { email: string; phone: string }> = {};
                 const vdcrManagerContacts: Record<string, { email: string; phone: string }> = {};
                 
                 projectMembers?.forEach((member: any) => {
-                  // console.log('📞 Processing project member:', member);
+                  // // console.log('📞 Processing project member:', member);
                   if (member.name && member.email) {
                     if (member.role === 'project_manager') {
                       projectManagerContacts[member.name] = { 
                         email: member.email, 
                         phone: member.phone || ''
                       };
-                      // console.log('📞 Added project manager contact:', member.name, '->', { email: member.email, phone: member.phone || '' });
+                      // // console.log('📞 Added project manager contact:', member.name, '->', { email: member.email, phone: member.phone || '' });
                     } else if (member.role === 'vdcr_manager') {
                       vdcrManagerContacts[member.name] = { 
                         email: member.email, 
                         phone: member.phone || ''
                       };
-                      // console.log('📞 Added VDCR manager contact:', member.name, '->', { email: member.email, phone: member.phone || '' });
+                      // // console.log('📞 Added VDCR manager contact:', member.name, '->', { email: member.email, phone: member.phone || '' });
                     }
                   } else {
-                    console.log('⚠️ Skipping project member (missing name or email):', member);
+                    // console.log('⚠️ Skipping project member (missing name or email):', member);
                   }
                 });
               
-              // console.log('📞 Final project manager contacts:', projectManagerContacts);
-              // console.log('📞 Final VDCR manager contacts:', vdcrManagerContacts);
-              // console.log('📞 Project manager contacts keys:', Object.keys(projectManagerContacts));
-              // console.log('📞 VDCR manager contacts keys:', Object.keys(vdcrManagerContacts));
+              // // console.log('📞 Final project manager contacts:', projectManagerContacts);
+              // // console.log('📞 Final VDCR manager contacts:', vdcrManagerContacts);
+              // // console.log('📞 Project manager contacts keys:', Object.keys(projectManagerContacts));
+              // // console.log('📞 VDCR manager contacts keys:', Object.keys(vdcrManagerContacts));
               
               // Set the contacts state
               setProjectManagerContacts(projectManagerContacts);
               setVdcrManagerContacts(vdcrManagerContacts);
               
-              // console.log('📞 Contacts state updated successfully');
-              // console.log('📞 After setting state - projectManagerContacts:', projectManagerContacts);
-              // console.log('📞 After setting state - vdcrManagerContacts:', vdcrManagerContacts);
+              // // console.log('📞 Contacts state updated successfully');
+              // // console.log('📞 After setting state - projectManagerContacts:', projectManagerContacts);
+              // // console.log('📞 After setting state - vdcrManagerContacts:', vdcrManagerContacts);
             }
           } catch (error) {
             console.error('❌ Error loading contact details:', error);
@@ -567,13 +567,13 @@ const AddProjectForm = ({ onClose, onSubmit, editData, isEditMode }: AddProjectF
           ...prev,
           ...parsedData
         };
-        // console.log('📄 New form data:', newData);
+        // // console.log('📄 New form data:', newData);
         return newData;
       });
       
       // Show what was filled
       const filledFields = Object.keys(parsedData).filter(key => parsedData[key as keyof typeof parsedData]);
-      // console.log('📄 Filled fields:', filledFields);
+      // // console.log('📄 Filled fields:', filledFields);
       
       if (filledFields.length > 0) {
         toast({
@@ -683,25 +683,25 @@ const AddProjectForm = ({ onClose, onSubmit, editData, isEditMode }: AddProjectF
           const arrayBuffer = await file.arrayBuffer();
           const workbook = XLSX.read(arrayBuffer, { type: 'array' });
           
-          // console.log('📊 Excel workbook loaded:', workbook.SheetNames);
+          // // console.log('📊 Excel workbook loaded:', workbook.SheetNames);
           
           workbook.SheetNames.forEach(sheetName => {
             const worksheet = workbook.Sheets[sheetName];
-            // console.log('📊 Processing sheet:', sheetName);
+            // // console.log('📊 Processing sheet:', sheetName);
             
             // Try different methods to extract data
             try {
               // Method 1: Convert to JSON with headers
               const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-              // console.log('📊 Sheet data (JSON):', jsonData);
+              // // console.log('📊 Sheet data (JSON):', jsonData);
               
               // Process headers and data separately
               if (jsonData.length >= 2) {
                 const headers = jsonData[0];
                 const dataRow = jsonData[1];
                 
-                // console.log('📊 Headers:', headers);
-                // console.log('📊 Data row:', dataRow);
+                // // console.log('📊 Headers:', headers);
+                // // console.log('📊 Data row:', dataRow);
                 
                 // Create structured text with field: value format
                 headers.forEach((header: any, index: number) => {
@@ -752,7 +752,7 @@ const AddProjectForm = ({ onClose, onSubmit, editData, isEditMode }: AddProjectF
           
           // If no data extracted, provide sample data for testing
           if (!fullText.trim()) {
-            // console.log('📊 No data extracted, providing sample data');
+            // // console.log('📊 No data extracted, providing sample data');
             fullText = `Project: Petrochemical Plant Expansion
 Client: Reliance Industries Ltd
 Location: Jamnagar, Gujarat
@@ -764,7 +764,7 @@ Services: Design, Manufacturing, Testing, Documentation
 Industry: Petrochemical`;
           }
           
-          // console.log('📊 Final extracted text:', fullText);
+          // // console.log('📊 Final extracted text:', fullText);
           resolve(fullText);
         } catch (error) {
           console.error('📊 Excel processing error:', error);
@@ -778,7 +778,7 @@ Deadline: 2025-06-30
 Scope: Design and manufacturing of pressure vessels and heat exchangers
 Services: Design, Manufacturing, Testing, Documentation
 Industry: Petrochemical`;
-          // console.log('📊 Using fallback data:', fallbackText);
+          // // console.log('📊 Using fallback data:', fallbackText);
           resolve(fallbackText);
         }
         return fullText;
@@ -1247,11 +1247,11 @@ Industry: Petrochemical`;
   };
 
   const startEditingEntry = async (field: string, index: number, value: string) => {
-    // console.log('🔧 Starting edit for field:', field, 'index:', index, 'value:', value);
-    // console.log('🔧 Current editingEntries state:', editingEntries);
+    // // console.log('🔧 Starting edit for field:', field, 'index:', index, 'value:', value);
+    // // console.log('🔧 Current editingEntries state:', editingEntries);
     
     if (field === 'projectManager') {
-      // console.log('🔧 Project Manager edit started for:', value);
+      // // console.log('🔧 Project Manager edit started for:', value);
       
       // IMMEDIATE STATE SET - No database query for now
       const newEditingState = {
@@ -1261,15 +1261,15 @@ Industry: Petrochemical`;
         phone: ''  // Will be filled later
       };
       
-      // console.log('🔧 Setting editingProjectManager state IMMEDIATELY with:', newEditingState);
+      // // console.log('🔧 Setting editingProjectManager state IMMEDIATELY with:', newEditingState);
       setEditingProjectManager(newEditingState);
-      // console.log('🔧 editingProjectManager state set successfully');
+      // // console.log('🔧 editingProjectManager state set successfully');
       
       // Force re-render
       setForceRender(prev => prev + 1);
       
       // IMMEDIATE FIX: Use actual table data (hardcoded based on your table)
-      // console.log('🔧 Using actual table data for:', value);
+      // // console.log('🔧 Using actual table data for:', value);
       
       // Simulate database delay
       setTimeout(() => {
@@ -1286,7 +1286,7 @@ Industry: Petrochemical`;
           contacts = { email: 'gaurav@example.com', phone: '111111111' };
         }
         
-        // console.log('🔧 Actual table contacts for', value, ':', contacts);
+        // // console.log('🔧 Actual table contacts for', value, ':', contacts);
         
         // Update the editing state with actual table data
         setEditingProjectManager(prev => {
@@ -1296,7 +1296,7 @@ Industry: Petrochemical`;
               email: contacts.email,
               phone: contacts.phone
             };
-            // console.log('🔧 Updated editingProjectManager state with actual table data:', updated);
+            // // console.log('🔧 Updated editingProjectManager state with actual table data:', updated);
             return updated;
           }
           return null;
@@ -1304,10 +1304,10 @@ Industry: Petrochemical`;
         
         // Force re-render after update
         setForceRender(prev => prev + 1);
-        // console.log('🔧 Force re-render triggered after actual table data update');
+        // // console.log('🔧 Force re-render triggered after actual table data update');
       }, 1000); // 1 second delay to simulate database fetch
     } else if (field === 'vdcrManager') {
-      console.log('🔧 VDCR Manager edit started for:', value);
+      // console.log('🔧 VDCR Manager edit started for:', value);
       
       // IMMEDIATE STATE SET - No database query for now
       const newEditingState = {
@@ -1317,15 +1317,15 @@ Industry: Petrochemical`;
         phone: ''  // Will be filled later
       };
       
-      // console.log('🔧 Setting editingVdcrManager state IMMEDIATELY with:', newEditingState);
+      // // console.log('🔧 Setting editingVdcrManager state IMMEDIATELY with:', newEditingState);
       setEditingVdcrManager(newEditingState);
-      // console.log('🔧 editingVdcrManager state set successfully');
+      // // console.log('🔧 editingVdcrManager state set successfully');
       
       // Force re-render
       setForceRender(prev => prev + 1);
       
       // IMMEDIATE FIX: Use actual VDCR table data
-      // console.log('🔧 Using actual VDCR table data for:', value);
+      // // console.log('🔧 Using actual VDCR table data for:', value);
       
       // Simulate database delay
       setTimeout(() => {
@@ -1338,7 +1338,7 @@ Industry: Petrochemical`;
           contacts = { email: 'vdcr2@example.com', phone: '333333333' };
         }
         
-        // console.log('🔧 Actual VDCR table contacts for', value, ':', contacts);
+        // // console.log('🔧 Actual VDCR table contacts for', value, ':', contacts);
         
         // Update the editing state with actual VDCR table data
         setEditingVdcrManager(prev => {
@@ -1348,7 +1348,7 @@ Industry: Petrochemical`;
               email: contacts.email,
               phone: contacts.phone
             };
-            // console.log('🔧 Updated editingVdcrManager state with actual VDCR table data:', updated);
+            // // console.log('🔧 Updated editingVdcrManager state with actual VDCR table data:', updated);
             return updated;
           }
           return null;
@@ -1356,13 +1356,13 @@ Industry: Petrochemical`;
         
         // Force re-render after update
         setForceRender(prev => prev + 1);
-        // console.log('🔧 Force re-render triggered after actual VDCR table data update');
+        // // console.log('🔧 Force re-render triggered after actual VDCR table data update');
       }, 1000); // 1 second delay to simulate database fetch
     } else {
-      // console.log('🔧 Setting editing state for field:', field, 'with value:', value);
+      // // console.log('🔧 Setting editing state for field:', field, 'with value:', value);
       setEditingEntries(prev => {
         const newState = { ...prev, [field]: { index, value } };
-        // console.log('🔧 New editing state:', newState);
+        // // console.log('🔧 New editing state:', newState);
         return newState;
       });
       
@@ -1373,10 +1373,10 @@ Industry: Petrochemical`;
 
   const saveEditedEntry = async (field: string) => {
     const editing = editingEntries[field];
-    // console.log('💾 🎯 SAVE FUNCTION CALLED for field:', field);
-    // console.log('💾 🎯 Current editingEntries state:', editingEntries);
-    // console.log('💾 🎯 Editing object for field:', editing);
-    // console.log('💾 🎯 Field value to save:', editing?.value);
+    // // console.log('💾 🎯 SAVE FUNCTION CALLED for field:', field);
+    // // console.log('💾 🎯 Current editingEntries state:', editingEntries);
+    // // console.log('💾 🎯 Editing object for field:', editing);
+    // // console.log('💾 🎯 Field value to save:', editing?.value);
     
     if (editing && editing.value.trim()) {
       const oldValue = dynamicOptions[field][editing.index];
@@ -1388,11 +1388,11 @@ Industry: Petrochemical`;
           i === editing.index ? newValue : option
         );
         
-        // console.log('💾 Updated options for field:', field, 'new options:', updatedOptions);
+        // // console.log('💾 Updated options for field:', field, 'new options:', updatedOptions);
         
         // If the edited value is currently selected, update the form data
         if (formData[field as keyof ProjectFormData] === oldValue) {
-          // console.log('💾 Updating form data for field:', field, 'new value:', newValue);
+          // // console.log('💾 Updating form data for field:', field, 'new value:', newValue);
           handleInputChange(field as keyof ProjectFormData, newValue);
         }
         
@@ -1403,7 +1403,7 @@ Industry: Petrochemical`;
       });
       
       // Save to database - update all projects that have this old value
-        // console.log('💾 Saving to database - updating projects with old value:', oldValue, 'to new value:', newValue);
+        // // console.log('💾 Saving to database - updating projects with old value:', oldValue, 'to new value:', newValue);
         
         // Map field names to database column names
         const fieldMapping: Record<string, string> = {
@@ -1419,40 +1419,40 @@ Industry: Petrochemical`;
         
         const dbField = fieldMapping[field];
         if (dbField) {
-        // console.log('💾 🎯 Database field mapping:', field, '->', dbField);
-        // console.log('💾 🎯 Updating projects where', dbField, '=', oldValue, 'to', newValue);
+        // // console.log('💾 🎯 Database field mapping:', field, '->', dbField);
+        // // console.log('💾 🎯 Updating projects where', dbField, '=', oldValue, 'to', newValue);
         
         // Direct database update without connection test
-        // console.log('💾 🎯 About to start database update...');
-        // console.log('💾 🎯 Supabase client:', supabase);
-        // console.log('💾 🎯 Update query:', {
+        // // console.log('💾 🎯 About to start database update...');
+        // // console.log('💾 🎯 Supabase client:', supabase);
+        // // console.log('💾 🎯 Update query:', {
         //   table: 'projects',
         //   update: { [dbField]: newValue },
         //   where: { [dbField]: oldValue }
         // });
         
         // Direct database update without timeout
-        // console.log('💾 🎯 Starting direct database update...');
+        // // console.log('💾 🎯 Starting direct database update...');
         
         // Use async/await for better error handling
         (async () => {
           try {
-            // console.log('💾 🎯 Executing database update...');
+            // // console.log('💾 🎯 Executing database update...');
             const { data, error } = await supabase
               .from('projects')
               .update({ [dbField]: newValue })
               .eq(dbField, oldValue)
               .select();
             
-            // console.log('💾 🎯 Database update promise resolved');
+            // // console.log('💾 🎯 Database update promise resolved');
             if (error) {
               // console.error('❌ 🎯 Database update failed:', error);
               console.error('❌ 🎯 Error details:', error.message, error.details, error.hint);
               // console.error('❌ 🎯 Error code:', error.code);
             } else {
-              console.log('✅ 🎯 Database update successful:', data);
-              // console.log('✅ 🎯 Updated', data?.length || 0, 'projects');
-              // console.log('✅ 🎯 Updated projects:', data);
+              // console.log('✅ 🎯 Database update successful:', data);
+              // // console.log('✅ 🎯 Updated', data?.length || 0, 'projects');
+              // // console.log('✅ 🎯 Updated projects:', data);
             }
           } catch (dbError) {
             console.error('❌ 🎯 Database query error:', dbError);
@@ -1460,7 +1460,7 @@ Industry: Petrochemical`;
           }
         })();
         
-        // console.log('💾 🎯 Database update started in background');
+        // // console.log('💾 🎯 Database update started in background');
         //     toast({
         //       title: "Success",
         //   description: "Changes saved successfully!",
@@ -1488,7 +1488,7 @@ Industry: Petrochemical`;
     if (editingProjectManager && editingProjectManager.name.trim()) {
       const oldName = dynamicOptions.projectManager[editingProjectManager.index];
       const newName = editingProjectManager.name.trim();
-      // console.log('💾 Saving Project Manager edit - old name:', oldName, 'new name:', newName);
+      // // console.log('💾 Saving Project Manager edit - old name:', oldName, 'new name:', newName);
       
       setDynamicOptions(prev => {
         const updatedOptions = prev.projectManager.map((option, i) => 
@@ -1517,13 +1517,13 @@ Industry: Petrochemical`;
           email: editingProjectManager.email,
           phone: editingProjectManager.phone
         };
-        // console.log('💾 Updated project manager contacts:', newContacts);
+        // // console.log('💾 Updated project manager contacts:', newContacts);
         return newContacts;
       });
       
       // Save to database - update all projects that have this old manager name
       try {
-        // console.log('💾 Saving Project Manager to database - updating projects with old name:', oldName, 'to new name:', newName);
+        // // console.log('💾 Saving Project Manager to database - updating projects with old name:', oldName, 'to new name:', newName);
         
         const { data, error } = await supabase
           .from('projects')
@@ -1539,8 +1539,8 @@ Industry: Petrochemical`;
             variant: "destructive",
           });
         } else {
-          // console.log('✅ Database update successful:', data);
-          // console.log('✅ Updated', data?.length || 0, 'projects');
+          // // console.log('✅ Database update successful:', data);
+          // // console.log('✅ Updated', data?.length || 0, 'projects');
           toast({
             title: "Success",
             description: `Project Manager updated successfully (${data?.length || 0} projects updated)`,
@@ -1567,7 +1567,7 @@ Industry: Petrochemical`;
     if (editingVdcrManager && editingVdcrManager.name.trim()) {
       const oldName = dynamicOptions.vdcrManager[editingVdcrManager.index];
       const newName = editingVdcrManager.name.trim();
-      // console.log('💾 Saving VDCR Manager edit - old name:', oldName, 'new name:', newName);
+      // // console.log('💾 Saving VDCR Manager edit - old name:', oldName, 'new name:', newName);
       
       setDynamicOptions(prev => {
         const updatedOptions = prev.vdcrManager.map((option, i) => 
@@ -1596,13 +1596,13 @@ Industry: Petrochemical`;
           email: editingVdcrManager.email,
           phone: editingVdcrManager.phone
         };
-        // console.log('💾 Updated VDCR manager contacts:', newContacts);
+        // // console.log('💾 Updated VDCR manager contacts:', newContacts);
         return newContacts;
       });
       
       // Save to database - update all projects that have this old VDCR manager name
       try {
-        // console.log('💾 Saving VDCR Manager to database - updating projects with old name:', oldName, 'to new name:', newName);
+        // // console.log('💾 Saving VDCR Manager to database - updating projects with old name:', oldName, 'to new name:', newName);
         
         const { data, error } = await supabase
           .from('projects')
@@ -1618,8 +1618,8 @@ Industry: Petrochemical`;
             variant: "destructive",
           });
         } else {
-          // console.log('✅ Database update successful:', data);
-          // console.log('✅ Updated', data?.length || 0, 'projects');
+          // // console.log('✅ Database update successful:', data);
+          // // console.log('✅ Updated', data?.length || 0, 'projects');
           toast({
             title: "Success",
             description: `VDCR Manager updated successfully (${data?.length || 0} projects updated)`,
@@ -1644,12 +1644,12 @@ Industry: Petrochemical`;
 
   const deleteEntry = async (field: string, index: number) => {
     const deletedValue = dynamicOptions[field][index];
-    // console.log('🗑️ Delete entry called for field:', field, 'index:', index, 'deletedValue:', deletedValue);
+    // // console.log('🗑️ Delete entry called for field:', field, 'index:', index, 'deletedValue:', deletedValue);
     
     // Remove from dynamic options
     setDynamicOptions(prev => {
       const newOptions = prev[field].filter((_, i) => i !== index);
-      // console.log('🗑️ New options after deletion:', newOptions);
+      // // console.log('🗑️ New options after deletion:', newOptions);
       return {
         ...prev,
         [field]: newOptions
@@ -1658,7 +1658,7 @@ Industry: Petrochemical`;
     
     // If the deleted value is currently selected, clear the form field
     if (formData[field as keyof ProjectFormData] === deletedValue) {
-      // console.log('🗑️ Clearing form field as deleted value was selected');
+      // // console.log('🗑️ Clearing form field as deleted value was selected');
       handleInputChange(field as keyof ProjectFormData, '');
     }
     
@@ -1667,7 +1667,7 @@ Industry: Petrochemical`;
       setProjectManagerContacts(prev => {
         const newContacts = { ...prev };
         delete newContacts[deletedValue];
-        // console.log('🗑️ Updated project manager contacts:', newContacts);
+        // // console.log('🗑️ Updated project manager contacts:', newContacts);
         return newContacts;
       });
     }
@@ -1677,14 +1677,14 @@ Industry: Petrochemical`;
       setVdcrManagerContacts(prev => {
         const newContacts = { ...prev };
         delete newContacts[deletedValue];
-        // console.log('🗑️ Updated VDCR manager contacts:', newContacts);
+        // // console.log('🗑️ Updated VDCR manager contacts:', newContacts);
         return newContacts;
       });
     }
     
     // Update database - set all projects with this value to empty or null
     try {
-      // console.log('🗑️ Updating database - removing value:', deletedValue, 'from field:', field);
+      // // console.log('🗑️ Updating database - removing value:', deletedValue, 'from field:', field);
       
       // Map field names to database column names
       const fieldMapping: Record<string, string> = {
@@ -1699,8 +1699,8 @@ Industry: Petrochemical`;
       
       const dbField = fieldMapping[field];
       if (dbField) {
-        // console.log('🗑️ Database field mapping:', field, '->', dbField);
-        // console.log('🗑️ Removing value:', deletedValue, 'from field:', dbField);
+        // // console.log('🗑️ Database field mapping:', field, '->', dbField);
+        // // console.log('🗑️ Removing value:', deletedValue, 'from field:', dbField);
         
         const { data, error } = await supabase
           .from('projects')
@@ -1717,8 +1717,8 @@ Industry: Petrochemical`;
             variant: "destructive",
           });
         } else {
-          // console.log('✅ Database update successful - value removed:', data);
-          // console.log('✅ Updated', data?.length || 0, 'projects');
+          // // console.log('✅ Database update successful - value removed:', data);
+          // // console.log('✅ Updated', data?.length || 0, 'projects');
           toast({
             title: "Success",
             description: `Value removed successfully (${data?.length || 0} projects updated)`,
@@ -1842,23 +1842,23 @@ Industry: Petrochemical`;
     
     setIsSubmitting(true);
     
-    // // console.log('🚀 Form submitted!');
-    // // console.log('📋 Form data:', formData);
+    // // // console.log('🚀 Form submitted!');
+    // // // console.log('📋 Form data:', formData);
     
-    // // console.log('🔍 About to enter try block...');
+    // // // console.log('🔍 About to enter try block...');
       
     try {
-      // // console.log('🔍 Starting  project creation process...');
-      // // console.log('🔍 Form data keys:', Object.keys(formData));
-      // // console.log('🔍 Form data values:', Object.values(formData));
+      // // // console.log('🔍 Starting  project creation process...');
+      // // // console.log('🔍 Form data keys:', Object.keys(formData));
+      // // // console.log('🔍 Form data values:', Object.values(formData));
       
       // Get current user and firm_id
-      // // console.log('🔍 About to get user from auth...');
+      // // // console.log('🔍 About to get user from auth...');
       let user;
       
       // Use localStorage instead of auth call
       const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-      // // console.log('👤 User data from localStorage:', userData);
+      // // // console.log('👤 User data from localStorage:', userData);
       
       if (!userData.id) {
         // // console.error('❌ No user found in localStorage');
@@ -1867,7 +1867,7 @@ Industry: Petrochemical`;
       }
       
       user = { id: userData.id, email: userData.email };
-      // // console.log('✅ User authenticated from localStorage:', user.email);
+      // // // console.log('✅ User authenticated from localStorage:', user.email);
       
       if (!user) {
         toast({ title: 'Error', description: 'User not authenticated. Please login again.', variant: 'destructive' });
@@ -1876,7 +1876,7 @@ Industry: Petrochemical`;
 
       // Get user's firm_id from localStorage
       const firmId = userData.firm_id;
-      // // console.log('🏢 Firm ID from localStorage:', firmId);
+      // // // console.log('🏢 Firm ID from localStorage:', firmId);
       
       if (!firmId) {
         toast({ title: 'Error', description: 'Firm ID not found. Please contact your administrator.', variant: 'destructive' });
@@ -1955,21 +1955,21 @@ Industry: Petrochemical`;
         status: 'active'
       };
 
-      //  console.log('🔍 Project data being sent to update:', projectDataForSupabase);
+      //  // console.log('🔍 Project data being sent to update:', projectDataForSupabase);
 
-      // // console.log('🏗️ Project data for Supabase:', projectDataForSupabase);
-      // // console.log('🏗️ Is edit mode:', isEditMode);
-      // // console.log('🏗️ Edit data:', editData);
+      // // // console.log('🏗️ Project data for Supabase:', projectDataForSupabase);
+      // // // console.log('🏗️ Is edit mode:', isEditMode);
+      // // // console.log('🏗️ Edit data:', editData);
 
       let createdProject;
       
       if (isEditMode && editData && (editData as any).id) {
         // Update existing project
         const projectId = (editData as any).id;
-        // // console.log('🔄 Updating existing project with ID:', projectId);
+        // // // console.log('🔄 Updating existing project with ID:', projectId);
         try {
           createdProject = await fastAPI.updateProject(projectId, projectDataForSupabase);
-          // // console.log('✅ Project updated successfully:', createdProject);
+          // // // console.log('✅ Project updated successfully:', createdProject);
         } catch (apiError) {
           // // console.error('❌ Update failed:', apiError);
           // // console.error('❌ Update error details:', {
@@ -1981,10 +1981,10 @@ Industry: Petrochemical`;
         }
       } else {
         // Create new project
-        // // console.log('🆕 Creating new project...');
+        // // // console.log('🆕 Creating new project...');
         try {
           createdProject = await fastAPI.createProject(projectDataForSupabase);
-          // // console.log('✅ Project created successfully:', createdProject);
+          // // // console.log('✅ Project created successfully:', createdProject);
         } catch (apiError) {
           // // console.error('❌ Create failed:', apiError);
           // // console.error('❌ Create error details:', {
@@ -1996,24 +1996,24 @@ Industry: Petrochemical`;
         }
       }
       
-      // // console.log('✅ Project created successfully:', createdProject);
+      // // // console.log('✅ Project created successfully:', createdProject);
     
              // Handle equipment records
       if (equipmentData.length > 0) {
          if (isEditMode && editData) {
            // STRICT EDIT MODE: In edit mode, we should ONLY update existing equipment
            // Equipment from database should ALWAYS have IDs
-          //  console.log('🔧 STRICT EDIT MODE: Processing equipment for existing project...');
-          //  console.log('🔍 Equipment data before processing:', equipmentData);
-          //  console.log('📊 Equipment with IDs:', equipmentData.filter(e => e.id).length);
-          //  console.log('📊 Equipment without IDs:', equipmentData.filter(e => !e.id).length);
+          //  // console.log('🔧 STRICT EDIT MODE: Processing equipment for existing project...');
+          //  // console.log('🔍 Equipment data before processing:', equipmentData);
+          //  // console.log('📊 Equipment with IDs:', equipmentData.filter(e => e.id).length);
+          //  // console.log('📊 Equipment without IDs:', equipmentData.filter(e => !e.id).length);
            
            // Separate equipment into: existing (with IDs) and new (without IDs)
            const existingEquipment = equipmentData.filter(e => e.id);
            const newEquipment = equipmentData.filter(e => !e.id);
            
-          //  console.log(`✅ Found ${existingEquipment.length} existing equipment (will UPDATE)`);
-          //  console.log(`🆕 Found ${newEquipment.length} new equipment (will CREATE only if has real values)`);
+          //  // console.log(`✅ Found ${existingEquipment.length} existing equipment (will UPDATE)`);
+          //  // console.log(`🆕 Found ${newEquipment.length} new equipment (will CREATE only if has real values)`);
            
            // Remove duplicates from existing equipment based on ID
            const uniqueExistingEquipment = existingEquipment.filter((equipment, index, self) => {
@@ -2032,7 +2032,7 @@ Industry: Petrochemical`;
              }
              
              try {
-              //  console.log(`✅ UPDATING existing equipment ID: ${equipment.id}, Type: ${equipment.type}, Tag: ${equipment.tagNumber}`);
+              //  // console.log(`✅ UPDATING existing equipment ID: ${equipment.id}, Type: ${equipment.type}, Tag: ${equipment.tagNumber}`);
                const equipmentDataForSupabase = {
                  type: equipment.type,
                  tag_number: equipment.tagNumber || 'TBD',
@@ -2049,7 +2049,7 @@ Industry: Petrochemical`;
                
                // Note: Global uniqueness validation happens in fastAPI.updateEquipment
                await fastAPI.updateEquipment(equipment.id, equipmentDataForSupabase);
-              //  console.log(`✅ Successfully updated equipment ID: ${equipment.id}`);
+              //  // console.log(`✅ Successfully updated equipment ID: ${equipment.id}`);
              } catch (equipmentError: any) {
                console.error(`❌ Error updating equipment ID ${equipment.id}:`, equipmentError);
                const errorMsg = equipmentError?.message || 'Failed to update equipment.';
@@ -2059,7 +2059,7 @@ Industry: Petrochemical`;
            
            // Process new equipment - ONLY CREATE if it has real values
            if (newEquipment.length > 0) {
-            //  console.log(`🆕 Processing ${newEquipment.length} potentially new equipment entries...`);
+            //  // console.log(`🆕 Processing ${newEquipment.length} potentially new equipment entries...`);
              
              // Remove duplicates from new equipment
              const uniqueNewEquipment = newEquipment.filter((equipment, index, self) => {
@@ -2086,11 +2086,11 @@ Industry: Petrochemical`;
                return isUnique;
              });
              
-            //  console.log(`🆕 Creating ${uniqueNewEquipment.length} new equipment entries...`);
+            //  // console.log(`🆕 Creating ${uniqueNewEquipment.length} new equipment entries...`);
              
              for (const equipment of uniqueNewEquipment) {
                try {
-                //  console.log(`🆕 Checking if equipment already exists: Type: ${equipment.type}, Tag: ${equipment.tagNumber}, Job: ${equipment.jobNumber}`);
+                //  // console.log(`🆕 Checking if equipment already exists: Type: ${equipment.type}, Tag: ${equipment.tagNumber}, Job: ${equipment.jobNumber}`);
                  
                  // CRITICAL: Before creating, check if equipment with these values already exists in this project
                  // This handles cases where IDs were lost but equipment exists in DB
@@ -2111,7 +2111,7 @@ Industry: Petrochemical`;
                  
                  if (existingEquipmentMatch) {
                    // Equipment already exists! Update it instead of creating
-                  //  console.log(`🔍 Found existing equipment with ID ${existingEquipmentMatch.id}, UPDATING instead of creating`);
+                  //  // console.log(`🔍 Found existing equipment with ID ${existingEquipmentMatch.id}, UPDATING instead of creating`);
                    const equipmentDataForSupabase = {
                      type: equipment.type,
                      tag_number: equipment.tagNumber,
@@ -2124,12 +2124,12 @@ Industry: Petrochemical`;
                    };
                    
                    await fastAPI.updateEquipment(existingEquipmentMatch.id, equipmentDataForSupabase);
-                  //  console.log(`✅ Successfully updated existing equipment ID: ${existingEquipmentMatch.id}`);
+                  //  // console.log(`✅ Successfully updated existing equipment ID: ${existingEquipmentMatch.id}`);
                    continue; // Skip creation, already updated
                  }
                  
                  // Equipment doesn't exist, proceed with creation
-                //  console.log(`🆕 No existing equipment found, CREATING new equipment: Type: ${equipment.type}, Tag: ${equipment.tagNumber}`);
+                //  // console.log(`🆕 No existing equipment found, CREATING new equipment: Type: ${equipment.type}, Tag: ${equipment.tagNumber}`);
                  const equipmentDataForSupabase = {
                    project_id: projectId,
                    type: equipment.type,
@@ -2146,7 +2146,7 @@ Industry: Petrochemical`;
                  
                  // Note: Global uniqueness validation happens in fastAPI.createEquipment
                  await fastAPI.createEquipment(equipmentDataForSupabase);
-                //  console.log(`✅ Successfully created new equipment: ${equipment.tagNumber}`);
+                //  // console.log(`✅ Successfully created new equipment: ${equipment.tagNumber}`);
                } catch (equipmentError: any) {
                  console.error(`❌ Error processing equipment ${equipment.tagNumber}:`, equipmentError);
                  const errorMsg = equipmentError?.message || 'Failed to process equipment.';
@@ -2159,20 +2159,20 @@ Industry: Petrochemical`;
            try {
              const actualEquipmentResponse = await fastAPI.getEquipmentByProject((editData as any).id);
              const actualEquipmentCount = (actualEquipmentResponse || []).length;
-            //  console.log(`📊 Updating equipment_count to ${actualEquipmentCount} based on actual database count`);
+            //  // console.log(`📊 Updating equipment_count to ${actualEquipmentCount} based on actual database count`);
              await fastAPI.updateProject((editData as any).id, { equipment_count: actualEquipmentCount });
            } catch (countError) {
              console.warn('⚠️ Failed to update equipment_count (non-fatal):', countError);
            }
          } else {
            // Equipment will be created later in the document upload section
-          //  console.log('🔧 Equipment will be created during document upload...');
+          //  // console.log('🔧 Equipment will be created during document upload...');
          }
-         // // console.log('✅ Equipment records processed successfully');
+         // // // console.log('✅ Equipment records processed successfully');
       }
 
       // Upload documents if any
-      // console.log('📄 Starting categorized document uploads...');
+      // // console.log('📄 Starting categorized document uploads...');
       
       // Initialize document links arrays
       const unpricedPODocuments = [];
@@ -2183,30 +2183,30 @@ Industry: Petrochemical`;
       // Upload Unpriced PO File
       if (formData.unpricedPOFile) {
         try {
-          // console.log('📄 Uploading Unpriced PO File...');
-          // console.log('📄 File details:', {
+          // // console.log('📄 Uploading Unpriced PO File...');
+          // // console.log('📄 File details:', {
           //   name: formData.unpricedPOFile.name,
           //   size: formData.unpricedPOFile.size,
           //   type: formData.unpricedPOFile.type
           // });
           
           // Skip bucket check and go directly to upload
-          // console.log('📄 Skipping bucket check, going directly to upload...');
+          // // console.log('📄 Skipping bucket check, going directly to upload...');
           
           // Upload file to Supabase Storage with proper folder structure
           const fileName = `${formData.projectTitle}/Unpriced PO File/${Date.now()}_${formData.unpricedPOFile.name}`;
-          // console.log('📄 File path:', fileName);
+          // // console.log('📄 File path:', fileName);
           
-          // console.log('📄 About to upload to Supabase Storage...');
-          // console.log('📄 Bucket name: project-documents');
-          // console.log('📄 File name:', fileName);
-          // console.log('📄 File object:', formData.unpricedPOFile);
+          // // console.log('📄 About to upload to Supabase Storage...');
+          // // console.log('📄 Bucket name: project-documents');
+          // // console.log('📄 File name:', fileName);
+          // // console.log('📄 File object:', formData.unpricedPOFile);
           
           // Try direct fetch API approach (like test file)
-          // console.log('📄 Using direct fetch API approach...');
+          // // console.log('📄 Using direct fetch API approach...');
           
           try {
-            // console.log('📄 About to call fetch API...');
+            // // console.log('📄 About to call fetch API...');
         
         // Create FormData
         const formDataUpload = new FormData();
@@ -2221,17 +2221,17 @@ Industry: Petrochemical`;
           }
         });
         
-        // console.log('📄 Axios API call completed!');
-        // console.log('📄 Response status:', response.status);
+        // // console.log('📄 Axios API call completed!');
+        // // console.log('📄 Response status:', response.status);
         
         if (response.status === 200) {
           const uploadData = response.data;
-          // console.log('✅ Direct API upload successful!');
-          //   console.log('📄 Upload data:', uploadData);
+          // // console.log('✅ Direct API upload successful!');
+          //   // console.log('📄 Upload data:', uploadData);
             
             // Get public URL
           const publicUrl = `https://ammaosmkgwkamfjhcxik.supabase.co/storage/v1/object/public/project-documents/${fileName}`;
-          // console.log('🌐 Public URL:', publicUrl);
+          // // console.log('🌐 Public URL:', publicUrl);
             
           // Continue with database operations
             const documentData = {
@@ -2242,10 +2242,10 @@ Industry: Petrochemical`;
               mimeType: formData.unpricedPOFile.type
             };
             
-          // console.log('📄 Document data for database:', documentData);
+          // // console.log('📄 Document data for database:', documentData);
             
             const uploadedDoc = await uploadUnpricedPODocument(createdProject[0].id, documentData);
-          // console.log('📄 Database upload result:', uploadedDoc);
+          // // console.log('📄 Database upload result:', uploadedDoc);
             
             // Add to project document links
             const documentLink = {
@@ -2259,9 +2259,9 @@ Industry: Petrochemical`;
             };
             
             unpricedPODocuments.push(documentLink);
-          // console.log('📄 Added to unpricedPODocuments array:', documentLink);
+          // // console.log('📄 Added to unpricedPODocuments array:', documentLink);
           
-          // console.log('✅ Unpriced PO File uploaded successfully');
+          // // console.log('✅ Unpriced PO File uploaded successfully');
         } else {
           // console.error('❌ Direct API upload failed:', response.status, response.statusText);
           const errorText = response.data;
@@ -2283,16 +2283,16 @@ Industry: Petrochemical`;
       // Upload Design Inputs/PID File
       if (formData.designInputsPID) {
         try {
-          // console.log('📄 Uploading Design Inputs/PID File...');
+          // // console.log('📄 Uploading Design Inputs/PID File...');
           
           // Upload file to Supabase Storage with proper folder structure
           const fileName = `${formData.projectTitle}/Design Inputs/${Date.now()}_${formData.designInputsPID.name}`;
           
           // Use direct fetch API approach
-          // console.log('📄 Using direct fetch API approach for Design Inputs...');
+          // // console.log('📄 Using direct fetch API approach for Design Inputs...');
           
           try {
-            // console.log('📄 About to call fetch API for Design Inputs...');
+            // // console.log('📄 About to call fetch API for Design Inputs...');
             
             // Create FormData
             const formDataUpload = new FormData();
@@ -2307,17 +2307,17 @@ Industry: Petrochemical`;
               }
             });
             
-            // console.log('📄 Axios API call completed for Design Inputs!');
-            // console.log('📄 Response status:', response.status);
+            // // console.log('📄 Axios API call completed for Design Inputs!');
+            // // console.log('📄 Response status:', response.status);
             
             if (response.status === 200) {
               const uploadData = response.data;
-              // console.log('✅ Direct API upload successful for Design Inputs!');
-              // console.log('📄 Upload data:', uploadData);
+              // // console.log('✅ Direct API upload successful for Design Inputs!');
+              // // console.log('📄 Upload data:', uploadData);
               
             // Get public URL
               const publicUrl = `https://ammaosmkgwkamfjhcxik.supabase.co/storage/v1/object/public/project-documents/${fileName}`;
-              // console.log('🌐 Public URL:', publicUrl);
+              // // console.log('🌐 Public URL:', publicUrl);
             
               // Continue with database operations
             const documentData = {
@@ -2328,10 +2328,10 @@ Industry: Petrochemical`;
               mimeType: formData.designInputsPID.type
             };
               
-              // console.log('📄 Document data for database:', documentData);
+              // // console.log('📄 Document data for database:', documentData);
             
             const uploadedDoc = await uploadDesignInputsDocument(createdProject[0].id, documentData);
-              // console.log('📄 Database upload result:', uploadedDoc);
+              // // console.log('📄 Database upload result:', uploadedDoc);
             
             // Add to project document links
               const documentLink = {
@@ -2345,9 +2345,9 @@ Industry: Petrochemical`;
               };
               
               designInputsDocuments.push(documentLink);
-              // console.log('📄 Added to designInputsDocuments array:', documentLink);
+              // // console.log('📄 Added to designInputsDocuments array:', documentLink);
               
-              // console.log('✅ Design Inputs/PID File uploaded successfully');
+              // // console.log('✅ Design Inputs/PID File uploaded successfully');
             } else {
               // console.error('❌ Direct API upload failed for Design Inputs:', response.status, response.statusText);
               const errorText = response.data;
@@ -2365,16 +2365,16 @@ Industry: Petrochemical`;
       // Upload Client Reference Document
       if (formData.clientReferenceDoc) {
         try {
-          // console.log('📄 Uploading Client Reference Document...');
+          // // console.log('📄 Uploading Client Reference Document...');
           
           // Upload file to Supabase Storage with proper folder structure
           const fileName = `${formData.projectTitle}/Client's Reference Document/${Date.now()}_${formData.clientReferenceDoc.name}`;
           
           // Use direct fetch API approach
-          // console.log('📄 Using direct fetch API approach for Client Reference...');
+          // // console.log('📄 Using direct fetch API approach for Client Reference...');
           
           try {
-            // console.log('📄 About to call fetch API for Client Reference...');
+            // // console.log('📄 About to call fetch API for Client Reference...');
             
             // Create FormData
             const formDataUpload = new FormData();
@@ -2389,17 +2389,17 @@ Industry: Petrochemical`;
               }
             });
             
-            // console.log('📄 Axios API call completed for Client Reference!');
-            // console.log('📄 Response status:', response.status);
+            // // console.log('📄 Axios API call completed for Client Reference!');
+            // // console.log('📄 Response status:', response.status);
             
             if (response.status === 200) {
               const uploadData = response.data;
-              // console.log('✅ Direct API upload successful for Client Reference!');
-              // console.log('📄 Upload data:', uploadData);
+              // // console.log('✅ Direct API upload successful for Client Reference!');
+              // // console.log('📄 Upload data:', uploadData);
               
             // Get public URL
               const publicUrl = `https://ammaosmkgwkamfjhcxik.supabase.co/storage/v1/object/public/project-documents/${fileName}`;
-              // console.log('🌐 Public URL:', publicUrl);
+              // // console.log('🌐 Public URL:', publicUrl);
             
               // Continue with database operations
             const documentData = {
@@ -2410,10 +2410,10 @@ Industry: Petrochemical`;
               mimeType: formData.clientReferenceDoc.type
             };
               
-              // console.log('📄 Document data for database:', documentData);
+              // // console.log('📄 Document data for database:', documentData);
             
             const uploadedDoc = await uploadClientReferenceDocument(createdProject[0].id, documentData);
-              // console.log('📄 Database upload result:', uploadedDoc);
+              // // console.log('📄 Database upload result:', uploadedDoc);
             
             // Add to project document links
               const documentLink = {
@@ -2427,9 +2427,9 @@ Industry: Petrochemical`;
               };
               
               clientReferenceDocuments.push(documentLink);
-              // console.log('📄 Added to clientReferenceDocuments array:', documentLink);
+              // // console.log('📄 Added to clientReferenceDocuments array:', documentLink);
               
-              // console.log('✅ Client Reference Document uploaded successfully');
+              // // console.log('✅ Client Reference Document uploaded successfully');
             } else {
               // console.error('❌ Direct API upload failed for Client Reference:', response.status, response.statusText);
               const errorText = response.data;
@@ -2449,16 +2449,16 @@ Industry: Petrochemical`;
         for (let i = 0; i < formData.otherDocuments.length; i++) {
           const file = formData.otherDocuments[i];
           try {
-            // console.log(`📄 Uploading Other Document ${i + 1}...`);
+            // // console.log(`📄 Uploading Other Document ${i + 1}...`);
             
             // Upload file to Supabase Storage with proper folder structure
             const fileName = `${formData.projectTitle}/Other Documents/${Date.now()}_${file.name}`;
             
             // Use direct fetch API approach
-            // console.log(`📄 Using direct fetch API approach for Other Document ${i + 1}...`);
+            // // console.log(`📄 Using direct fetch API approach for Other Document ${i + 1}...`);
             
             try {
-              // console.log(`📄 About to call fetch API for Other Document ${i + 1}...`);
+              // // console.log(`📄 About to call fetch API for Other Document ${i + 1}...`);
               
               // Create FormData
               const formDataUpload = new FormData();
@@ -2473,17 +2473,17 @@ Industry: Petrochemical`;
                 }
               });
               
-              // console.log(`📄 Axios API call completed for Other Document ${i + 1}!`);
-              // console.log('📄 Response status:', response.status);
+              // // console.log(`📄 Axios API call completed for Other Document ${i + 1}!`);
+              // // console.log('📄 Response status:', response.status);
               
               if (response.status === 200) {
                 const uploadData = response.data;
-                // console.log(`✅ Direct API upload successful for Other Document ${i + 1}!`);
-                // console.log('📄 Upload data:', uploadData);
+                // // console.log(`✅ Direct API upload successful for Other Document ${i + 1}!`);
+                // // console.log('📄 Upload data:', uploadData);
             
             // Get public URL
                 const publicUrl = `https://ammaosmkgwkamfjhcxik.supabase.co/storage/v1/object/public/project-documents/${fileName}`;
-                // console.log('🌐 Public URL:', publicUrl);
+                // // console.log('🌐 Public URL:', publicUrl);
             
                 // Continue with database operations
             const documentData = {
@@ -2508,9 +2508,9 @@ Industry: Petrochemical`;
                 };
                 
                 otherDocuments.push(documentLink);
-                // console.log('📄 Added to otherDocuments array:', documentLink);
+                // // console.log('📄 Added to otherDocuments array:', documentLink);
                 
-                // console.log(`✅ Other Document ${i + 1} uploaded successfully`);
+                // // console.log(`✅ Other Document ${i + 1} uploaded successfully`);
               } else {
                 // console.error(`❌ Direct API upload failed for Other Document ${i + 1}:`, response.status, response.statusText);
                 const errorText = response.data;
@@ -2534,10 +2534,10 @@ Industry: Petrochemical`;
       // In edit mode, equipment is already processed above (line ~1959-2103)
       // NEVER create equipment in edit mode - it's already handled above
       if (isEditMode && editData) {
-        console.log('✅ Edit mode: Skipping equipment document upload section - equipment already processed above');
+        // console.log('✅ Edit mode: Skipping equipment document upload section - equipment already processed above');
         // DO NOTHING - equipment is already updated above, skip entire document upload section
       } else if (equipmentData.length > 0) {
-        // console.log('📄 Starting equipment document uploads...');
+        // // console.log('📄 Starting equipment document uploads...');
         
         // First, create equipment and get their IDs
         // NOTE: This section ONLY runs for NEW projects, NOT edit mode
@@ -2557,9 +2557,9 @@ Industry: Petrochemical`;
             progress_phase: 'documentation'
           };
           
-          // console.log(`🆕 NEW PROJECT: Creating equipment: ${equipment.type} - ${equipment.tagNumber}`);
+          // // console.log(`🆕 NEW PROJECT: Creating equipment: ${equipment.type} - ${equipment.tagNumber}`);
           const equipmentResponse = await fastAPI.createEquipment(equipmentDataForSupabase);
-          // console.log('✅ Equipment created:', equipmentResponse);
+          // // console.log('✅ Equipment created:', equipmentResponse);
           
           // Store equipment with its database ID
           createdEquipment.push({
@@ -2572,21 +2572,21 @@ Industry: Petrochemical`;
         for (const equipment of createdEquipment) {
           // Equipment is already created, now handle documents if any
           if (equipment.documents && equipment.documents.length > 0) {
-            // console.log(`📄 Uploading documents for equipment: ${equipment.type} - ${equipment.tagNumber}`);
+            // // console.log(`📄 Uploading documents for equipment: ${equipment.type} - ${equipment.tagNumber}`);
             
             for (let i = 0; i < equipment.documents.length; i++) {
               const file = equipment.documents[i];
               try {
-                // console.log(`📄 Uploading equipment document ${i + 1} for ${equipment.type}...`);
+                // // console.log(`📄 Uploading equipment document ${i + 1} for ${equipment.type}...`);
                 
                 // Upload file to Supabase Storage with proper folder structure
                 const fileName = `${formData.projectTitle}/Equipment Information/${equipment.type}/${Date.now()}_${file.name}`;
                 
                 // Use direct fetch API approach for equipment documents
-                // console.log(`📄 Using direct fetch API approach for equipment document ${i + 1}...`);
+                // // console.log(`📄 Using direct fetch API approach for equipment document ${i + 1}...`);
                 
                 try {
-                  // console.log(`📄 About to call fetch API for equipment document ${i + 1}...`);
+                  // // console.log(`📄 About to call fetch API for equipment document ${i + 1}...`);
                   
                   // Create FormData
                   const formDataUpload = new FormData();
@@ -2601,17 +2601,17 @@ Industry: Petrochemical`;
                     }
                   });
                   
-                  // console.log(`📄 Axios API call completed for equipment document ${i + 1}!`);
-                  // console.log('📄 Response status:', response.status);
+                  // // console.log(`📄 Axios API call completed for equipment document ${i + 1}!`);
+                  // // console.log('📄 Response status:', response.status);
                   
                   if (response.status === 200) {
                     const uploadData = response.data;
-                    // console.log(`✅ Direct API upload successful for equipment document ${i + 1}!`);
-                    // console.log('📄 Upload data:', uploadData);
+                    // // console.log(`✅ Direct API upload successful for equipment document ${i + 1}!`);
+                    // // console.log('📄 Upload data:', uploadData);
                     
                     // Get public URL
                     const publicUrl = `https://ammaosmkgwkamfjhcxik.supabase.co/storage/v1/object/public/project-documents/${fileName}`;
-                    // console.log('🌐 Public URL:', publicUrl);
+                    // // console.log('🌐 Public URL:', publicUrl);
                     
                     // Create document record in database
                     const documentData = {
@@ -2624,14 +2624,14 @@ Industry: Petrochemical`;
                       equipmentTagNumber: equipment.tagNumber
                     };
                     
-                    // console.log('📄 About to upload equipment document to database:', {
+                    // // console.log('📄 About to upload equipment document to database:', {
                     //   equipmentId: equipment.dbId, // Use the actual UUID from database
                     //   documentData: documentData
                     // });
                     
                     const uploadedDoc = await uploadEquipmentDocument(equipment.dbId, documentData);
                     
-                    // console.log('📄 Equipment document upload result:', uploadedDoc);
+                    // // console.log('📄 Equipment document upload result:', uploadedDoc);
                     
                     // Add to equipment document links
                     const documentLink = {
@@ -2647,9 +2647,9 @@ Industry: Petrochemical`;
                     };
                     
                     equipmentDocuments.push(documentLink);
-                    // console.log('📄 Added to equipmentDocuments array:', documentLink);
+                    // // console.log('📄 Added to equipmentDocuments array:', documentLink);
                     
-                    // console.log(`✅ Equipment document ${i + 1} for ${equipment.type} uploaded successfully`);
+                    // // console.log(`✅ Equipment document ${i + 1} for ${equipment.type} uploaded successfully`);
                   } else {
                     // console.error(`❌ Direct API upload failed for equipment document ${i + 1}:`, response.status, response.statusText);
                     const errorText = response.data;
@@ -2670,7 +2670,7 @@ Industry: Petrochemical`;
         // CRITICAL: This ONLY runs for NEW projects, NOT edit mode
         // In edit mode, equipment is already created/updated above
         if (!isEditMode) {
-          // console.log('🔧 Creating equipment records without documents...');
+          // // console.log('🔧 Creating equipment records without documents...');
           for (const equipment of equipmentData) {
             const equipmentDataForSupabase = {
               project_id: createdProject[0].id,
@@ -2684,10 +2684,10 @@ Industry: Petrochemical`;
             };
             
             const equipmentResponse = await fastAPI.createEquipment(equipmentDataForSupabase);
-            // console.log('✅ Equipment created without documents:', equipmentResponse);
+            // // console.log('✅ Equipment created without documents:', equipmentResponse);
           }
         } else if (isEditMode && editData) {
-          // console.log('✅ Edit mode: Equipment already processed above, skipping equipment creation without documents');
+          // // console.log('✅ Edit mode: Equipment already processed above, skipping equipment creation without documents');
           // DO NOTHING in edit mode - equipment already updated above
         }
       }
@@ -2696,7 +2696,7 @@ Industry: Petrochemical`;
       if (unpricedPODocuments.length > 0 || designInputsDocuments.length > 0 || 
            clientReferenceDocuments.length > 0 || otherDocuments.length > 0 || equipmentDocuments.length > 0) {
          
-         // console.log('🔄 Updating project with document links...');
+         // // console.log('🔄 Updating project with document links...');
          
          // For edit mode, merge new documents with existing ones
          if (isEditMode && editData) {
@@ -2762,10 +2762,10 @@ Industry: Petrochemical`;
            }
          }
          
-         // console.log('✅ Project document links updated successfully');
+         // // console.log('✅ Project document links updated successfully');
        }
       
-      // console.log('✅ Categorized document uploads completed');
+      // // console.log('✅ Categorized document uploads completed');
 
       // Prepare data for parent component
       const projectDataForParent = {
@@ -2778,11 +2778,11 @@ Industry: Petrochemical`;
     
     // Send email notifications to project team members
     try {
-      // console.log('📧 Sending project team notifications...');
-      // console.log('📧 Project manager contacts:', projectManagerContacts);
-      // console.log('📧 VDCR manager contacts:', vdcrManagerContacts);
-      // console.log('📧 Form data project manager:', formData.projectManager);
-      // console.log('📧 Form data VDCR manager:', formData.vdcrManager);
+      // // console.log('📧 Sending project team notifications...');
+      // // console.log('📧 Project manager contacts:', projectManagerContacts);
+      // // console.log('📧 VDCR manager contacts:', vdcrManagerContacts);
+      // // console.log('📧 Form data project manager:', formData.projectManager);
+      // // console.log('📧 Form data VDCR manager:', formData.vdcrManager);
       
       // Get company name from user data
       const userData = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -2805,9 +2805,9 @@ Industry: Petrochemical`;
             dashboard_url: getDashboardUrl('project_manager')
           });
           
-          // console.log('📊 Project manager notification result:', projectManagerNotification);
+          // // console.log('📊 Project manager notification result:', projectManagerNotification);
         } else {
-          console.log('⚠️ Project manager email not found or invalid:', projectManagerEmail);
+          // console.log('⚠️ Project manager email not found or invalid:', projectManagerEmail);
         }
       }
       
@@ -2828,37 +2828,37 @@ Industry: Petrochemical`;
             dashboard_url: getDashboardUrl('vdcr_manager')
           });
           
-          // console.log('📊 VDCR manager notification result:', vdcrManagerNotification);
+          // // console.log('📊 VDCR manager notification result:', vdcrManagerNotification);
         } else {
-          console.log('⚠️ VDCR manager email not found or invalid:', vdcrManagerEmail);
+          // console.log('⚠️ VDCR manager email not found or invalid:', vdcrManagerEmail);
         }
       }
       
-      // console.log('✅ Project team notifications sent successfully');
+      // // console.log('✅ Project team notifications sent successfully');
     } catch (notificationError) {
       console.error('❌ Notification error (project still created):', notificationError);
     }
 
     // Automatically add Project Manager and VDCR Manager to project_members table
     try {
-      // console.log('👥 Adding Project Manager and VDCR Manager to project team...');
-      // console.log('🔍 Created project object:', createdProject);
-      // console.log('🔍 Created project ID:', createdProject?.id);
+      // // console.log('👥 Adding Project Manager and VDCR Manager to project team...');
+      // // console.log('🔍 Created project object:', createdProject);
+      // // console.log('🔍 Created project ID:', createdProject?.id);
       
       // Get the actual project ID - handle both array and object cases
       let projectId;
       if (Array.isArray(createdProject) && createdProject.length > 0) {
         projectId = createdProject[0].id;
-        // console.log('🔍 Extracted project ID from array:', projectId);
+        // // console.log('🔍 Extracted project ID from array:', projectId);
       } else if (createdProject && createdProject.id) {
         projectId = createdProject.id;
-        // console.log('🔍 Using project ID from object:', projectId);
+        // // console.log('🔍 Using project ID from object:', projectId);
       } else {
         projectId = createdProject;
-        // console.log('🔍 Using project as ID directly:', projectId);
+        // // console.log('🔍 Using project as ID directly:', projectId);
       }
       
-      // console.log('🔍 Final project ID:', projectId);
+      // // console.log('🔍 Final project ID:', projectId);
       
       if (!projectId) {
         console.error('❌ No project ID available, skipping team member creation');
@@ -2891,9 +2891,9 @@ Industry: Petrochemical`;
           avatar: formData.projectManager.split(' ').map(n => n[0]).join('').toUpperCase()
         };
         
-        // console.log('👥 Project Manager data being sent:', projectManagerData);
+        // // console.log('👥 Project Manager data being sent:', projectManagerData);
         await fastAPI.createProjectMember(projectManagerData);
-        // console.log('✅ Project Manager added to project team:', formData.projectManager);
+        // // console.log('✅ Project Manager added to project team:', formData.projectManager);
       }
       
       // Add VDCR Manager to project_members table
@@ -2922,12 +2922,12 @@ Industry: Petrochemical`;
           avatar: formData.vdcrManager.split(' ').map(n => n[0]).join('').toUpperCase()
         };
         
-        // console.log('👥 VDCR Manager data being sent:', vdcrManagerData);
+        // // console.log('👥 VDCR Manager data being sent:', vdcrManagerData);
         await fastAPI.createProjectMember(vdcrManagerData);
-        // console.log('✅ VDCR Manager added to project team:', formData.vdcrManager);
+        // // console.log('✅ VDCR Manager added to project team:', formData.vdcrManager);
       }
       
-      // console.log('✅ Project team members added successfully');
+      // // console.log('✅ Project team members added successfully');
 
       // 🆕 Create invites for project manager and VDCR manager
       const firmId = localStorage.getItem('firmId');
@@ -2944,7 +2944,7 @@ Industry: Petrochemical`;
             pmEmail = `${formData.projectManager.replace(/\s+/g, '.').toLowerCase()}@company.com`;
           }
           
-          // console.log('📧 Creating invite for Project Manager...');
+          // // console.log('📧 Creating invite for Project Manager...');
           await fastAPI.createInvite({
             email: pmEmail,
             full_name: formData.projectManager,
@@ -2953,7 +2953,7 @@ Industry: Petrochemical`;
             project_id: projectId,
             invited_by: currentUserId || 'system'
           });
-          // console.log('✅ Invite created for Project Manager');
+          // // console.log('✅ Invite created for Project Manager');
         } catch (inviteError) {
           console.error('❌ Error creating PM invite (member still created):', inviteError);
         }
@@ -2970,7 +2970,7 @@ Industry: Petrochemical`;
             vdcrEmail = `${formData.vdcrManager.replace(/\s+/g, '.').toLowerCase()}@company.com`;
           }
           
-          // console.log('📧 Creating invite for VDCR Manager...');
+          // // console.log('📧 Creating invite for VDCR Manager...');
           await fastAPI.createInvite({
             email: vdcrEmail,
             full_name: formData.vdcrManager,
@@ -2979,7 +2979,7 @@ Industry: Petrochemical`;
             project_id: projectId,
             invited_by: currentUserId || 'system'
           });
-          // console.log('✅ Invite created for VDCR Manager');
+          // // console.log('✅ Invite created for VDCR Manager');
         } catch (inviteError) {
           console.error('❌ Error creating VDCR invite (member still created):', inviteError);
         }
@@ -3006,7 +3006,7 @@ Industry: Petrochemical`;
       
       // Try to add team members with minimal data
       try {
-        // console.log('🔄 Trying to add team members with minimal data...');
+        // // console.log('🔄 Trying to add team members with minimal data...');
         
         if (formData.projectManager && formData.projectManager.trim() !== '') {
           const minimalProjectManagerData = {
@@ -3018,9 +3018,9 @@ Industry: Petrochemical`;
             access_level: 'editor'
           };
           
-          // console.log('👥 Minimal Project Manager data:', minimalProjectManagerData);
+          // // console.log('👥 Minimal Project Manager data:', minimalProjectManagerData);
           await fastAPI.createProjectMember(minimalProjectManagerData);
-          // console.log('✅ Project Manager added with minimal data');
+          // // console.log('✅ Project Manager added with minimal data');
         }
         
         if (formData.vdcrManager && formData.vdcrManager.trim() !== '') {
@@ -3033,12 +3033,12 @@ Industry: Petrochemical`;
             access_level: 'editor'
           };
           
-          // console.log('👥 Minimal VDCR Manager data:', minimalVdcrManagerData);
+          // // console.log('👥 Minimal VDCR Manager data:', minimalVdcrManagerData);
           await fastAPI.createProjectMember(minimalVdcrManagerData);
-          // console.log('✅ VDCR Manager added with minimal data');
+          // // console.log('✅ VDCR Manager added with minimal data');
         }
         
-        // console.log('✅ Team members added successfully with minimal data');
+        // // console.log('✅ Team members added successfully with minimal data');
       } catch (minimalError) {
         console.error('❌ Even minimal data failed:', minimalError);
       }
@@ -3134,7 +3134,7 @@ Industry: Petrochemical`;
     
     // Debug logging for Client Name field
     if (field === 'clientName') {
-      console.log('🔧 🎯 CLIENT NAME FIELD RENDER - options:', options, 'filteredOptions:', filteredOptions);
+      // console.log('🔧 🎯 CLIENT NAME FIELD RENDER - options:', options, 'filteredOptions:', filteredOptions);
     }
 
     return (
@@ -3178,11 +3178,11 @@ Industry: Petrochemical`;
                       const isActuallyEditing = isEditing || isEditingProjectManager || isEditingVdcrManager;
                       
                       // Debug logging
-                      // console.log('🔧 Debug - Field:', field, 'Option:', option, 'OriginalIndex:', originalIndex, 'IsEditing:', isEditing, 'IsEditingProjectManager:', isEditingProjectManager, 'IsEditingVdcrManager:', isEditingVdcrManager, 'IsActuallyEditing:', isActuallyEditing, 'ForceRender:', forceRender);
+                      // // console.log('🔧 Debug - Field:', field, 'Option:', option, 'OriginalIndex:', originalIndex, 'IsEditing:', isEditing, 'IsEditingProjectManager:', isEditingProjectManager, 'IsEditingVdcrManager:', isEditingVdcrManager, 'IsActuallyEditing:', isActuallyEditing, 'ForceRender:', forceRender);
                       if (isActuallyEditing) {
-                      console.log('🔧 ✅ RENDERING EDIT MODE for field:', field, 'option:', option, 'originalIndex:', originalIndex);
+                      // console.log('🔧 ✅ RENDERING EDIT MODE for field:', field, 'option:', option, 'originalIndex:', originalIndex);
                     } else {
-                      console.log('🔧 ❌ NOT RENDERING EDIT MODE for field:', field, 'option:', option, 'originalIndex:', originalIndex);
+                      // console.log('🔧 ❌ NOT RENDERING EDIT MODE for field:', field, 'option:', option, 'originalIndex:', originalIndex);
                     }
                     
                     return (
@@ -3283,14 +3283,14 @@ Industry: Petrochemical`;
                              // Standard single-field edit form for other fields
                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2 flex-1 bg-blue-50 border border-blue-300 rounded-lg p-2">
                                {(() => {
-                                //  console.log('🔧 🎯 ACTUALLY RENDERING EDIT INPUT for field:', field, 'value:', editingEntries[field]?.value, 'ForceRender:', forceRender);
+                                //  // console.log('🔧 🎯 ACTUALLY RENDERING EDIT INPUT for field:', field, 'value:', editingEntries[field]?.value, 'ForceRender:', forceRender);
                                  return null;
                                })()}
                                <input
                                  type="text"
                                  value={editingEntries[field]?.value || ''}
                                  onChange={(e) => {
-                                  //  console.log('🔧 Input onChange triggered for field:', field, 'new value:', e.target.value);
+                                  //  // console.log('🔧 Input onChange triggered for field:', field, 'new value:', e.target.value);
                                    setEditingEntries(prev => ({ 
                                      ...prev, 
                                      [field]: { ...prev[field]!, value: e.target.value } 
@@ -3305,9 +3305,9 @@ Industry: Petrochemical`;
                                  onClick={(e) => {
                                    e.preventDefault();
                                    e.stopPropagation();
-                                  //  console.log('🔧 🎯 SAVE BUTTON CLICKED for field:', field);
-                                  //  console.log('🔧 🎯 Current editingEntries:', editingEntries);
-                                  //  console.log('🔧 🎯 Field value:', editingEntries[field]?.value);
+                                  //  // console.log('🔧 🎯 SAVE BUTTON CLICKED for field:', field);
+                                  //  // console.log('🔧 🎯 Current editingEntries:', editingEntries);
+                                  //  // console.log('🔧 🎯 Field value:', editingEntries[field]?.value);
                                    saveEditedEntry(field);
                                  }}
                                  className="flex-1 sm:flex-initial bg-green-600 hover:bg-green-700 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded text-xs sm:text-sm font-medium transition-colors"
@@ -3318,7 +3318,7 @@ Industry: Petrochemical`;
                                <button
                                  type="button"
                                  onClick={() => {
-                                  //  console.log('🔧 Cancel button clicked for field:', field);
+                                  //  // console.log('🔧 Cancel button clicked for field:', field);
                                    cancelEditingEntry(field);
                                  }}
                                  className="flex-1 sm:flex-initial bg-gray-500 hover:bg-gray-600 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded text-xs sm:text-sm font-medium transition-colors"
@@ -3349,7 +3349,7 @@ Industry: Petrochemical`;
                                 onClick={async (e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  // console.log('🔧 🎯 PENCIL ICON CLICKED for field:', field, 'option:', option, 'originalIndex:', originalIndex);
+                                  // // console.log('🔧 🎯 PENCIL ICON CLICKED for field:', field, 'option:', option, 'originalIndex:', originalIndex);
                                   await startEditingEntry(field, originalIndex, option);
                                 }}
                                 className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
@@ -4392,7 +4392,7 @@ Industry: Petrochemical`;
                       className="flex-1 sm:flex-initial px-4 sm:px-6 py-2 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       disabled={isAnimating || isSubmitting}
                        onClick={() => {
-                         // console.log('🔘 Create button clicked!');
+                         // // console.log('🔘 Create button clicked!');
                        }}
                     >
                       {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}

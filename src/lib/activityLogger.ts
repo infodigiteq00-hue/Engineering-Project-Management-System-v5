@@ -60,7 +60,7 @@ export enum ActivityType {
 const getCurrentUserId = (): string => {
   try {
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    // console.log('🔍 User data from localStorage:', userData);
+    // // console.log('🔍 User data from localStorage:', userData);
     return userData.id || userData.user_id || 'system';
   } catch (error) {
     console.error('❌ Error parsing user data:', error);
@@ -72,7 +72,7 @@ const getCurrentUserId = (): string => {
 const getCurrentUserName = (): string => {
   try {
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    // console.log('🔍 User name from localStorage:', userData);
+    // // console.log('🔍 User name from localStorage:', userData);
     return userData.full_name || userData.name || userData.user_name || userData.email || 'Unknown User';
   } catch (error) {
     console.error('❌ Error parsing user name:', error);
@@ -92,9 +92,9 @@ export const logActivity = async (data: {
   metadata?: any;
 }) => {
   try {
-    // console.log('🔍 logActivity called with:', data);
+    // // console.log('🔍 logActivity called with:', data);
     const userId = getCurrentUserId();
-    // console.log('🔍 Current user ID:', userId);
+    // // console.log('🔍 Current user ID:', userId);
     
     // Use standalone equipment table if projectId is null, undefined, or 'standalone' (standalone equipment has no project)
     // Standalone equipment has no projectId - only equipmentId is available
@@ -111,7 +111,7 @@ export const logActivity = async (data: {
         metadata: data.metadata,
         createdBy: userId
       });
-      // console.log('✅ Standalone equipment activity logged successfully:', result);
+      // // console.log('✅ Standalone equipment activity logged successfully:', result);
     } else if (data.projectId && data.equipmentId) {
       // Use regular equipment_activity_logs table for project equipment (projectId must be a valid UUID)
       const result = await activityApi.logEquipmentActivity({
@@ -125,7 +125,7 @@ export const logActivity = async (data: {
         metadata: data.metadata,
         createdBy: userId
       });
-      // console.log('✅ Activity logged successfully:', result);
+      // // console.log('✅ Activity logged successfully:', result);
     }
   } catch (error) {
     console.error('❌ Failed to log activity:', error);

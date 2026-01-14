@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -1321,7 +1321,7 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                                                           await updateEquipment(item.id, {
                                                             technical_sections: updatedSections
                                                           });
-                                                          // console.log('âœ… Field name saved to database, refreshing data...');
+                                                          // // console.log('âœ… Field name saved to database, refreshing data...');
                                                           await refreshEquipmentData();
                                                         } catch (error) {
                                                           console.error('Error saving field name change:', error);
@@ -1352,7 +1352,7 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                                                           await updateEquipment(item.id, {
                                                             technical_sections: updatedSections
                                                           });
-                                                          // console.log('âœ… Field value saved to database, refreshing data...');
+                                                          // // console.log('âœ… Field value saved to database, refreshing data...');
                                                           await refreshEquipmentData();
                                                         } catch (error) {
                                                           console.error('Error saving field value change:', error);
@@ -1383,11 +1383,11 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
 
                                                       // Save to database
                                                       try {
-                                                        // console.log('ðŸ—‘ï¸ Deleting custom field from database:', item.id, updatedSections);
+                                                        // // console.log('ðŸ—‘ï¸ Deleting custom field from database:', item.id, updatedSections);
                                                         await updateEquipment(item.id, {
                                                           technical_sections: updatedSections
                                                         });
-                                                        // console.log('âœ… Custom field deleted successfully');
+                                                        // // console.log('âœ… Custom field deleted successfully');
                                                         toast({
                                                           title: "Success",
                                                           description: "Custom field deleted successfully",
@@ -1689,11 +1689,11 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
 
                                       // Save to database
                                       try {
-                                        // console.log('ðŸ’¾ Saving team custom field to database:', item.id, updatedTeamFields);
+                                        // // console.log('ðŸ’¾ Saving team custom field to database:', item.id, updatedTeamFields);
                                         await updateEquipment(item.id, {
                                           team_custom_fields: updatedTeamFields
                                         });
-                                        // console.log('âœ… Team custom field saved successfully');
+                                        // // console.log('âœ… Team custom field saved successfully');
                                         toast({
                                           title: "Success",
                                           description: "Team custom field added successfully",
@@ -1738,18 +1738,18 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                           {(() => {
                             const teamFields = teamCustomFields[item.id] || [];
                             
-                            // console.log('ðŸ” Team tab - projectMembers:', projectMembers);
-                            // console.log('ðŸ” Team tab - equipment ID:', item.id);
+                            // // console.log('ðŸ” Team tab - projectMembers:', projectMembers);
+                            // // console.log('ðŸ” Team tab - equipment ID:', item.id);
 
                             // Find team members assigned to this equipment
                             const assignedMembers = projectMembers.filter(member => {
-                              // console.log('ðŸ” Checking member:', member.name, 'equipment_assignments:', member.equipment_assignments);
+                              // // console.log('ðŸ” Checking member:', member.name, 'equipment_assignments:', member.equipment_assignments);
                               return member.equipment_assignments &&
                                 (member.equipment_assignments.includes(item.id) ||
                                  member.equipment_assignments.includes("All Equipment"));
                             });
                             
-                            // console.log('ðŸ” Team tab - assignedMembers:', assignedMembers);
+                            // // console.log('ðŸ” Team tab - assignedMembers:', assignedMembers);
 
                             // Create combined list of custom fields and project members
                             const allTeamItems = [
@@ -1837,11 +1837,11 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
 
                                           // Save to database
                                           try {
-                                            // console.log('ðŸ—‘ï¸ Deleting team custom field from database:', item.id, updatedFields);
+                                            // // console.log('ðŸ—‘ï¸ Deleting team custom field from database:', item.id, updatedFields);
                                             await updateEquipment(item.id, {
                                               team_custom_fields: updatedFields
                                             });
-                                            // console.log('âœ… Team custom field deleted successfully');
+                                            // // console.log('âœ… Team custom field deleted successfully');
                                             toast({
                                               title: "Success",
                                               description: "Team custom field deleted successfully",
@@ -2184,7 +2184,7 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    // console.log('âž• Add Entry button clicked for equipment:', item.id);
+                                    // // console.log('âž• Add Entry button clicked for equipment:', item.id);
                                     setAddingProgressEntryForEquipment(item.id);
                                     setNewProgressType('general');
                                     setNewProgressEntry('');
@@ -2201,7 +2201,7 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                                     setImageAudioChunks([]);
                                     setImageRecordingDuration(0);
                                     setIsImageRecording(false);
-                                    // console.log('ðŸ"„ Form reset for new entry');
+                                    // // console.log('ðŸ"„ Form reset for new entry');
                                   }}
                                   className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm h-7 sm:h-6 px-2 sm:px-3 whitespace-nowrap"
                                 >
@@ -2424,12 +2424,12 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                                   multiple
                                   accept=".pdf,.doc,.docx,.xls,.xlsx,.dwg,.dxf,.jpg,.jpeg,.png"
                                   onChange={(e) => {
-                                    // console.log('ðŸš€ SIMPLE: File input changed!');
-                                    // console.log('ðŸš€ SIMPLE: Files:', e.target.files);
+                                    // // console.log('ðŸš€ SIMPLE: File input changed!');
+                                    // // console.log('ðŸš€ SIMPLE: Files:', e.target.files);
                                     const files = Array.from(e.target.files || []);
-                                    // console.log('ðŸš€ SIMPLE: Files array:', files);
+                                    // // console.log('ðŸš€ SIMPLE: Files array:', files);
                                     if (files.length > 0) {
-                                      // console.log('ðŸš€ SIMPLE: Starting upload...');
+                                      // // console.log('ðŸš€ SIMPLE: Starting upload...');
                                       handleDocumentUpload(item.id, files);
                                     }
                                   }}
@@ -2502,11 +2502,11 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                               <div className="text-xs font-medium text-gray-700">Upload New Documents:</div>
                               <div className="h-36 overflow-y-auto border border-gray-200 rounded bg-gray-50 p-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                 {(() => {
-                                  // console.log('ðŸ“„ EDIT MODE: Checking documents for equipment:', item.id);
-                                  // console.log('ðŸ“„ EDIT MODE: Documents state:', documents);
-                                  // console.log('ðŸ“„ EDIT MODE: Documents for this equipment:', documents[item.id]);
-                                  // console.log('ðŸ“„ EDIT MODE: Documents length:', documents[item.id]?.length || 0);
-                                  // console.log('ðŸ“„ EDIT MODE: Documents loading:', documentsLoading[item.id]);
+                                  // // console.log('ðŸ“„ EDIT MODE: Checking documents for equipment:', item.id);
+                                  // // console.log('ðŸ“„ EDIT MODE: Documents state:', documents);
+                                  // // console.log('ðŸ“„ EDIT MODE: Documents for this equipment:', documents[item.id]);
+                                  // // console.log('ðŸ“„ EDIT MODE: Documents length:', documents[item.id]?.length || 0);
+                                  // // console.log('ðŸ“„ EDIT MODE: Documents loading:', documentsLoading[item.id]);
                                   return null;
                                 })()}
                                 {documentsLoading[item.id] ? (
@@ -2529,7 +2529,7 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                               <Button
                                 size="sm"
                                 onClick={() => {
-                                  // console.log('âž• Add Document button clicked for equipment:', item.id);
+                                  // // console.log('âž• Add Document button clicked for equipment:', item.id);
                                   setEditingEquipmentId(item.id);
                                 }}
                                 className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm h-7 sm:h-6 px-2 sm:px-3 whitespace-nowrap"
@@ -2540,11 +2540,11 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                             </div>
                             <div className="max-h-[200px] sm:h-36 overflow-y-auto border border-gray-200 rounded bg-gray-50 p-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                               {(() => {
-                                // console.log('ðŸ“„ PERFECT: Rendering documents for equipment:', item.id);
-                                // console.log('ðŸ“„ PERFECT: Documents state:', documents);
-                                // console.log('ðŸ“„ PERFECT: Documents for this equipment:', documents[item.id]);
-                                // console.log('ðŸ“„ PERFECT: Documents length:', documents[item.id]?.length || 0);
-                                // console.log('ðŸ“„ PERFECT: Documents loading:', documentsLoading[item.id]);
+                                // // console.log('ðŸ“„ PERFECT: Rendering documents for equipment:', item.id);
+                                // // console.log('ðŸ“„ PERFECT: Documents state:', documents);
+                                // // console.log('ðŸ“„ PERFECT: Documents for this equipment:', documents[item.id]);
+                                // // console.log('ðŸ“„ PERFECT: Documents length:', documents[item.id]?.length || 0);
+                                // // console.log('ðŸ“„ PERFECT: Documents loading:', documentsLoading[item.id]);
                                 return null;
                               })()}
                               {documentsLoading[item.id] ? (
@@ -2741,7 +2741,7 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                                   customFields: item.customFields || [],
                                   certificationTitle: item.certificationTitle || ''
                                 };
-                                // console.log('ðŸ"§ Setting editFormData with custom fields:', formData);
+                                // // console.log('ðŸ"§ Setting editFormData with custom fields:', formData);
                                 setEditFormData(formData);
                               }}
                             >

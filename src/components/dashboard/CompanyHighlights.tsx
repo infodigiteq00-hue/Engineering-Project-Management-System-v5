@@ -57,15 +57,15 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
     try {
       const api = (await import('@/lib/api')).default;
       // Fetch projects with status to identify completed ones
-      console.log('📋 CompanyHighlights: Fetching firm projects for firmId:', firmId);
+      // // console.log('📋 CompanyHighlights: Fetching firm projects for firmId:', firmId);
       const response = await api.get(`/projects?firm_id=eq.${firmId}&select=id,status`);
       const projects = response.data as any[];
       const projectIds = projects.map((project: any) => project.id).filter(Boolean);
-      console.log('📋 CompanyHighlights: Firm projects loaded:', {
-        totalProjects: projects.length,
-        projectIds: projectIds.length,
-        ids: projectIds
-      });
+      // // console.log('📋 CompanyHighlights: Firm projects loaded:', {
+      //   totalProjects: projects.length,
+      //   projectIds: projectIds.length,
+      //   ids: projectIds
+      // });
       setFirmProjectIds([...new Set(projectIds)]);
       
       // Extract completed project IDs
@@ -145,7 +145,7 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
       }
       
       if (projectIds.length > 0) {
-        console.log(`✅ Found ${projectIds.length} assigned projects for ${normalizedEmail}:`, projectIds);
+        // console.log(`✅ Found ${projectIds.length} assigned projects for ${normalizedEmail}:`, projectIds);
       } else {
         // Debug: Check if there are any project_members entries with similar emails
         console.warn(`⚠️ No assigned projects found for ${normalizedEmail}. Checking for similar emails...`);
@@ -179,10 +179,10 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
     // If AuthContext is still loading but localStorage has data, proceed anyway
     if (authLoading) {
       if (localStorageFirmId && localStorageUserRole) {
-        console.log('⚠️ CompanyHighlights: AuthContext still loading but localStorage has data, proceeding...', { localStorageFirmId, localStorageUserRole });
+        // // console.log('⚠️ CompanyHighlights: AuthContext still loading but localStorage has data, proceeding...', { localStorageFirmId, localStorageUserRole });
         // Continue - don't return
       } else {
-        console.log('⏳ CompanyHighlights: Waiting for auth to load...');
+        // // console.log('⏳ CompanyHighlights: Waiting for auth to load...');
         return;
       }
     }
@@ -196,7 +196,7 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
       return;
     }
     
-    console.log('✅ CompanyHighlights: Starting data fetch', { currentFirmId, currentUserRole });
+    // // console.log('✅ CompanyHighlights: Starting data fetch', { currentFirmId, currentUserRole });
 
     const loadUserData = async () => {
       const userId = localStorage.getItem('userId') || '';
@@ -566,12 +566,12 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
         // Get userRole from localStorage if empty
         const currentUserRole = userRole || localStorage.getItem('userRole') || '';
         
-        console.log('🔧 CompanyHighlights: fetchEquipmentCardUpdates called', {
-          userRole,
-          currentUserRole,
-          firmProjectIdsLength: firmProjectIds.length,
-          assignedProjectIdsLength: assignedProjectIds.length
-        });
+        // // console.log('🔧 CompanyHighlights: fetchEquipmentCardUpdates called', {
+        //   userRole,
+        //   currentUserRole,
+        //   firmProjectIdsLength: firmProjectIds.length,
+        //   assignedProjectIdsLength: assignedProjectIds.length
+        // });
         
         // For firm_admin, use firmProjectIds if available, otherwise fetch
         let projectIds: string[] = [];
@@ -579,20 +579,20 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
         // Priority 1: Use firmProjectIds if available (regardless of userRole)
         if (firmProjectIds.length > 0) {
           projectIds = firmProjectIds;
-          console.log('🔧 CompanyHighlights: Using cached firmProjectIds:', projectIds.length, projectIds);
+          // // console.log('🔧 CompanyHighlights: Using cached firmProjectIds:', projectIds.length, projectIds);
         } 
         // Priority 2: If firmProjectIds empty but user is firm_admin, fetch directly
         else if (currentUserRole === 'firm_admin') {
-          console.log('🔧 CompanyHighlights: firmProjectIds empty, fetching directly...');
+          // // console.log('🔧 CompanyHighlights: firmProjectIds empty, fetching directly...');
           const userData = JSON.parse(localStorage.getItem('userData') || '{}');
           const firmId = userData.firm_id || localStorage.getItem('firmId');
-          console.log('🔧 CompanyHighlights: FirmId from localStorage:', firmId);
+          // // console.log('🔧 CompanyHighlights: FirmId from localStorage:', firmId);
           if (firmId) {
             const api = (await import('@/lib/api')).default;
             const response = await api.get(`/projects?firm_id=eq.${firmId}&select=id,status`);
             const projects = response.data as any[];
             projectIds = projects.map((project: any) => project.id).filter(Boolean);
-            console.log('🔧 CompanyHighlights: Fetched projectIds directly:', projectIds.length, projectIds);
+            // // console.log('🔧 CompanyHighlights: Fetched projectIds directly:', projectIds.length, projectIds);
             // Update state for future use
             if (projectIds.length > 0) {
               setFirmProjectIds([...new Set(projectIds)]);
@@ -604,7 +604,7 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
         // Priority 3: Use assignedProjectIds for non-firm_admin users
         else {
           projectIds = assignedProjectIds;
-          console.log('🔧 CompanyHighlights: Using assignedProjectIds:', projectIds.length);
+          // // console.log('🔧 CompanyHighlights: Using assignedProjectIds:', projectIds.length);
         }
         
         if (!projectIds || projectIds.length === 0) {
@@ -617,17 +617,17 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
         // Fetch equipment activity logs with activity_type = 'equipment_updated'
         const allUpdates: any[] = [];
         
-        console.log('🔧 CompanyHighlights: Fetching equipment logs...', {
-          projectIds: projectIds?.length || 0,
-          projectIdsArray: projectIds,
-          firmProjectIdsLength: firmProjectIds.length,
-          dateRangeStart,
-          dateRangeEnd,
-          userRole
-        });
+        // // console.log('🔧 CompanyHighlights: Fetching equipment logs...', {
+        //   projectIds: projectIds?.length || 0,
+        //   projectIdsArray: projectIds,
+        //   firmProjectIdsLength: firmProjectIds.length,
+        //   dateRangeStart,
+        //   dateRangeEnd,
+        //   userRole
+        // });
         
         if (!projectIds || projectIds.length === 0) {
-          console.warn('⚠️ CompanyHighlights: No project IDs available, skipping equipment logs fetch');
+          // console.warn('⚠️ CompanyHighlights: No project IDs available, skipping equipment logs fetch');
           setEquipmentCardUpdates([]);
           setLoading(false);
           return;
@@ -643,7 +643,7 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
                 dateTo: dateRangeEnd
               });
               if (Array.isArray(logs)) {
-                console.log(`🔧 CompanyHighlights: Got ${logs.length} equipment logs for project ${projectId}`);
+                // // console.log(`🔧 CompanyHighlights: Got ${logs.length} equipment logs for project ${projectId}`);
                 allUpdates.push(...logs);
               }
             } catch (error) {
@@ -667,14 +667,14 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
             let url = `/equipment_activity_logs?activity_type=eq.equipment_updated&created_at=gte.${dateRangeStart}&created_at=lte.${dateRangeEnd}&select=*,equipment:equipment_id(id,tag_number,type,name,project_id,projects:project_id(id,name)),created_by_user:created_by(full_name,email)&order=created_at.desc`;
             const response = await apiClient.get(url);
             const logs = Array.isArray(response.data) ? response.data : [];
-            console.log(`🔧 CompanyHighlights: Got ${logs.length} equipment logs for firm_admin`);
+            // // console.log(`🔧 CompanyHighlights: Got ${logs.length} equipment logs for firm_admin`);
             allUpdates.push(...logs);
           } catch (error) {
             console.error('Error fetching all equipment updates:', error);
           }
         }
 
-        console.log('🔧 CompanyHighlights: Total equipment updates collected:', allUpdates.length);
+        // // console.log('🔧 CompanyHighlights: Total equipment updates collected:', allUpdates.length);
 
         // Transform activity logs to match the format expected by the UI
         const transformedUpdates = allUpdates.map((log: any) => ({
@@ -705,20 +705,20 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
       // Don't set loading to false here - let production updates control the loading state
     };
 
-    console.log('🔧 CompanyHighlights: Equipment logs fetch conditions check:', {
-      isExpanded,
-      activeTab,
-      productionSubTab,
-      canSeeTab: canSeeTab('production'),
-      projectIdsLoaded,
-      projectIds: userRole === 'firm_admin' ? firmProjectIds.length : assignedProjectIds.length
-    });
+    // // console.log('🔧 CompanyHighlights: Equipment logs fetch conditions check:', {
+    //   isExpanded,
+    //   activeTab,
+    //   productionSubTab,
+    //   canSeeTab: canSeeTab('production'),
+    //   projectIdsLoaded,
+    //   projectIds: userRole === 'firm_admin' ? firmProjectIds.length : assignedProjectIds.length
+    // });
     
     if (isExpanded && activeTab === 'production' && canSeeTab('production') && productionSubTab === 'all-updates') {
-      console.log('✅ CompanyHighlights: Conditions met, fetching equipment logs...');
+      // // console.log('✅ CompanyHighlights: Conditions met, fetching equipment logs...');
       fetchEquipmentCardUpdates();
     } else {
-      console.log('⚠️ CompanyHighlights: Equipment logs fetch skipped - conditions not met');
+      // console.log('⚠️ CompanyHighlights: Equipment logs fetch skipped - conditions not met');
     }
   }, [dateRangeStart, dateRangeEnd, isExpanded, activeTab, productionSubTab, userRole, assignedProjectIds, projectIdsLoaded, completedProjectIds]);
 
@@ -905,12 +905,12 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
         // Get userRole from localStorage if empty
         const currentUserRole = userRole || localStorage.getItem('userRole') || '';
         
-        console.log('📄 CompanyHighlights: fetchDocumentationUpdates called', {
-          userRole,
-          currentUserRole,
-          firmProjectIdsLength: firmProjectIds.length,
-          assignedProjectIdsLength: assignedProjectIds.length
-        });
+        // // console.log('📄 CompanyHighlights: fetchDocumentationUpdates called', {
+        //   userRole,
+        //   currentUserRole,
+        //   firmProjectIdsLength: firmProjectIds.length,
+        //   assignedProjectIdsLength: assignedProjectIds.length
+        // });
         
         // For firm_admin, use firmProjectIds if available, otherwise fetch
         let projectIds: string[] = [];
@@ -918,20 +918,20 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
         // Priority 1: Use firmProjectIds if available (regardless of userRole)
         if (firmProjectIds.length > 0) {
           projectIds = firmProjectIds;
-          console.log('📄 CompanyHighlights: Using cached firmProjectIds:', projectIds.length, projectIds);
+          // // console.log('📄 CompanyHighlights: Using cached firmProjectIds:', projectIds.length, projectIds);
         } 
         // Priority 2: If firmProjectIds empty but user is firm_admin, fetch directly
         else if (currentUserRole === 'firm_admin') {
-          console.log('📄 CompanyHighlights: firmProjectIds empty, fetching directly...');
+          // // console.log('📄 CompanyHighlights: firmProjectIds empty, fetching directly...');
           const userData = JSON.parse(localStorage.getItem('userData') || '{}');
           const firmId = userData.firm_id || localStorage.getItem('firmId');
-          console.log('📄 CompanyHighlights: FirmId from localStorage:', firmId);
+          // // console.log('📄 CompanyHighlights: FirmId from localStorage:', firmId);
           if (firmId) {
             const api = (await import('@/lib/api')).default;
             const response = await api.get(`/projects?firm_id=eq.${firmId}&select=id,status`);
             const projects = response.data as any[];
             projectIds = projects.map((project: any) => project.id).filter(Boolean);
-            console.log('📄 CompanyHighlights: Fetched projectIds directly:', projectIds.length, projectIds);
+            // // console.log('📄 CompanyHighlights: Fetched projectIds directly:', projectIds.length, projectIds);
             // Update state for future use
             if (projectIds.length > 0) {
               setFirmProjectIds([...new Set(projectIds)]);
@@ -943,7 +943,7 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
         // Priority 3: Use assignedProjectIds for non-firm_admin users
         else {
           projectIds = assignedProjectIds;
-          console.log('📄 CompanyHighlights: Using assignedProjectIds:', projectIds.length);
+          // // console.log('📄 CompanyHighlights: Using assignedProjectIds:', projectIds.length);
         }
 
         // If user has no visible projects, nothing to fetch
@@ -963,14 +963,14 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
         // Always fetch fresh data - don't rely on cache after refresh
         setLoading(true);
 
-        console.log('📄 CompanyHighlights: Fetching VDCR documents...', {
-          projectIds: projectIds?.length || 0,
-          projectIdsArray: projectIds,
-          firmProjectIdsLength: firmProjectIds.length,
-          dateRangeStart,
-          dateRangeEnd,
-          userRole
-        });
+        // // console.log('📄 CompanyHighlights: Fetching VDCR documents...', {
+        //   projectIds: projectIds?.length || 0,
+        //   projectIdsArray: projectIds,
+        //   firmProjectIdsLength: firmProjectIds.length,
+        //   dateRangeStart,
+        //   dateRangeEnd,
+        //   userRole
+        // });
 
         if (!projectIds || projectIds.length === 0) {
           console.warn('⚠️ CompanyHighlights: No project IDs available, skipping VDCR fetch');
@@ -985,11 +985,11 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
           projectIds
         );
 
-        console.log('📄 CompanyHighlights: VDCR documents received:', {
-          totalDocuments: Array.isArray(documents) ? documents.length : 0,
-          firstDoc: Array.isArray(documents) ? documents[0] : null,
-          allDocs: documents
-        });
+        // // console.log('📄 CompanyHighlights: VDCR documents received:', {
+        //   totalDocuments: Array.isArray(documents) ? documents.length : 0,
+        //   firstDoc: Array.isArray(documents) ? documents[0] : null,
+        //   allDocs: documents
+        // });
 
         const docsArray = Array.isArray(documents) ? documents : [];
         // Filter to only show records with valid status (not null/undefined)
@@ -998,17 +998,17 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
           return doc.vdcr_records?.updated_at && doc.vdcr_records?.status;
         });
         
-        console.log('📄 CompanyHighlights: After status filter:', {
-          beforeFilter: docsArray.length,
-          afterFilter: statusChangedDocs.length
-        });
+        // // console.log('📄 CompanyHighlights: After status filter:', {
+        //   beforeFilter: docsArray.length,
+        //   afterFilter: statusChangedDocs.length
+        // });
 
         const filteredDocs = filterByAssignedProjects(statusChangedDocs, 'vdcr_records.project_id');
         
-        console.log('📄 CompanyHighlights: Final VDCR documents:', {
-          finalCount: filteredDocs.length,
-          sample: filteredDocs[0]
-        });
+        // // console.log('📄 CompanyHighlights: Final VDCR documents:', {
+        //   finalCount: filteredDocs.length,
+        //   sample: filteredDocs[0]
+        // });
 
         setDocumentationUpdates(filteredDocs);
       } catch (error) {
@@ -1020,24 +1020,24 @@ const CompanyHighlights = ({ onSelectProject }: CompanyHighlightsProps) => {
     };
 
     const currentProjectIds = userRole === 'firm_admin' ? firmProjectIds : assignedProjectIds;
-    console.log('📄 CompanyHighlights: VDCR fetch conditions check:', {
-      isExpanded,
-      activeTab,
-      canSeeTab: canSeeTab('documentation'),
-      projectIdsLoaded,
-      projectIds: currentProjectIds.length,
-      firmProjectIds: firmProjectIds.length,
-      assignedProjectIds: assignedProjectIds.length,
-      firmProjectIdsArray: firmProjectIds,
-      dateRangeStart,
-      dateRangeEnd
-    });
+    // // console.log('📄 CompanyHighlights: VDCR fetch conditions check:', {
+    //   isExpanded,
+    //   activeTab,
+    //   canSeeTab: canSeeTab('documentation'),
+    //   projectIdsLoaded,
+    //   projectIds: currentProjectIds.length,
+    //   firmProjectIds: firmProjectIds.length,
+    //   assignedProjectIds: assignedProjectIds.length,
+    //   firmProjectIdsArray: firmProjectIds,
+    //   dateRangeStart,
+    //   dateRangeEnd
+    // });
     
     if (isExpanded && activeTab === 'documentation' && canSeeTab('documentation')) {
-      console.log('✅ CompanyHighlights: Conditions met, fetching VDCR documents...');
+      // // console.log('✅ CompanyHighlights: Conditions met, fetching VDCR documents...');
       fetchDocumentationUpdates();
     } else {
-      console.log('⚠️ CompanyHighlights: VDCR fetch skipped - conditions not met');
+      // console.log('⚠️ CompanyHighlights: VDCR fetch skipped - conditions not met');
     }
   }, [dateRangeStart, dateRangeEnd, activeTab, isExpanded, userRole, assignedProjectIds, firmProjectIds, timePeriod, projectIdsLoaded, completedProjectIds]);
 

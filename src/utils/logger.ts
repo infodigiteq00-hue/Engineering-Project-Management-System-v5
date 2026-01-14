@@ -5,7 +5,7 @@ const isDevelopment = import.meta.env.DEV || import.meta.env.MODE === 'developme
 export const logger = {
   log: (...args: any[]) => {
     if (isDevelopment) {
-      console.log(...args);
+      // console.log(...args);
     }
   },
   error: (...args: any[]) => {

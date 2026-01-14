@@ -113,20 +113,20 @@ const ProjectDetails = ({ project, onBack, onViewEquipment, onViewVDCR, vdcrData
 
   // Safety check: if project is undefined, navigate back
   if (!project) {
-    // console.log('⚠️ Project data is undefined, navigating back...');
+    // // console.log('⚠️ Project data is undefined, navigating back...');
     onBack();
     return null;
   }
 
   // Debug: Log project data
-  // console.log('🔍 ProjectDetails received project:', project);
-  // console.log('📊 Project ID:', project?.id);
-  // console.log('📊 Project Name:', project?.name);
-  // console.log('📊 Project Client:', project?.client);
-  // console.log('📊 Project Location:', project?.location);
-  // console.log('📊 Project Manager:', project?.manager);
-  // console.log('📊 Project Status:', project?.status);
-  // console.log('🔧 Equipment Breakdown:', project?.equipmentBreakdown);
+  // // console.log('🔍 ProjectDetails received project:', project);
+  // // console.log('📊 Project ID:', project?.id);
+  // // console.log('📊 Project Name:', project?.name);
+  // // console.log('📊 Project Client:', project?.client);
+  // // console.log('📊 Project Location:', project?.location);
+  // // console.log('📊 Project Manager:', project?.manager);
+  // // console.log('📊 Project Status:', project?.status);
+  // // console.log('🔧 Equipment Breakdown:', project?.equipmentBreakdown);
   const [documentPreview, setDocumentPreview] = useState<{ url: string; name: string; type: string; description: string } | null>(null);
   const [selectedVDCR, setSelectedVDCR] = useState<string | null>(null);
   const [selectedVDCRStatus, setSelectedVDCRStatus] = useState<'approved' | 'sent-for-approval' | 'received-for-comment' | 'rejected'>('approved');
@@ -226,8 +226,8 @@ const ProjectDetails = ({ project, onBack, onViewEquipment, onViewVDCR, vdcrData
       documentUrl = project.otherDocumentsLinks[0].file_url;
     }
 
-    // console.log('📄 Document click:', { title, documentUrl, hasUrl: !!documentUrl });
-    // console.log('📄 Full document data:', {
+    // // console.log('📄 Document click:', { title, documentUrl, hasUrl: !!documentUrl });
+    // // console.log('📄 Full document data:', {
     //   unpricedPODocuments: project.unpricedPODocuments,
     //   designInputsDocuments: project.designInputsDocuments,
     //   clientReferenceDocuments: project.clientReferenceDocuments,
@@ -273,7 +273,7 @@ const ProjectDetails = ({ project, onBack, onViewEquipment, onViewVDCR, vdcrData
   const toggleEditMode = () => {
     if (isEditMode) {
       // Save changes - we're exiting edit mode
-      // console.log('Saving changes:', editData);
+      // // console.log('Saving changes:', editData);
     } else {
       // Entering edit mode - ALWAYS sync with latest project values
       syncEditDataFromProject();
@@ -301,14 +301,14 @@ const ProjectDetails = ({ project, onBack, onViewEquipment, onViewVDCR, vdcrData
 
   const handleSaveChanges = () => {
     // Here you would typically save to your backend
-    // console.log('Saving changes:', editData);
+    // // console.log('Saving changes:', editData);
     setIsEditMode(false);
     // You could also call a prop function to update the parent component
   };
 
   const handleMarkAsComplete = () => {
     // Here you would typically update the project status in your backend
-    // console.log('Marking project as complete:', project.id);
+    // // console.log('Marking project as complete:', project.id);
     // You could also call a prop function to update the parent component
     toast({ title: 'Success', description: 'Project marked as complete!' });
   };
@@ -347,7 +347,7 @@ const ProjectDetails = ({ project, onBack, onViewEquipment, onViewVDCR, vdcrData
 
   const handleDocumentUpload = () => {
     // Here you would typically upload the document to your backend
-    // console.log('Uploading document:', newDocument);
+    // // console.log('Uploading document:', newDocument);
 
     // For now, we'll just close the modal
     setShowDocumentUpload(false);
@@ -360,14 +360,14 @@ const ProjectDetails = ({ project, onBack, onViewEquipment, onViewVDCR, vdcrData
 
   const handleRemoveDocument = (documentType: string) => {
     if (confirm('Are you sure you want to remove this document?')) {
-      // console.log('Removing document:', documentType);
+      // // console.log('Removing document:', documentType);
       // Here you would typically remove the document from your backend
     }
   };
 
   const handleEditProject = () => {
     // TODO: Implement edit project functionality
-    // console.log('Edit project:', project.id);
+    // // console.log('Edit project:', project.id);
     toast({ title: 'Notice', description: 'Edit project functionality will be implemented here' });
   };
 
@@ -375,7 +375,7 @@ const ProjectDetails = ({ project, onBack, onViewEquipment, onViewVDCR, vdcrData
     const confirmed = window.confirm(`Are you sure you want to mark the project "${project.name}" as complete?`);
     if (confirmed) {
       // Here you would typically update the project status in your backend
-      // console.log('Marking project as complete:', project.id);
+      // // console.log('Marking project as complete:', project.id);
       // You could also call a prop function to update the parent component
       toast({ title: 'Success', description: 'Project marked as complete successfully!' });
     }
@@ -384,7 +384,7 @@ const ProjectDetails = ({ project, onBack, onViewEquipment, onViewVDCR, vdcrData
   const handleDeleteProject = () => {
     if (confirm(`Are you sure you want to delete project "${project.name}"? This action cannot be undone.`)) {
       // TODO: Implement delete project functionality
-      // console.log('Delete project:', project.id);
+      // // console.log('Delete project:', project.id);
       toast({ title: 'Notice', description: 'Delete project functionality will be implemented here' });
     }
   };

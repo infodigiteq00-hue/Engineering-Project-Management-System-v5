@@ -61,10 +61,10 @@ const UnifiedProjectView = ({
   }, []);
 
   // Debug: Log project data
-  // console.log('🔍 UnifiedProjectView received projectData:', projectData);
-  // console.log('📊 Project ID:', projectId);
-  // console.log('📊 Project Name:', projectName);
-  // console.log('🔧 Equipment data received:', equipment);
+  // // console.log('🔍 UnifiedProjectView received projectData:', projectData);
+  // // console.log('📊 Project ID:', projectId);
+  // // console.log('📊 Project Name:', projectName);
+  // // console.log('🔧 Equipment data received:', equipment);
 
   // Search states
   const [vdcrSearchQuery, setVdcrSearchQuery] = useState("");
@@ -107,7 +107,7 @@ const UnifiedProjectView = ({
     const normalizedUserEmail = currentUserEmail.toLowerCase().trim();
     
     // Debug logging (can be removed after testing)
-    console.log('🔍 Equipment Filtering Debug:', {
+    // console.log('🔍 Equipment Filtering Debug:', {
       currentUserEmail: normalizedUserEmail,
       currentUserRole,
       teamMembersCount: teamMembers.length,
@@ -118,7 +118,7 @@ const UnifiedProjectView = ({
     
     // Project managers and VDCR managers can see all equipment
     if (currentUserRole === 'firm_admin' || currentUserRole === 'project_manager' || currentUserRole === 'vdcr_manager') {
-      console.log('✅ User is admin/manager - showing all equipment');
+      // console.log('✅ User is admin/manager - showing all equipment');
       return equipment;
     }
     
@@ -126,13 +126,13 @@ const UnifiedProjectView = ({
     if (currentUserRole === 'editor' || currentUserRole === 'viewer') {
       // If team members are still loading, wait (don't show equipment yet)
       if (teamMembersLoading) {
-        console.log('⏳ Team members still loading - waiting...');
+        // console.log('⏳ Team members still loading - waiting...');
         return [];
       }
       
       // If team members haven't loaded yet, return empty array (will update when loaded)
       if (teamMembers.length === 0) {
-        console.log('⏳ Team members not loaded yet - waiting...');
+        // console.log('⏳ Team members not loaded yet - waiting...');
         return [];
       }
       
@@ -142,7 +142,7 @@ const UnifiedProjectView = ({
         return memberEmail === normalizedUserEmail;
       });
       
-      console.log('🔍 User team member search:', {
+      // console.log('🔍 User team member search:', {
         searchingFor: normalizedUserEmail,
         found: !!userTeamMember,
         memberEmail: userTeamMember?.email,
@@ -151,12 +151,12 @@ const UnifiedProjectView = ({
       });
       
       if (!userTeamMember) {
-        console.log('⚠️ User not found in team members - showing no equipment');
+        // console.log('⚠️ User not found in team members - showing no equipment');
         return [];
       }
       
       if (!userTeamMember.equipmentAssignments || userTeamMember.equipmentAssignments.length === 0) {
-        console.log('⚠️ No equipment assignments found for user - showing no equipment');
+        // console.log('⚠️ No equipment assignments found for user - showing no equipment');
         return [];
       }
       
@@ -166,7 +166,7 @@ const UnifiedProjectView = ({
       
       // Check if user has "All Equipment" assignment
       if (assignments.includes('All Equipment')) {
-        console.log('✅ User has "All Equipment" assignment - showing all equipment');
+        // console.log('✅ User has "All Equipment" assignment - showing all equipment');
         return equipment;
       }
       
@@ -194,7 +194,7 @@ const UnifiedProjectView = ({
         return false;
       });
       
-      console.log(`✅ Filtered equipment: ${filtered.length} of ${equipment.length} items`, {
+      // console.log(`✅ Filtered equipment: ${filtered.length} of ${equipment.length} items`, {
         assignments,
         equipmentIds: equipment.map(eq => eq.id)
       });
@@ -202,7 +202,7 @@ const UnifiedProjectView = ({
     }
     
     // Default: return all equipment (for other roles or if role is not recognized)
-    console.log('⚠️ Unknown role or no filtering applied - showing all equipment');
+    // console.log('⚠️ Unknown role or no filtering applied - showing all equipment');
     return equipment;
   }, [equipment, teamMembers, teamMembersLoading, user?.email, userRole]);
 
@@ -222,15 +222,15 @@ const UnifiedProjectView = ({
   const loadVDCRData = async () => {
     try {
       setIsLoadingVDCR(true);
-      console.log('🔄 Loading VDCR data for project:', projectId);
+      // console.log('🔄 Loading VDCR data for project:', projectId);
       
       // Load activity logs for Activity Log tab
       try {
         const { activityApi } = await import('@/lib/activityApi');
-        console.log('📄 UnifiedProjectView: Fetching VDCR activity logs for project:', projectId);
+        // console.log('📄 UnifiedProjectView: Fetching VDCR activity logs for project:', projectId);
         const logs = await activityApi.getVDCRActivityLogs(projectId);
         const logsArray = Array.isArray(logs) ? logs : [];
-        console.log('📄 UnifiedProjectView: VDCR activity logs loaded:', {
+        // console.log('📄 UnifiedProjectView: VDCR activity logs loaded:', {
           count: logsArray.length,
           firstLog: logsArray[0],
           allLogs: logsArray
@@ -246,7 +246,7 @@ const UnifiedProjectView = ({
         const { fastAPI } = await import('@/lib/api');
         const records = await fastAPI.getVDCRRecordsByProject(projectId);
         const recordsArray = Array.isArray(records) ? records : [];
-        console.log('✅ Loaded VDCR records:', recordsArray.length, 'records');
+        // console.log('✅ Loaded VDCR records:', recordsArray.length, 'records');
         setVdcrDocuments(recordsArray);
       } catch (error) {
         console.error('❌ Error loading VDCR records:', error);
@@ -265,12 +265,12 @@ const UnifiedProjectView = ({
   const loadEquipmentProgressEntries = async () => {
     try {
       setIsLoadingEquipmentLogs(true);
-      console.log('🔧 UnifiedProjectView: Loading equipment logs for project:', projectId);
+      // console.log('🔧 UnifiedProjectView: Loading equipment logs for project:', projectId);
       // Import activityApi to fetch from equipment_activity_logs table
       const { activityApi } = await import('@/lib/activityApi');
       const entries = await activityApi.getEquipmentActivityLogs(projectId);
       const entriesArray = Array.isArray(entries) ? entries : [];
-      console.log('🔧 UnifiedProjectView: Equipment logs loaded:', {
+      // console.log('🔧 UnifiedProjectView: Equipment logs loaded:', {
         count: entriesArray.length,
         firstEntry: entriesArray[0],
         allEntries: entriesArray
@@ -289,11 +289,11 @@ const UnifiedProjectView = ({
     try {
       setTeamMembersLoading(true);
       // PERFORMANCE: Console logs commented out - uncomment if needed for debugging
-      // console.log('🔄 SETTINGS TAB: Fetching project members for project:', projectId);
+      // // console.log('🔄 SETTINGS TAB: Fetching project members for project:', projectId);
 
       // Fetch from project_members table
       const teamData = await fastAPI.getProjectMembers(projectId);
-      // console.log('👥 Raw project members data:', teamData);
+      // // console.log('👥 Raw project members data:', teamData);
 
       // Transform the data to match the expected format
       const transformedMembers = (teamData as any[]).map((member, index) => ({
@@ -312,8 +312,8 @@ const UnifiedProjectView = ({
         accessLevel: member.access_level || 'viewer'
       }));
 
-      // console.log('✅ Transformed project members:', transformedMembers.length);
-      // console.log('✅ Team members details:', transformedMembers);
+      // // console.log('✅ Transformed project members:', transformedMembers.length);
+      // // console.log('✅ Team members details:', transformedMembers);
       setTeamMembers(transformedMembers);
     } catch (error) {
       // console.error('❌ Error fetching team members:', error);
@@ -376,7 +376,7 @@ const UnifiedProjectView = ({
   useEffect(() => {
     if (projectId) {
       // PERFORMANCE: Console logs commented out - uncomment if needed for debugging
-      // console.log('🔄 Project ID changed, fetching team members for:', projectId);
+      // // console.log('🔄 Project ID changed, fetching team members for:', projectId);
       fetchTeamMembers();
       loadVDCRData();
       loadEquipmentProgressEntries();
@@ -386,22 +386,22 @@ const UnifiedProjectView = ({
   // Listen for team member creation events
   useEffect(() => {
     const handleTeamMemberCreated = (event: any) => {
-      // console.log('🔄 Team member created event received:', event.detail);
-      // console.log('🔄 Refreshing team list...');
+      // // console.log('🔄 Team member created event received:', event.detail);
+      // // console.log('🔄 Refreshing team list...');
       fetchTeamMembers();
     };
 
     const handleProjectCreated = (event: any) => {
-      // console.log('🔄 Project created event received:', event.detail);
+      // // console.log('🔄 Project created event received:', event.detail);
       if (event.detail.teamMembersAdded) {
-        // console.log('🔄 Project created with team members, refreshing team list...');
+        // // console.log('🔄 Project created with team members, refreshing team list...');
         fetchTeamMembers();
       }
     };
 
     const handleEquipmentChanged = (event: any) => {
-      // console.log('🔄 Equipment changed event received:', event.detail);
-      // console.log('🔄 Refreshing equipment activities...');
+      // // console.log('🔄 Equipment changed event received:', event.detail);
+      // // console.log('🔄 Refreshing equipment activities...');
       loadEquipmentProgressEntries();
     };
 
@@ -709,7 +709,7 @@ const UnifiedProjectView = ({
   const addTeamMember = async () => {
     if (newMember.name && newMember.email && newMember.position && newMember.role && newMember.equipmentAssignments?.length) {
       try {
-        // console.log('👥 Adding new team member:', newMember);
+        // // console.log('👥 Adding new team member:', newMember);
         
       const role = roles.find(r => r.name === newMember.role);
       
@@ -739,11 +739,11 @@ const UnifiedProjectView = ({
           last_active: new Date().toISOString()
         };
 
-        // console.log('👥 Member data to save:', memberData);
+        // // console.log('👥 Member data to save:', memberData);
         
         // Save to database
         const savedMember = await fastAPI.createProjectMember(memberData);
-        // console.log('✅ Team member saved to database:', savedMember);
+        // // console.log('✅ Team member saved to database:', savedMember);
         
         // Log team member addition for all assigned equipment in a single batch entry (if any)
         if (newMember.equipmentAssignments && newMember.equipmentAssignments.length > 0) {
@@ -754,7 +754,7 @@ const UnifiedProjectView = ({
               if (targetEquipment) {
                 // Get tag number - check multiple possible fields and handle empty strings
                 // Debug log to see what fields are available
-                // console.log(`🔍 Equipment ${equipmentId} data:`, {
+                // // console.log(`🔍 Equipment ${equipmentId} data:`, {
                 // tagNumber: targetEquipment.tagNumber,
                 //   tag: targetEquipment.tag,
                 //   tag_number: targetEquipment.tag_number,
@@ -784,14 +784,14 @@ const UnifiedProjectView = ({
           
           if (equipmentList.length > 0) {
             try {
-              // console.log(`📝 Logging team member addition batch for ${equipmentList.length} equipment...`);
+              // // console.log(`📝 Logging team member addition batch for ${equipmentList.length} equipment...`);
               await logTeamMemberAddedBatch(
                 projectId,
                 equipmentList,
                 newMember.name,
                 newMember.position || newMember.role || 'viewer'
               );
-              // console.log(`✅ Activity logged: Team member added to ${equipmentList.length} equipment`);
+              // // console.log(`✅ Activity logged: Team member added to ${equipmentList.length} equipment`);
             } catch (logError) {
               // console.error(`⚠️ Error logging team member addition batch activity (non-fatal):`, logError);
             }
@@ -800,30 +800,30 @@ const UnifiedProjectView = ({
         
         // Send email notification to the new team member (MOVED BEFORE EQUIPMENT ASSIGNMENT)
         try {
-          // console.log('📧 Sending email notification to new team member...');
-          // console.log('📧 New member data:', newMember);
-          // console.log('📧 Project name:', projectName);
+          // // console.log('📧 Sending email notification to new team member...');
+          // // console.log('📧 New member data:', newMember);
+          // // console.log('📧 Project name:', projectName);
           
           // Get company name from firm_id instead of userData
           const userData = JSON.parse(localStorage.getItem('userData') || '{}');
           const firmId = userData.firm_id;
 
           let companyName = 'Your Company'; // Default fallback
-          // console.log('📧 Firm ID from userData:', firmId);
-          // console.log('📧 Full userData from localStorage:', userData);
+          // // console.log('📧 Firm ID from userData:', firmId);
+          // // console.log('📧 Full userData from localStorage:', userData);
           
           // Try to get company name from localStorage first (faster)
           if (userData.company_name) {
             companyName = userData.company_name;
-            // console.log('📧 Company name from localStorage:', companyName);
+            // // console.log('📧 Company name from localStorage:', companyName);
           } else if (projectData && projectData.client) {
             // Use project client as company name
             companyName = projectData.client;
-            // console.log('📧 Company name from project client:', companyName);
+            // // console.log('📧 Company name from project client:', companyName);
           } else if (firmId) {
             // Fallback: try database (but with timeout)
             try {
-              // console.log('📧 Fetching company name from database...');
+              // // console.log('📧 Fetching company name from database...');
               const { DatabaseService } = await import('@/lib/database');
               
               // Add timeout to prevent hanging
@@ -837,17 +837,17 @@ const UnifiedProjectView = ({
               ]);
               
               companyName = (firmData as { name?: string })?.name || 'Your Company';
-              // console.log('📧 Company name fetched from database:', companyName);
+              // // console.log('📧 Company name fetched from database:', companyName);
             } catch (error) {
               // console.error('❌ Error fetching company name:', error);
-              // console.log('📧 Using fallback company name due to error');
+              // // console.log('📧 Using fallback company name due to error');
               companyName = 'Your Company'; // Keep fallback
             }
           } else {
-            // console.log('📧 No firm ID found, using fallback company name');
+            // // console.log('📧 No firm ID found, using fallback company name');
           }
           
-          // console.log('📧 Final company name to use:', companyName);
+          // // console.log('📧 Final company name to use:', companyName);
           
           // Get dashboard URL
           const dashboardUrl = window.location.origin;
@@ -863,8 +863,8 @@ const UnifiedProjectView = ({
             equipment_name: '' // Empty for general team members
           });
           
-          // console.log('📧 Email notification result:', emailResult);
-          // console.log('📧 Email details sent:', {
+          // // console.log('📧 Email notification result:', emailResult);
+          // // console.log('📧 Email details sent:', {
           //   to_name: newMember.name,
           //   to_email: newMember.email,
           //   project_name: projectName,
@@ -874,9 +874,9 @@ const UnifiedProjectView = ({
           // });
           
           if (emailResult.success) {
-            // console.log('✅ Email notification sent successfully');
+            // // console.log('✅ Email notification sent successfully');
           } else {
-            // console.log('⚠️ Email notification failed:', emailResult.message);
+            // // console.log('⚠️ Email notification failed:', emailResult.message);
           }
         } catch (emailError) {
           // console.error('❌ Error sending email notification:', emailError);
@@ -887,7 +887,7 @@ const UnifiedProjectView = ({
           const firmId = localStorage.getItem('firmId');
           const currentUserId = user?.id || localStorage.getItem('userId');
           
-          // console.log('📧 Creating invite for team member...');
+          // // console.log('📧 Creating invite for team member...');
           await fastAPI.createInvite({
             email: newMember.email,
             full_name: newMember.name,
@@ -896,14 +896,14 @@ const UnifiedProjectView = ({
             project_id: projectId,
             invited_by: currentUserId || 'system'
           });
-          // console.log('✅ Invite created for team member');
+          // // console.log('✅ Invite created for team member');
         } catch (inviteError) {
           // console.error('❌ Error creating invite (member still created):', inviteError);
         }
         
         // Add user to selected equipment Team tabs (MOVED AFTER EMAIL)
         if (newMember.equipmentAssignments && newMember.equipmentAssignments.length > 0) {
-          // console.log('🔄 Adding user to selected equipment Team tabs...');
+          // // console.log('🔄 Adding user to selected equipment Team tabs...');
           
           // Filter out "All Equipment" and get actual equipment IDs
           const equipmentIds = newMember.equipmentAssignments.filter(id => id !== "All Equipment");
@@ -914,7 +914,7 @@ const UnifiedProjectView = ({
               // Find the equipment to get its current team data
               const targetEquipment = equipment.find(eq => eq.id === equipmentId);
               if (targetEquipment) {
-                // console.log(`🔄 Adding user to equipment ${equipmentId} Team tab...`);
+                // // console.log(`🔄 Adding user to equipment ${equipmentId} Team tab...`);
                 
                 // Map display role to equipment_team_positions role (only accepts 'editor' or 'viewer')
                 const equipmentRoleMap: { [key: string]: 'editor' | 'viewer' } = {
@@ -935,12 +935,12 @@ const UnifiedProjectView = ({
                   role: equipmentRole
                 };
                 
-                // console.log('📧 Team position data being sent:', teamPositionData);
+                // // console.log('📧 Team position data being sent:', teamPositionData);
                 
                 // Save to team_positions table
                 try {
                   await fastAPI.createTeamPosition(teamPositionData);
-                  // console.log(`✅ User added to equipment ${equipmentId} Team tab`);
+                  // // console.log(`✅ User added to equipment ${equipmentId} Team tab`);
                 } catch (teamPosError) {
                   // Silently fail - equipment team position is optional and non-critical
                   // console.error(`⚠️ Failed to create equipment team position (non-fatal):`, teamPosError);
@@ -1003,7 +1003,7 @@ const UnifiedProjectView = ({
   const updateTeamMember = async () => {
     if (selectedMember && newMember.name && newMember.email && newMember.role) {
       try {
-        // console.log('👥 Updating team member:', selectedMember.id, newMember);
+        // // console.log('👥 Updating team member:', selectedMember.id, newMember);
         
       const role = roles.find(r => r.name === newMember.role);
       
@@ -1031,11 +1031,11 @@ const UnifiedProjectView = ({
           updated_at: new Date().toISOString()
         };
 
-        // console.log('👥 Member data to update:', memberData);
+        // // console.log('👥 Member data to update:', memberData);
         
         // Update in database
         await fastAPI.updateProjectMember(selectedMember.id, memberData);
-        // console.log('✅ Team member updated in database');
+        // // console.log('✅ Team member updated in database');
         
         // Refresh team members list
         await fetchTeamMembers();
@@ -1057,11 +1057,11 @@ const UnifiedProjectView = ({
   const removeTeamMember = async (memberId) => {
     if (window.confirm("Are you sure you want to remove this team member?")) {
       try {
-        // console.log('👥 Removing team member:', memberId);
+        // // console.log('👥 Removing team member:', memberId);
         
         // Delete from database
         await fastAPI.deleteProjectMember(memberId);
-        // console.log('✅ Team member deleted from database');
+        // // console.log('✅ Team member deleted from database');
         
         // Refresh team members list
         await fetchTeamMembers();
@@ -1081,14 +1081,14 @@ const UnifiedProjectView = ({
       if (!member) return;
       
       const newStatus = member.status === "active" ? "inactive" : "active";
-      // console.log('👥 Toggling member status:', memberId, newStatus);
+      // // console.log('👥 Toggling member status:', memberId, newStatus);
       
       // Update in database
       await fastAPI.updateProjectMember(memberId, { 
         status: newStatus,
         updated_at: new Date().toISOString()
       });
-      // console.log('✅ Member status updated in database');
+      // // console.log('✅ Member status updated in database');
       
       // Refresh team members list
       await fetchTeamMembers();
@@ -1310,11 +1310,11 @@ const UnifiedProjectView = ({
                   onViewDetails={() => setActiveTab("project-details")}
                   onViewVDCR={() => setActiveTab("vdcr")}
                   onUserAdded={() => {
-                    // console.log('🔄 SETTINGS TAB: onUserAdded callback triggered, refreshing team members...');
+                    // // console.log('🔄 SETTINGS TAB: onUserAdded callback triggered, refreshing team members...');
                     fetchTeamMembers();
                   }}
                   onActivityUpdate={() => {
-                    // console.log('🔄 Activity updated, refreshing equipment activity logs...');
+                    // // console.log('🔄 Activity updated, refreshing equipment activity logs...');
                     loadEquipmentProgressEntries();
                   }}
                 />
@@ -1678,7 +1678,7 @@ const UnifiedProjectView = ({
                     <div className="space-y-4">
                         {/* Filtered VDCR Logs */}
                         {(() => {
-                          console.log('📄 UnifiedProjectView: Rendering VDCR logs, vdcrRecords:', {
+                          // console.log('📄 UnifiedProjectView: Rendering VDCR logs, vdcrRecords:', {
                             length: vdcrRecords?.length || 0,
                             records: vdcrRecords
                           });
@@ -2152,7 +2152,7 @@ const UnifiedProjectView = ({
 
                           // Use real equipment activity logs from equipment_activity_logs table
                           const entries = equipmentProgressEntries || [];
-                          console.log('🔧 UnifiedProjectView: Rendering equipment logs, equipmentProgressEntries:', {
+                          // console.log('🔧 UnifiedProjectView: Rendering equipment logs, equipmentProgressEntries:', {
                             length: entries.length,
                             entries: entries
                           });
@@ -3321,18 +3321,18 @@ const UnifiedProjectView = ({
                   // Horizontal scroll navigation for PDF pages
                   if (e.deltaX > 0) {
                     // Scroll right - could trigger next page if needed
-                    // console.log('Scroll right detected');
+                    // // console.log('Scroll right detected');
                   } else if (e.deltaX < 0) {
                     // Scroll left - could trigger previous page if needed  
-                    // console.log('Scroll left detected');
+                    // // console.log('Scroll left detected');
                   }
                 }}
                 onKeyDown={(e) => {
                   // Keyboard navigation
                   if (e.key === 'ArrowRight') {
-                    // console.log('Right arrow - next page');
+                    // // console.log('Right arrow - next page');
                   } else if (e.key === 'ArrowLeft') {
-                    // console.log('Left arrow - previous page');
+                    // // console.log('Left arrow - previous page');
                   }
                 }}
                 tabIndex={0}

@@ -66,7 +66,7 @@ const evictOldestImages = (): void => {
       localStorage.removeItem(cachedKeys[i].key);
     }
     
-    console.log(`🧹 [ImageCache] Evicted ${toRemove} oldest images`);
+    // console.log(`🧹 [ImageCache] Evicted ${toRemove} oldest images`);
   }
 };
 
@@ -140,7 +140,7 @@ export const cacheImage = async (imageUrl: string): Promise<void> => {
     };
     
     localStorage.setItem(cacheKey, JSON.stringify(storageData));
-    console.log(`💾 [ImageCache] Cached image: ${(blob.size / 1024).toFixed(2)}KB`);
+    // console.log(`💾 [ImageCache] Cached image: ${(blob.size / 1024).toFixed(2)}KB`);
   } catch (error) {
     console.warn('Failed to cache image:', error);
   }
@@ -198,7 +198,7 @@ export const clearImageCache = (): void => {
     localStorage.removeItem(key);
   });
   
-  console.log(`🧹 [ImageCache] Cleared ${keysToRemove.length} cached images`);
+  // console.log(`🧹 [ImageCache] Cleared ${keysToRemove.length} cached images`);
 };
 
 /**

@@ -19,14 +19,14 @@ const ResetPasswordSimple = () => {
     let timeoutId: NodeJS.Timeout | null = null;
 
     const handlePasswordReset = async () => {
-      console.log('🔍 ResetPasswordSimple - Starting verification...');
-      console.log('📍 Current URL:', window.location.href);
+      // console.log('🔍 ResetPasswordSimple - Starting verification...');
+      // console.log('📍 Current URL:', window.location.href);
       
       // Check localStorage directly first (more reliable than getSession)
       const storageKey = 'sb-ypdlbqrcxnugrvllbmsi-token';
       const storedSession = localStorage.getItem(storageKey);
       
-      console.log('🔍 Checking localStorage for session...', {
+      // console.log('🔍 Checking localStorage for session...', {
         hasStoredSession: !!storedSession,
         storageKey
       });
@@ -34,7 +34,7 @@ const ResetPasswordSimple = () => {
       if (storedSession) {
         try {
           const sessionData = JSON.parse(storedSession);
-          console.log('📦 Parsed session data:', {
+          // console.log('📦 Parsed session data:', {
             hasAccessToken: !!sessionData.access_token,
             hasUser: !!sessionData.user,
             hasRefreshToken: !!sessionData.refresh_token,
@@ -49,7 +49,7 @@ const ResetPasswordSimple = () => {
             const now = Math.floor(Date.now() / 1000);
             const isExpired = expiresAt && expiresAt <= now;
             
-            console.log('⏰ Token expiry check:', {
+            // console.log('⏰ Token expiry check:', {
               expiresAt,
               now,
               isExpired,
@@ -58,26 +58,26 @@ const ResetPasswordSimple = () => {
             
             // For password reset, even if slightly expired, proceed if we have refresh token
             if (!expiresAt || !isExpired || sessionData.refresh_token) {
-              console.log('✅ Valid session found in localStorage! User:', sessionData.user.email);
+              // console.log('✅ Valid session found in localStorage! User:', sessionData.user.email);
               // If we have valid tokens in localStorage, proceed immediately
               // This is the key fix - don't wait for getSession() to work
               setSessionReady(true);
               return;
             } else {
-              console.log('⚠️ Stored session expired and no refresh token, will try to exchange code...');
+              // console.log('⚠️ Stored session expired and no refresh token, will try to exchange code...');
             }
           } else {
-            console.log('⚠️ Session data missing required fields');
+            // console.log('⚠️ Session data missing required fields');
           }
         } catch (e) {
           console.warn('⚠️ Failed to parse stored session:', e);
         }
       } else {
-        console.log('⚠️ No session found in localStorage');
+        // console.log('⚠️ No session found in localStorage');
       }
       
       // Wait a moment - Supabase might be processing the code in background (detectSessionInUrl)
-      console.log('⏳ Waiting for Supabase auto-detection (detectSessionInUrl)...');
+      // console.log('⏳ Waiting for Supabase auto-detection (detectSessionInUrl)...');
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Check localStorage again (Supabase might have stored it by now)
@@ -86,7 +86,7 @@ const ResetPasswordSimple = () => {
         try {
           const sessionData = JSON.parse(storedSessionAfterWait);
           if (sessionData.access_token && sessionData.user) {
-            console.log('✅ Session found in localStorage after wait! User:', sessionData.user.email);
+            // console.log('✅ Session found in localStorage after wait! User:', sessionData.user.email);
             setSessionReady(true);
             return;
           }
@@ -98,18 +98,18 @@ const ResetPasswordSimple = () => {
       // Fallback: check if session already exists via Supabase
       const { data: { session: existingSession } } = await supabase.auth.getSession();
       if (existingSession) {
-        console.log('✅ Session already exists via getSession!');
+        // console.log('✅ Session already exists via getSession!');
         setSessionReady(true);
         return;
       }
 
       // Set up auth state listener BEFORE doing anything
-      console.log('👂 Setting up auth state listener...');
+      // console.log('👂 Setting up auth state listener...');
       authListener = supabase.auth.onAuthStateChange((event, session) => {
-        console.log('🔔 Auth state changed:', event, session ? 'has session' : 'no session');
+        // console.log('🔔 Auth state changed:', event, session ? 'has session' : 'no session');
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           if (session) {
-            console.log('✅ Session detected via listener! User:', session.user?.email);
+            // console.log('✅ Session detected via listener! User:', session.user?.email);
             setSessionReady(true);
             if (timeoutId) clearTimeout(timeoutId);
           }
@@ -124,7 +124,7 @@ const ResetPasswordSimple = () => {
         const hashCode = hashParams.get('code');
         const hashError = hashParams.get('error');
         
-        console.log('🔍 Extracted params:', {
+        // console.log('🔍 Extracted params:', {
           codeFromParams: code ? 'found' : 'none',
           codeFromHash: hashCode ? 'found' : 'none',
           hashError: hashError || 'none'
@@ -147,7 +147,7 @@ const ResetPasswordSimple = () => {
           return;
         }
 
-        console.log('✅ Code found. Attempting exchange...');
+        // console.log('✅ Code found. Attempting exchange...');
         
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         
@@ -167,7 +167,7 @@ const ResetPasswordSimple = () => {
         // Try the simplest approach: use exchangeCodeForSession with just the code
         // But wrap it in a Promise.race with timeout
         try {
-          console.log('🔄 Attempting exchangeCodeForSession...');
+          // console.log('🔄 Attempting exchangeCodeForSession...');
           
           const exchangePromise = supabase.auth.exchangeCodeForSession(recoveryCode);
           const timeoutPromise = new Promise((_, reject) => 
@@ -183,7 +183,7 @@ const ResetPasswordSimple = () => {
           }
 
           if (result?.data?.session) {
-            console.log('✅ Session created! User:', result.data.session.user?.email);
+            // console.log('✅ Session created! User:', result.data.session.user?.email);
             setSessionReady(true);
             if (timeoutId) clearTimeout(timeoutId);
             return;
@@ -200,7 +200,7 @@ const ResetPasswordSimple = () => {
           }
 
           if (session) {
-            console.log('✅ Session verified! User:', session.user?.email);
+            // console.log('✅ Session verified! User:', session.user?.email);
             setSessionReady(true);
             if (timeoutId) clearTimeout(timeoutId);
             return;
@@ -213,7 +213,7 @@ const ResetPasswordSimple = () => {
           
           // If timeout, try REST API as fallback
           if (err.message?.includes('timeout')) {
-            console.log('⏱️ SDK timed out, trying REST API fallback...');
+            // console.log('⏱️ SDK timed out, trying REST API fallback...');
             
             try {
               const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -237,7 +237,7 @@ const ResetPasswordSimple = () => {
                   });
                   
                   if (sessionData?.session) {
-                    console.log('✅ Session set via REST API!');
+                    // console.log('✅ Session set via REST API!');
                     setSessionReady(true);
                     if (timeoutId) clearTimeout(timeoutId);
                     return;
@@ -297,10 +297,10 @@ const ResetPasswordSimple = () => {
     setMessage(null);
 
     try {
-      console.log('🔄 Updating password...');
+      // console.log('🔄 Updating password...');
       
       // Skip getSession() entirely - it's hanging. Use localStorage directly
-      console.log('📡 Step 1: Getting session from localStorage...');
+      // console.log('📡 Step 1: Getting session from localStorage...');
       const storageKey = 'sb-ypdlbqrcxnugrvllbmsi-auth-token';
       const storedSession = localStorage.getItem(storageKey);
       
@@ -318,7 +318,7 @@ const ResetPasswordSimple = () => {
           setLoading(false);
           return;
         }
-        console.log('✅ Session found in localStorage:', { userEmail: sessionData.user.email });
+        // console.log('✅ Session found in localStorage:', { userEmail: sessionData.user.email });
       } catch (e) {
         console.error('❌ Failed to parse localStorage session:', e);
         setError('Invalid session data. Please request a new password reset link.');
@@ -327,7 +327,7 @@ const ResetPasswordSimple = () => {
       }
       
       // Use REST API directly - skip all SDK methods that might hang
-      console.log('📡 Step 2: Updating password via REST API...');
+      // console.log('📡 Step 2: Updating password via REST API...');
       
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -344,7 +344,7 @@ const ResetPasswordSimple = () => {
       let accessToken = sessionData.access_token;
       
       if (expiresAt && expiresAt <= now && sessionData.refresh_token) {
-        console.log('🔄 Token expired, refreshing via REST API...');
+        // console.log('🔄 Token expired, refreshing via REST API...');
         try {
           const refreshResponse = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=refresh_token`, {
             method: 'POST',
@@ -360,7 +360,7 @@ const ResetPasswordSimple = () => {
           if (refreshResponse.ok) {
             const refreshData = await refreshResponse.json();
             accessToken = refreshData.access_token;
-            console.log('✅ Token refreshed!');
+            // console.log('✅ Token refreshed!');
             // Update localStorage
             sessionData.access_token = refreshData.access_token;
             sessionData.refresh_token = refreshData.refresh_token;
@@ -375,7 +375,7 @@ const ResetPasswordSimple = () => {
       }
       
       // Update password via REST API
-      console.log('📡 Step 3: Calling password update API...');
+      // console.log('📡 Step 3: Calling password update API...');
       const controller = new AbortController();
       const fetchTimeout = setTimeout(() => controller.abort(), 10000);
       
@@ -391,7 +391,7 @@ const ResetPasswordSimple = () => {
       });
 
       clearTimeout(fetchTimeout);
-      console.log('📡 Password update response status:', response.status);
+      // console.log('📡 Password update response status:', response.status);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -401,7 +401,7 @@ const ResetPasswordSimple = () => {
         return;
       }
 
-      console.log('✅ Password updated successfully!');
+      // console.log('✅ Password updated successfully!');
       setMessage("Password updated successfully! Redirecting to login...");
       setLoading(false);
       

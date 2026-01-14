@@ -263,7 +263,7 @@ export const clearCache = (prefix?: string): void => {
     }
     
     keysToRemove.forEach(key => localStorage.removeItem(key));
-    console.log(`🧹 [Cache] Cleared ${keysToRemove.length} cache entries (preserved critical caches)`);
+    // console.log(`🧹 [Cache] Cleared ${keysToRemove.length} cache entries (preserved critical caches)`);
   } catch (error) {
     console.warn('Failed to clear cache:', error);
   }
@@ -310,7 +310,7 @@ export const CACHE_KEYS = {
 export const initializeCacheCleanup = (): void => {
   // Clean up expired entries on startup
   cleanupCache();
-  console.log('🧹 [Cache] Initialized cache cleanup');
+  // console.log('🧹 [Cache] Initialized cache cleanup');
 };
 
 /**

@@ -153,7 +153,7 @@ const ProjectsVDCR = ({ projectId, projectName, onBack, onViewDetails, onViewEqu
   // Debug: Log selectedEquipments changes (only when not empty)
   useEffect(() => {
     if (selectedEquipments.length > 0) {
-      // console.log('🔧 selectedEquipments changed:', selectedEquipments);
+      // // console.log('🔧 selectedEquipments changed:', selectedEquipments);
     }
   }, [selectedEquipments]);
 
@@ -266,7 +266,7 @@ const ProjectsVDCR = ({ projectId, projectName, onBack, onViewDetails, onViewEqu
   // Set selected equipment when equipment data loads and we're editing
   useEffect(() => {
     if (editingVDCR && equipmentData.length > 0 && selectedEquipments.length === 0) {
-      // console.log('🔧 Equipment data loaded, setting selected equipment for edit:', editingVDCR.equipmentTagNo);
+      // // console.log('🔧 Equipment data loaded, setting selected equipment for edit:', editingVDCR.equipmentTagNo);
       setSelectedEquipments(editingVDCR.equipmentTagNo);
     }
   }, [equipmentData, editingVDCR]);
@@ -289,7 +289,7 @@ const ProjectsVDCR = ({ projectId, projectName, onBack, onViewDetails, onViewEqu
             mfg_serial_numbers: updatedMfgSerial,
             job_numbers: updatedJobNo
           });
-          // console.log(`✅ Cleaned up AUTO-GENERATED values for record ${record.id}`);
+          // // console.log(`✅ Cleaned up AUTO-GENERATED values for record ${record.id}`);
         }
       }
     } catch (error) {
@@ -321,7 +321,7 @@ const ProjectsVDCR = ({ projectId, projectName, onBack, onViewDetails, onViewEqu
          } catch (error: any) {
            // Silently handle 404 (table doesn't exist yet) - no need to log
            if (error?.response?.status !== 404) {
-             console.log('Error loading revision events:', error);
+             // console.log('Error loading revision events:', error);
            }
            revisionEvents = [];
          }
@@ -623,7 +623,7 @@ const ProjectsVDCR = ({ projectId, projectName, onBack, onViewDetails, onViewEqu
   };
 
   const handleEditVDCR = (record: VDCRRecord) => {
-    // console.log('🔧 Opening edit form for VDCR record, equipment tags:', record.equipmentTagNo);
+    // // console.log('🔧 Opening edit form for VDCR record, equipment tags:', record.equipmentTagNo);
 
     setEditingVDCR(record);
     setIsAddingNew(false);
@@ -747,7 +747,7 @@ const handleCreateRevisionEvent = async () => {
   }
 
   try {
-    console.log('🔄 Creating revision event with data:', {
+    // console.log('🔄 Creating revision event with data:', {
       vdcr_record_id: editingVDCR.id,
       event_type: revisionEventModal.eventType,
       revision_number: formData.revision,
@@ -774,9 +774,9 @@ const handleCreateRevisionEvent = async () => {
       created_by: user?.id || null
     };
 
-    console.log('📤 Sending revision event data to API:', eventData);
+    // console.log('📤 Sending revision event data to API:', eventData);
     const result = await fastAPI.createVDCRRevisionEvent(eventData);
-    console.log('✅ Revision event created successfully:', result);
+    // console.log('✅ Revision event created successfully:', result);
     
     toast({ 
       title: 'Success', 
@@ -919,7 +919,7 @@ const handleCreateRevisionEvent = async () => {
         // Create new VDCR record
         try {
           const newRecord = await fastAPI.createVDCRRecord(vdcrData);
-          console.log('✅ New VDCR record created:', newRecord);
+          // console.log('✅ New VDCR record created:', newRecord);
 
           // Set the selectedVDCR to the newly created record ID
           // Supabase POST with return=representation usually returns an array
@@ -928,23 +928,23 @@ const handleCreateRevisionEvent = async () => {
           // Handle array response (most common)
           if (Array.isArray(newRecord) && newRecord.length > 0) {
             recordId = newRecord[0].id;
-            console.log('📝 Extracted recordId from array:', recordId);
+            // console.log('📝 Extracted recordId from array:', recordId);
           } 
           // Handle object response
           else if (newRecord && typeof newRecord === 'object' && (newRecord as any).id) {
             recordId = (newRecord as any).id;
-            console.log('📝 Extracted recordId from object:', recordId);
+            // console.log('📝 Extracted recordId from object:', recordId);
           }
           
           if (recordId) {
             setSelectedVDCR(recordId);
-            console.log('🎯 Set selectedVDCR to:', recordId);
+            // console.log('🎯 Set selectedVDCR to:', recordId);
 
             // Log VDCR creation (always log creation separately)
             try {
-              console.log('📝 Logging VDCR creation:', { projectId, recordId, documentName: formData.documentName });
+              // console.log('📝 Logging VDCR creation:', { projectId, recordId, documentName: formData.documentName });
               await logVDCRCreated(projectId, recordId, formData.documentName);
-              console.log('✅ VDCR creation logged successfully');
+              // console.log('✅ VDCR creation logged successfully');
             } catch (logError) {
               console.error('⚠️ Error logging VDCR creation (non-fatal):', logError);
               console.error('⚠️ Log error details:', JSON.stringify(logError, null, 2));
@@ -953,9 +953,9 @@ const handleCreateRevisionEvent = async () => {
             // Log document upload separately if document was uploaded during creation
             if (documentUrl) {
               try {
-                console.log('📝 Logging document upload during creation:', { projectId, recordId, fileName: documentUrl.split('/').pop() });
+                // console.log('📝 Logging document upload during creation:', { projectId, recordId, fileName: documentUrl.split('/').pop() });
                 await logVDCRDocumentUploaded(projectId, recordId, formData.documentName, documentUrl.split('/').pop() || 'document');
-                console.log('✅ Document upload logged successfully during creation');
+                // console.log('✅ Document upload logged successfully during creation');
               } catch (logError) {
                 console.error('⚠️ Error logging document upload (non-fatal):', logError);
               }
@@ -971,13 +971,13 @@ const handleCreateRevisionEvent = async () => {
         } catch (error: any) {
           // 🔧 FIX: If 409 error (foreign key constraint), fetch correct ID and retry
           if (error?.response?.status === 409 && error?.response?.data?.code === '23503') {
-            console.log('⚠️ Foreign key error detected, fetching correct user ID...');
+            // console.log('⚠️ Foreign key error detected, fetching correct user ID...');
             const correctUserId = await fetchCorrectUserIdFromDB();
             if (correctUserId) {
               // Retry with correct user ID
               vdcrData.updated_by = correctUserId;
               const newRecord = await fastAPI.createVDCRRecord(vdcrData);
-              console.log('✅ New VDCR record created (retry):', newRecord);
+              // console.log('✅ New VDCR record created (retry):', newRecord);
               
               let recordId = null;
               // Handle array response
@@ -991,13 +991,13 @@ const handleCreateRevisionEvent = async () => {
               
               if (recordId) {
                 setSelectedVDCR(recordId);
-                console.log('🎯 Set selectedVDCR to (retry):', recordId);
+                // console.log('🎯 Set selectedVDCR to (retry):', recordId);
                 
                 // Log VDCR creation after retry (always log creation separately)
                 try {
-                  console.log('📝 Logging VDCR creation (retry):', { projectId, recordId, documentName: formData.documentName });
+                  // console.log('📝 Logging VDCR creation (retry):', { projectId, recordId, documentName: formData.documentName });
                   await logVDCRCreated(projectId, recordId, formData.documentName);
-                  console.log('✅ VDCR creation logged successfully (retry)');
+                  // console.log('✅ VDCR creation logged successfully (retry)');
                 } catch (logError) {
                   console.error('⚠️ Error logging VDCR creation (non-fatal):', logError);
                   console.error('⚠️ Log error details:', JSON.stringify(logError, null, 2));
@@ -1006,9 +1006,9 @@ const handleCreateRevisionEvent = async () => {
                 // Log document upload separately if document was uploaded during creation (retry)
                 if (documentUrl) {
                   try {
-                    console.log('📝 Logging document upload during creation (retry):', { projectId, recordId, fileName: documentUrl.split('/').pop() });
+                    // console.log('📝 Logging document upload during creation (retry):', { projectId, recordId, fileName: documentUrl.split('/').pop() });
                     await logVDCRDocumentUploaded(projectId, recordId, formData.documentName, documentUrl.split('/').pop() || 'document');
-                    console.log('✅ Document upload logged successfully during creation (retry)');
+                    // console.log('✅ Document upload logged successfully during creation (retry)');
                   } catch (logError) {
                     console.error('⚠️ Error logging document upload (non-fatal):', logError);
                   }
@@ -1088,9 +1088,9 @@ const handleCreateRevisionEvent = async () => {
           // Log document upload separately if document was uploaded (ALWAYS separate log entry)
           if (documentUrl && !editingVDCR.documentUrl) {
             try {
-              console.log('📝 Logging document upload during update:', { projectId, vdcrId: editingVDCR.id, fileName: documentUrl.split('/').pop() });
+              // console.log('📝 Logging document upload during update:', { projectId, vdcrId: editingVDCR.id, fileName: documentUrl.split('/').pop() });
               await logVDCRDocumentUploaded(projectId, editingVDCR.id, formData.documentName, documentUrl.split('/').pop() || 'document');
-              console.log('✅ Document upload logged successfully during update');
+              // console.log('✅ Document upload logged successfully during update');
             } catch (logError) {
               console.error('⚠️ Error logging document upload (non-fatal):', logError);
             }
@@ -1099,9 +1099,9 @@ const handleCreateRevisionEvent = async () => {
           // Log status change separately if status changed (ALWAYS separate log entry)
           if (changes.status) {
             try {
-              console.log('📝 Logging status change:', { projectId, vdcrId: editingVDCR.id, oldStatus: changes.status.old, newStatus: changes.status.new });
+              // console.log('📝 Logging status change:', { projectId, vdcrId: editingVDCR.id, oldStatus: changes.status.old, newStatus: changes.status.new });
               await logVDCRStatusChanged(projectId, editingVDCR.id, formData.documentName, changes.status.old, changes.status.new);
-              console.log('✅ Status change logged successfully');
+              // console.log('✅ Status change logged successfully');
             } catch (logError) {
               console.error('⚠️ Error logging status change (non-fatal):', logError);
             }
@@ -1115,7 +1115,7 @@ const handleCreateRevisionEvent = async () => {
           // Log each field change as a separate entry
           for (const [fieldName, fieldChange] of Object.entries(otherChanges)) {
             try {
-              console.log('📝 Logging field update:', { projectId, vdcrId: editingVDCR.id, fieldName, oldValue: fieldChange.old, newValue: fieldChange.new });
+              // console.log('📝 Logging field update:', { projectId, vdcrId: editingVDCR.id, fieldName, oldValue: fieldChange.old, newValue: fieldChange.new });
               await logVDCRFieldUpdated(
                 projectId, 
                 editingVDCR.id, 
@@ -1124,7 +1124,7 @@ const handleCreateRevisionEvent = async () => {
                 fieldChange.old || '', 
                 fieldChange.new || ''
               );
-              console.log(`✅ Field update logged successfully: ${fieldName}`);
+              // console.log(`✅ Field update logged successfully: ${fieldName}`);
             } catch (logError) {
               console.error(`⚠️ Error logging field update for ${fieldName} (non-fatal):`, logError);
             }
@@ -1132,7 +1132,7 @@ const handleCreateRevisionEvent = async () => {
         } catch (error: any) {
           // 🔧 FIX: If 409 error (foreign key constraint), fetch correct ID and retry
           if (error?.response?.status === 409 && error?.response?.data?.code === '23503') {
-            console.log('⚠️ Foreign key error detected, fetching correct user ID...');
+            // console.log('⚠️ Foreign key error detected, fetching correct user ID...');
             const correctUserId = await fetchCorrectUserIdFromDB();
             if (correctUserId) {
               // Retry with correct user ID
@@ -1275,43 +1275,43 @@ const handleCreateRevisionEvent = async () => {
     const fileExtension = uploadedFile.name.split('.').pop();
     const uniqueFileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
 
-    // console.log('📤 Starting file upload:', uploadedFile.name);
-    // console.log('📁 File type:', fileType);
-    // console.log('📁 File size:', uploadedFile.size, 'bytes');
+    // // console.log('📤 Starting file upload:', uploadedFile.name);
+    // // console.log('📁 File type:', fileType);
+    // // console.log('📁 File size:', uploadedFile.size, 'bytes');
 
     try {
-      // console.log('🔄 Starting Supabase storage upload...');
+      // // console.log('🔄 Starting Supabase storage upload...');
 
       // Skip bucket check for faster upload
 
       // No timeout needed - let upload take as long as needed
 
       // Upload to Supabase Storage - Direct approach without timeout race
-      // console.log('🚀 Starting upload to VDCR-docs bucket...');
-      // console.log('📁 Upload path: documents/' + uniqueFileName);
-      // console.log('📊 File size:', (uploadedFile.size / 1024 / 1024).toFixed(2), 'MB');
+      // // console.log('🚀 Starting upload to VDCR-docs bucket...');
+      // // console.log('📁 Upload path: documents/' + uniqueFileName);
+      // // console.log('📊 File size:', (uploadedFile.size / 1024 / 1024).toFixed(2), 'MB');
 
       // Direct upload without timeout race - let it take as long as needed
-      // console.log('⏳ Starting direct upload (no timeout)...');
+      // // console.log('⏳ Starting direct upload (no timeout)...');
 
       // Show progress to user (simplified)
-      // console.log(`📤 Uploading ${uploadedFile.name}...`);
+      // // console.log(`📤 Uploading ${uploadedFile.name}...`);
 
       let uploadData, uploadError;
       const bucketName = 'VDCR-docs';
 
       try {
-        // console.log('🔍 About to call supabase.storage.upload...');
-        // console.log('🔍 Bucket: VDCR-docs');
-        // console.log('🔍 Path: documents/' + uniqueFileName);
-        // console.log('🔍 File:', uploadedFile.name, uploadedFile.size, 'bytes');
+        // // console.log('🔍 About to call supabase.storage.upload...');
+        // // console.log('🔍 Bucket: VDCR-docs');
+        // // console.log('🔍 Path: documents/' + uniqueFileName);
+        // // console.log('🔍 File:', uploadedFile.name, uploadedFile.size, 'bytes');
 
         // Try VDCR-docs bucket first, fallback to project-documents if it fails
         // let bucketName = 'VDCR-docs';
         // let result;
 
         // try {
-        //   console.log('🔍 Trying VDCR-docs bucket first...');
+        //   // console.log('🔍 Trying VDCR-docs bucket first...');
 
         //   // Add timeout wrapper to prevent hanging
         //   const uploadPromise = supabase.storage
@@ -1333,7 +1333,7 @@ const handleCreateRevisionEvent = async () => {
         //   console.warn('⚠️ VDCR-docs bucket failed, trying project-documents bucket:', bucketError);
 
         //   bucketName = 'project-documents';
-        //   console.log('🔍 Trying project-documents bucket as fallback...');
+        //   // console.log('🔍 Trying project-documents bucket as fallback...');
 
         //   const uploadPromise = supabase.storage
         //     .from(bucketName)
@@ -1350,7 +1350,7 @@ const handleCreateRevisionEvent = async () => {
         let result;
 
         try {
-          // console.log('🔍 Uploading to VDCR-docs bucket using edge function...');
+          // // console.log('🔍 Uploading to VDCR-docs bucket using edge function...');
 
           // Use edge function for secure upload (service role key not exposed)
           const { uploadFileViaEdgeFunction } = await import('@/lib/edgeFunctions');
@@ -1377,13 +1377,13 @@ const handleCreateRevisionEvent = async () => {
           return;
         }
 
-        // console.log('🔍 Upload result:', result);
+        // // console.log('🔍 Upload result:', result);
         uploadData = result.data;
         uploadError = result.error;
 
         // Upload completed
 
-        // console.log('📤 Upload completed!');
+        // // console.log('📤 Upload completed!');
 
         if (uploadError) {
           // console.error('❌ Storage upload error:', uploadError);
@@ -1403,10 +1403,10 @@ const handleCreateRevisionEvent = async () => {
         }
 
         // Upload successful - skip verification to avoid hanging
-        // console.log('✅ Upload completed successfully!');
+        // // console.log('✅ Upload completed successfully!');
 
         // Show success message
-        // console.log(`✅ ${uploadedFile.name} uploaded successfully!`);
+        // // console.log(`✅ ${uploadedFile.name} uploaded successfully!`);
 
       } catch (error) {
         // Upload failed
@@ -1423,11 +1423,11 @@ const handleCreateRevisionEvent = async () => {
         throw error;
       }
 
-      // console.log('✅ File uploaded to storage:', uploadData);
+      // // console.log('✅ File uploaded to storage:', uploadData);
 
       // Get public URL using direct API method
       const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/VDCR-docs/documents/${uniqueFileName}`;
-      // console.log('✅ Public URL generated:', publicUrl);
+      // // console.log('✅ Public URL generated:', publicUrl);
 
       // Store document info for later use when saving VDCR record
       const newDocument: DocumentFile = {
@@ -1455,8 +1455,8 @@ const handleCreateRevisionEvent = async () => {
         setFormData(prev => ({ ...prev, revision: nextRevision }));
       }
 
-      // console.log('✅ File uploaded to storage successfully');
-      // console.log('📄 Document URL will be saved to vdcr_records.document_url when form is submitted');
+      // // console.log('✅ File uploaded to storage successfully');
+      // // console.log('📄 Document URL will be saved to vdcr_records.document_url when form is submitted');
 
     } catch (error) {
       // console.error('❌ File upload failed:', error);
@@ -1467,7 +1467,7 @@ const handleCreateRevisionEvent = async () => {
   };
 
   const openDocumentPreview = async (documentUrl: string, documentName: string) => {
-    // console.log('🔍 Opening document preview:', { documentUrl, documentName });
+    // // console.log('🔍 Opening document preview:', { documentUrl, documentName });
 
     // Find the document file from multiple sources
     let document = null;
@@ -1493,7 +1493,7 @@ const handleCreateRevisionEvent = async () => {
 
     // If still not found, create a mock document for preview
     if (!document && documentUrl) {
-      // console.log('📄 Creating mock document for preview');
+      // // console.log('📄 Creating mock document for preview');
       document = {
         id: `mock-${Date.now()}`,
         fileName: documentName,
@@ -1514,7 +1514,7 @@ const handleCreateRevisionEvent = async () => {
       };
     }
 
-    // console.log('📄 Document found/created:', document);
+    // // console.log('📄 Document found/created:', document);
 
     setPreviewModal({
       isOpen: true,
@@ -1543,20 +1543,20 @@ const handleCreateRevisionEvent = async () => {
     });
 
     // Load PDF if it's a PDF file
-    // console.log('🔍 Document name:', documentName);
-    // console.log('🔍 Document name lowercase:', documentName.toLowerCase());
-    // console.log('🔍 Ends with .pdf:', documentName.toLowerCase().endsWith('.pdf'));
-    // console.log('🔍 Document fileType:', document?.fileType);
-    // console.log('🔍 Document URL:', documentUrl);
+    // // console.log('🔍 Document name:', documentName);
+    // // console.log('🔍 Document name lowercase:', documentName.toLowerCase());
+    // // console.log('🔍 Ends with .pdf:', documentName.toLowerCase().endsWith('.pdf'));
+    // // console.log('🔍 Document fileType:', document?.fileType);
+    // // console.log('🔍 Document URL:', documentUrl);
 
     if (documentName.toLowerCase().endsWith('.pdf') || document?.fileType === 'pdf') {
-      // console.log('📄 Loading PDF document...');
+      // // console.log('📄 Loading PDF document...');
       // Convert relative URL to absolute URL if needed
       const pdfUrl = documentUrl.startsWith('http') ? documentUrl : `https://ammaosmkgwkamfjhcxik.supabase.co/storage/v1/object/public/VDCR-docs${documentUrl}`;
-      // console.log('📄 PDF URL for loading:', pdfUrl);
+      // // console.log('📄 PDF URL for loading:', pdfUrl);
       await loadPdfDocument(pdfUrl);
     } else {
-      // console.log('📄 Not a PDF file, skipping PDF loading');
+      // // console.log('📄 Not a PDF file, skipping PDF loading');
     }
   };
 
@@ -1769,24 +1769,24 @@ const handleCreateRevisionEvent = async () => {
   const loadPdfDocument = async (pdfUrl: string) => {
     try {
       setIsLoadingPdf(true);
-      // console.log('📄 Loading PDF document:', pdfUrl);
-      // console.log('📄 PDF.js available:', typeof window !== 'undefined' && (window as any).pdfjsLib);
+      // // console.log('📄 Loading PDF document:', pdfUrl);
+      // // console.log('📄 PDF.js available:', typeof window !== 'undefined' && (window as any).pdfjsLib);
 
       // Check if PDF.js is available
       if (typeof window !== 'undefined' && (window as any).pdfjsLib) {
         const pdfjsLib = (window as any).pdfjsLib;
-        // console.log('📄 PDF.js library found:', pdfjsLib);
+        // // console.log('📄 PDF.js library found:', pdfjsLib);
 
         // Configure PDF.js worker
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        // console.log('📄 PDF.js worker configured');
+        // // console.log('📄 PDF.js worker configured');
 
         // Load the PDF document
-        // console.log('📄 Starting PDF document loading...');
+        // // console.log('📄 Starting PDF document loading...');
         const loadingTask = pdfjsLib.getDocument(pdfUrl);
         const pdf = await loadingTask.promise;
 
-        // console.log('✅ PDF loaded successfully:', pdf);
+        // // console.log('✅ PDF loaded successfully:', pdf);
         setPdfDocument(pdf);
         setPdfViewerState(prev => ({
           ...prev,
@@ -1794,7 +1794,7 @@ const handleCreateRevisionEvent = async () => {
           currentPage: 1
         }));
 
-        // console.log('📄 PDF pages:', pdf.numPages);
+        // // console.log('📄 PDF pages:', pdf.numPages);
       } else {
         // console.warn('⚠️ PDF.js not available, falling back to iframe');
       }
@@ -1826,7 +1826,7 @@ const handleCreateRevisionEvent = async () => {
       };
 
       await page.render(renderContext).promise;
-      // console.log('✅ PDF page rendered:', pageNum);
+      // // console.log('✅ PDF page rendered:', pageNum);
     } catch (error) {
       // console.error('❌ Error rendering PDF page:', error);
     }
@@ -2031,7 +2031,7 @@ const handleCreateRevisionEvent = async () => {
       });
 
       const highestSrNo = Math.max(...existingSrNos, 0);
-      // console.log('Highest existing Sr. No.:', highestSrNo);
+      // // console.log('Highest existing Sr. No.:', highestSrNo);
 
       // Process each row and create VDCR records
       for (let index = 0; index < bulkUploadModal.previewData.length; index++) {
@@ -2070,7 +2070,7 @@ const handleCreateRevisionEvent = async () => {
           srNo = String(highestSrNo + index + 1).padStart(3, '0');
         }
 
-        // console.log(`Row ${index}: Sr. No. = ${srNo} (continuing from ${highestSrNo})`);
+        // // console.log(`Row ${index}: Sr. No. = ${srNo} (continuing from ${highestSrNo})`);
 
         // Prepare data for Supabase
         const vdcrRecordData = {
@@ -2095,7 +2095,7 @@ const handleCreateRevisionEvent = async () => {
         } catch (error: any) {
           // 🔧 FIX: If 409 error (foreign key constraint), fetch correct ID and retry
           if (error?.response?.status === 409 && error?.response?.data?.code === '23503') {
-            console.log('⚠️ Foreign key error detected, fetching correct user ID...');
+            // console.log('⚠️ Foreign key error detected, fetching correct user ID...');
             const correctUserId = await fetchCorrectUserIdFromDB();
             if (correctUserId) {
               // Retry with correct user ID
@@ -3004,21 +3004,21 @@ const handleCreateRevisionEvent = async () => {
                                 // Horizontal scroll navigation for PDF pages
                                 if (e.deltaX > 0) {
                                   // Scroll right - next page
-                                  // console.log('PDF Scroll right detected');
+                                  // // console.log('PDF Scroll right detected');
                                   handleNextPage();
                                 } else if (e.deltaX < 0) {
                                   // Scroll left - previous page  
-                                  // console.log('PDF Scroll left detected');
+                                  // // console.log('PDF Scroll left detected');
                                   handlePrevPage();
                                 }
                               }}
                               onKeyDown={(e) => {
                                 // Keyboard navigation
                                 if (e.key === 'ArrowRight') {
-                                  // console.log('PDF Right arrow - next page');
+                                  // // console.log('PDF Right arrow - next page');
                                   handleNextPage();
                                 } else if (e.key === 'ArrowLeft') {
-                                  // console.log('PDF Left arrow - previous page');
+                                  // // console.log('PDF Left arrow - previous page');
                                   handlePrevPage();
                                 }
                               }}

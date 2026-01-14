@@ -17,7 +17,7 @@ interface NotificationData {
 // Email service using EmailJS (free and easy)
 export const sendEmailNotification = async (data: NotificationData) => {
   try {
-    // console.log('📧 Sending email notification to:', data.admin_email);
+    // // console.log('📧 Sending email notification to:', data.admin_email);
     
     // Check if EmailJS credentials are set
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
@@ -25,15 +25,15 @@ export const sendEmailNotification = async (data: NotificationData) => {
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
     
     // Debug: Log the actual values
-    // console.log('🔍 EmailJS Debug - Service ID:', serviceId);
-    // console.log('🔍 EmailJS Debug - Template ID:', templateId);
-    // console.log('🔍 EmailJS Debug - Public Key:', publicKey);
+    // // console.log('🔍 EmailJS Debug - Service ID:', serviceId);
+    // // console.log('🔍 EmailJS Debug - Template ID:', templateId);
+    // // console.log('🔍 EmailJS Debug - Public Key:', publicKey);
     
     if (!serviceId || !templateId || !publicKey || 
         serviceId === 'your_service_id' || 
         templateId === 'your_template_id' || 
         publicKey === 'your_public_key') {
-      // console.log('⚠️ EmailJS credentials not set, skipping email');
+      // // console.log('⚠️ EmailJS credentials not set, skipping email');
       return { success: true, message: 'EmailJS credentials not configured' };
     }
     
@@ -63,19 +63,19 @@ Engineering Project Management Team`
 
     // Ensure email is properly formatted
     if (!templateParams.to_email || templateParams.to_email.trim() === '') {
-      // console.log('❌ Email address is empty or invalid');
+      // // console.log('❌ Email address is empty or invalid');
       return { success: false, message: 'Email address is empty or invalid' };
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(templateParams.to_email)) {
-      // console.log('❌ Invalid email format:', templateParams.to_email);
+      // // console.log('❌ Invalid email format:', templateParams.to_email);
       return { success: false, message: `Invalid email format: ${templateParams.to_email}` };
     }
 
     // Debug: Check if email is properly set
-    // console.log('📧 Template params debug:', {
+    // // console.log('📧 Template params debug:', {
     //   to_name: templateParams.to_name,
     //   to_email: templateParams.to_email,
     //   company_name: templateParams.company_name,
@@ -83,7 +83,7 @@ Engineering Project Management Team`
     //   dashboard_url: templateParams.dashboard_url
     // });
 
-    // console.log('📧 EmailJS params:', {
+    // // console.log('📧 EmailJS params:', {
     //   service_id: serviceId,
     //   template_id: templateId,
     //   user_id: publicKey,
@@ -103,13 +103,13 @@ Engineering Project Management Team`
     });
 
     const responseText = response.data;
-    // console.log('📧 EmailJS response:', response.status, responseText);
+    // // console.log('📧 EmailJS response:', response.status, responseText);
 
     if (response.status === 200) {
-      // console.log('✅ Email sent successfully');
+      // // console.log('✅ Email sent successfully');
       return { success: true, message: 'Email sent successfully' };
     } else {
-      // console.log('❌ Email sending failed:', response.status, responseText);
+      // // console.log('❌ Email sending failed:', response.status, responseText);
       return { success: false, message: `Email failed: ${response.status} - ${responseText}` };
     }
   } catch (error) {
@@ -122,11 +122,11 @@ Engineering Project Management Team`
 export const sendWhatsAppNotification = async (data: NotificationData) => {
   try {
     if (!data.admin_whatsapp) {
-      // console.log('📱 No WhatsApp number provided, skipping');
+      // // console.log('📱 No WhatsApp number provided, skipping');
       return { success: true, message: 'No WhatsApp number provided' };
     }
 
-    // console.log('📱 Sending WhatsApp notification to:', data.admin_whatsapp);
+    // // console.log('📱 Sending WhatsApp notification to:', data.admin_whatsapp);
     
     const message = `🎉 Welcome to ${data.company_name}!
 
@@ -160,10 +160,10 @@ Engineering Project Management`;
     });
 
     if (response.status === 200) {
-      // console.log('✅ WhatsApp sent successfully');
+      // // console.log('✅ WhatsApp sent successfully');
       return { success: true, message: 'WhatsApp sent successfully' };
     } else {
-      // console.log('❌ WhatsApp sending failed');
+      // // console.log('❌ WhatsApp sending failed');
       return { success: false, message: 'WhatsApp sending failed' };
     }
   } catch (error) {
@@ -174,7 +174,7 @@ Engineering Project Management`;
 
 // Main notification function
 export const sendNotifications = async (data: NotificationData) => {
-  // console.log('🚀 Sending notifications for:', data.company_name);
+  // // console.log('🚀 Sending notifications for:', data.company_name);
   
   try {
     // For now, send only email (WhatsApp setup is complex)
@@ -185,7 +185,7 @@ export const sendNotifications = async (data: NotificationData) => {
       whatsapp: { success: true, message: 'WhatsApp setup pending - will add later' }
     };
 
-    // console.log('📊 Notification results:', results);
+    // // console.log('📊 Notification results:', results);
     
     return {
       success: true,
@@ -225,8 +225,8 @@ interface ProjectTeamNotificationData {
 // Send email notification to project team members
 export const sendProjectTeamEmailNotification = async (data: ProjectTeamNotificationData) => {
   try {
-    // console.log('📧 Sending project team email notification to:', data.team_member_email);
-    // console.log('📧 Full notification data:', data);
+    // // console.log('📧 Sending project team email notification to:', data.team_member_email);
+    // // console.log('📧 Full notification data:', data);
     
     // Check if EmailJS credentials are set
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
@@ -234,15 +234,15 @@ export const sendProjectTeamEmailNotification = async (data: ProjectTeamNotifica
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
     
     // Debug: Log the actual values
-    // console.log('🔍 Project Team EmailJS Debug - Service ID:', serviceId);
-    // console.log('🔍 Project Team EmailJS Debug - Template ID:', templateId);
-    // console.log('🔍 Project Team EmailJS Debug - Public Key:', publicKey);
+    // // console.log('🔍 Project Team EmailJS Debug - Service ID:', serviceId);
+    // // console.log('🔍 Project Team EmailJS Debug - Template ID:', templateId);
+    // // console.log('🔍 Project Team EmailJS Debug - Public Key:', publicKey);
     
     if (!serviceId || !templateId || !publicKey || 
         serviceId === 'your_service_id' || 
         templateId === 'your_template_id' || 
         publicKey === 'your_public_key') {
-      // console.log('⚠️ EmailJS credentials not set, skipping email');
+      // // console.log('⚠️ EmailJS credentials not set, skipping email');
       return { success: true, message: 'EmailJS credentials not configured' };
     }
     
@@ -274,11 +274,11 @@ Engineering Project Management Team`
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(templateParams.to_email)) {
-      // console.log('❌ Invalid email format:', templateParams.to_email);
+      // // console.log('❌ Invalid email format:', templateParams.to_email);
       return { success: false, message: `Invalid email format: ${templateParams.to_email}` };
     }
 
-    // console.log('📧 Project team email params:', {
+    // // console.log('📧 Project team email params:', {
     //   to_name: templateParams.to_name,
     //   to_email: templateParams.to_email,
     //   project_name: templateParams.project_name,
@@ -298,13 +298,13 @@ Engineering Project Management Team`
     });
 
     const responseText = response.data;
-    // console.log('📧 Project team email response:', response.status, responseText);
+    // // console.log('📧 Project team email response:', response.status, responseText);
 
     if (response.status === 200) {
-      // console.log('✅ Project team email sent successfully');
+      // // console.log('✅ Project team email sent successfully');
       return { success: true, message: 'Email sent successfully' };
     } else {
-      // console.log('❌ Project team email sending failed:', response.status, responseText);
+      // // console.log('❌ Project team email sending failed:', response.status, responseText);
       return { success: false, message: `Email failed: ${response.status} - ${responseText}` };
     }
   } catch (error) {
@@ -315,12 +315,12 @@ Engineering Project Management Team`
 
 // Send notifications to project team members
 export const sendProjectTeamNotifications = async (data: ProjectTeamNotificationData) => {
-  // console.log('🚀 Sending project team notifications for:', data.project_name);
+  // // console.log('🚀 Sending project team notifications for:', data.project_name);
   
   try {
     const emailResult = await sendProjectTeamEmailNotification(data);
 
-    // console.log('📊 Project team notification results:', emailResult);
+    // // console.log('📊 Project team notification results:', emailResult);
     
     return {
       success: true,
