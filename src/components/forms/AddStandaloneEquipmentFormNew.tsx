@@ -174,11 +174,11 @@ const AddStandaloneEquipmentFormNew = ({ onClose, onSubmit }: AddStandaloneEquip
         const existingEquipment = await fastAPI.getStandaloneEquipment();
         
         // console.log('📋 Fetched existing equipment:', {
-          exists: !!existingEquipment,
-          isArray: Array.isArray(existingEquipment),
-          length: existingEquipment?.length || 0,
-          sample: existingEquipment?.[0]
-        });
+        //   exists: !!existingEquipment,
+        //   isArray: Array.isArray(existingEquipment),
+        //   length: existingEquipment?.length || 0,
+        //   sample: existingEquipment?.[0]
+        // });
         
         if (existingEquipment && Array.isArray(existingEquipment) && existingEquipment.length > 0) {
           
@@ -192,10 +192,10 @@ const AddStandaloneEquipmentFormNew = ({ onClose, onSubmit }: AddStandaloneEquip
           // Extract equipment managers from equipment_manager field in standalone_equipment table
           const uniqueEquipmentManagersFromEquipment = [...new Set(existingEquipment.map((eq: any) => eq.equipment_manager).filter(Boolean))];
           // console.log('📋 Equipment managers from equipment_manager field:', {
-            count: uniqueEquipmentManagersFromEquipment.length,
-            managers: uniqueEquipmentManagersFromEquipment,
-            sampleEquipment: existingEquipment.slice(0, 3).map((eq: any) => ({ id: eq.id, equipment_manager: eq.equipment_manager }))
-          });
+          //   count: uniqueEquipmentManagersFromEquipment.length,
+          //   managers: uniqueEquipmentManagersFromEquipment,
+          //   sampleEquipment: existingEquipment.slice(0, 3).map((eq: any) => ({ id: eq.id, equipment_manager: eq.equipment_manager }))
+          // });
           
           // Standard industry options (always available)
           const standardIndustries = ['Petrochemical', 'Steel', 'Refinery', 'Marine', 'Power', 'Pharmaceutical', 'Chemical', 'Oil & Gas'];
@@ -251,9 +251,9 @@ const AddStandaloneEquipmentFormNew = ({ onClose, onSubmit }: AddStandaloneEquip
               } else {
                 const teamPositions = await teamPositionsResponse.json();
                 // console.log('📋 Team positions query result:', {
-                  dataLength: teamPositions?.length || 0,
-                  data: teamPositions
-                });
+                //   dataLength: teamPositions?.length || 0,
+                //   data: teamPositions
+                // });
                 
                 equipmentManagersFromTeamPositions = teamPositions && Array.isArray(teamPositions) && teamPositions.length > 0 
                   ? [...new Set(teamPositions.map((tp: any) => tp.person_name).filter(Boolean))]
@@ -292,9 +292,9 @@ const AddStandaloneEquipmentFormNew = ({ onClose, onSubmit }: AddStandaloneEquip
               } else {
                 const projectManagersData = await usersResponse.json();
                 // console.log('📋 Users query result:', {
-                  dataLength: projectManagersData?.length || 0,
-                  data: projectManagersData
-                });
+                //   dataLength: projectManagersData?.length || 0,
+                //   data: projectManagersData
+                // });
                 
                 equipmentManagersFromUsers = projectManagersData && Array.isArray(projectManagersData) && projectManagersData.length > 0
                   ? [...new Set(projectManagersData.map((user: any) => user.full_name).filter(Boolean))]
@@ -330,11 +330,11 @@ const AddStandaloneEquipmentFormNew = ({ onClose, onSubmit }: AddStandaloneEquip
             // console.log('📊 Total unique equipment managers found:', allEquipmentManagers.length);
             // console.log('📊 Equipment managers list:', allEquipmentManagers);
             // console.log('📊 Sources breakdown:', {
-              fromEquipment: uniqueEquipmentManagersFromEquipment.length,
-              fromTeamPositions: equipmentManagersFromTeamPositions.length,
-              fromUsers: equipmentManagersFromUsers.length,
-              total: allEquipmentManagers.length
-            });
+            //   fromEquipment: uniqueEquipmentManagersFromEquipment.length,
+            //   fromTeamPositions: equipmentManagersFromTeamPositions.length,
+            //   fromUsers: equipmentManagersFromUsers.length,
+            //   total: allEquipmentManagers.length
+            // });
             
             // Update dynamic options with combined equipment managers
             setDynamicOptions(prev => {
@@ -425,10 +425,10 @@ const AddStandaloneEquipmentFormNew = ({ onClose, onSubmit }: AddStandaloneEquip
                 .eq('is_active', true);
               
               // console.log('📋 Project managers query result:', {
-                error: usersError,
-                data: projectManagersData,
-                count: projectManagersData?.length || 0
-              });
+              //   error: usersError,
+              //   data: projectManagersData,
+              //   count: projectManagersData?.length || 0
+              // });
               
               if (!usersError && projectManagersData && projectManagersData.length > 0) {
                 const equipmentManagersFromUsers = [...new Set(projectManagersData.map((user: any) => user.full_name).filter(Boolean))];
@@ -587,6 +587,39 @@ const AddStandaloneEquipmentFormNew = ({ onClose, onSubmit }: AddStandaloneEquip
     
     if (isSubmitting) return;
     
+    // 🔧 FIX: Validate that equipmentDetails exists and has at least one equipment
+    if (!equipmentDetails || Object.keys(equipmentDetails).length === 0) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please add at least one equipment unit in Step 1 before submitting.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    // 🔧 FIX: Validate that at least one equipment unit has required fields
+    let hasValidEquipment = false;
+    for (const [equipmentType, units] of Object.entries(equipmentDetails)) {
+      if (Array.isArray(units) && units.length > 0) {
+        for (const unit of units) {
+          if (unit.tagNumber && unit.tagNumber.trim() && unit.jobNumber && unit.jobNumber.trim() && unit.manufacturingSerial && unit.manufacturingSerial.trim()) {
+            hasValidEquipment = true;
+            break;
+          }
+        }
+        if (hasValidEquipment) break;
+      }
+    }
+    
+    if (!hasValidEquipment) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fill in Tag Number, Job Number, and Manufacturing Serial for at least one equipment unit.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
@@ -601,8 +634,18 @@ const AddStandaloneEquipmentFormNew = ({ onClose, onSubmit }: AddStandaloneEquip
       // The parent (EquipmentGrid) will handle the API call
       await onSubmit(submitData);
       
-      // If onSubmit succeeds, show success screen
+      // If onSubmit succeeds, show success screen and close form after a delay
       setShowSuccessScreen(true);
+      setIsSubmitting(false); // Reset submitting state so button shows correctly
+      setCreatedEquipment({ 
+        type: formData.equipmentType || Object.keys(equipmentDetails)[0] || 'Equipment',
+        tag_number: equipmentDetails[Object.keys(equipmentDetails)[0]]?.[0]?.tagNumber || formData.tagNumber || ''
+      });
+      
+      // Close form after showing success for 2 seconds
+      setTimeout(() => {
+        onClose();
+      }, 2000);
     } catch (error: any) {
       console.error('Error submitting form:', error);
       toast({
@@ -610,7 +653,6 @@ const AddStandaloneEquipmentFormNew = ({ onClose, onSubmit }: AddStandaloneEquip
         description: error?.message || 'Failed to submit form. Please try again.',
         variant: 'destructive'
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -680,14 +722,14 @@ const AddStandaloneEquipmentFormNew = ({ onClose, onSubmit }: AddStandaloneEquip
     // Debug logging for Equipment Manager field
     if (field === 'equipmentManager') {
       // console.log('🔧 Equipment Manager Field Render:', {
-        field,
-        options,
-        optionsLength: options.length,
-        filteredOptions,
-        filteredLength: filteredOptions.length,
-        dynamicOptions: dynamicOptions[field],
-        allDynamicOptions: dynamicOptions
-      });
+      //   field,
+      //   options,
+      //   optionsLength: options.length,
+      //   filteredOptions,
+      //   filteredLength: filteredOptions.length,
+      //   dynamicOptions: dynamicOptions[field],
+      //   allDynamicOptions: dynamicOptions
+      // });
     }
 
     return (

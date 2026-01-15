@@ -8,7 +8,8 @@
 -- Step 1: Enable RLS
 ALTER TABLE public.standalone_equipment_team_positions ENABLE ROW LEVEL SECURITY;
 
--- Step 2: Drop existing policies if any (optional - safe to run multiple times)
+-- Step 2: Drop existing functions and policies if any (optional - safe to run multiple times)
+DROP FUNCTION IF EXISTS public.is_user_assigned_to_standalone_equipment_for_insert(uuid);
 DROP POLICY IF EXISTS "Super admin can view all standalone equipment team positions" ON public.standalone_equipment_team_positions;
 DROP POLICY IF EXISTS "Firm admin can view firm standalone equipment team positions" ON public.standalone_equipment_team_positions;
 DROP POLICY IF EXISTS "Users can view assigned standalone equipment team positions" ON public.standalone_equipment_team_positions;
@@ -93,15 +94,38 @@ WITH CHECK (
   AND (assigned_by = auth.uid() OR assigned_by IS NULL)
 );
 
--- Policy 6: Users can create team positions for standalone equipment they created
+-- 🔧 FIX: Create SECURITY DEFINER function to check if user is assigned to equipment
+-- This avoids infinite recursion when checking team_positions during INSERT
+CREATE OR REPLACE FUNCTION public.is_user_assigned_to_standalone_equipment_for_insert(equipment_id_param uuid)
+RETURNS boolean AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.standalone_equipment_team_positions tp
+    JOIN public.users u ON LOWER(TRIM(tp.email)) = LOWER(TRIM(u.email))
+    WHERE tp.equipment_id = equipment_id_param
+    AND u.id = auth.uid()
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE
+SET search_path = public;
+
+-- Policy 6: Users can create team positions for standalone equipment they created OR are assigned to
+-- 🔧 FIX: Allow users assigned to equipment (via team_positions) to also add team members
 CREATE POLICY "Users can create standalone equipment team positions"
 ON public.standalone_equipment_team_positions FOR INSERT
 TO authenticated
 WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.standalone_equipment se
-    WHERE se.id = standalone_equipment_team_positions.equipment_id
-    AND se.created_by = auth.uid()
+  (
+    -- User created the equipment
+    EXISTS (
+      SELECT 1 FROM public.standalone_equipment se
+      WHERE se.id = standalone_equipment_team_positions.equipment_id
+      AND se.created_by = auth.uid()
+    )
+    OR
+    -- User is assigned to the equipment (e.g., Equipment Manager, Project Manager)
+    -- Use SECURITY DEFINER function to avoid recursion
+    public.is_user_assigned_to_standalone_equipment_for_insert(standalone_equipment_team_positions.equipment_id)
   )
   AND (assigned_by = auth.uid() OR assigned_by IS NULL)
 );
@@ -144,22 +168,34 @@ WITH CHECK (
   )
 );
 
--- Policy 9: Users can update team positions for standalone equipment they created
+-- Policy 9: Users can update team positions for standalone equipment they created OR are assigned to
 CREATE POLICY "Users can update standalone equipment team positions"
 ON public.standalone_equipment_team_positions FOR UPDATE
 TO authenticated
 USING (
-  EXISTS (
-    SELECT 1 FROM public.standalone_equipment se
-    WHERE se.id = standalone_equipment_team_positions.equipment_id
-    AND se.created_by = auth.uid()
+  (
+    -- User created the equipment
+    EXISTS (
+      SELECT 1 FROM public.standalone_equipment se
+      WHERE se.id = standalone_equipment_team_positions.equipment_id
+      AND se.created_by = auth.uid()
+    )
+    OR
+    -- User is assigned to the equipment
+    public.is_user_assigned_to_standalone_equipment_for_insert(standalone_equipment_team_positions.equipment_id)
   )
 )
 WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.standalone_equipment se
-    WHERE se.id = standalone_equipment_team_positions.equipment_id
-    AND se.created_by = auth.uid()
+  (
+    -- User created the equipment
+    EXISTS (
+      SELECT 1 FROM public.standalone_equipment se
+      WHERE se.id = standalone_equipment_team_positions.equipment_id
+      AND se.created_by = auth.uid()
+    )
+    OR
+    -- User is assigned to the equipment
+    public.is_user_assigned_to_standalone_equipment_for_insert(standalone_equipment_team_positions.equipment_id)
   )
 );
 
@@ -189,15 +225,21 @@ USING (
   )
 );
 
--- Policy 12: Users can delete team positions for standalone equipment they created
+-- Policy 12: Users can delete team positions for standalone equipment they created OR are assigned to
 CREATE POLICY "Users can delete standalone equipment team positions"
 ON public.standalone_equipment_team_positions FOR DELETE
 TO authenticated
 USING (
-  EXISTS (
-    SELECT 1 FROM public.standalone_equipment se
-    WHERE se.id = standalone_equipment_team_positions.equipment_id
-    AND se.created_by = auth.uid()
+  (
+    -- User created the equipment
+    EXISTS (
+      SELECT 1 FROM public.standalone_equipment se
+      WHERE se.id = standalone_equipment_team_positions.equipment_id
+      AND se.created_by = auth.uid()
+    )
+    OR
+    -- User is assigned to the equipment
+    public.is_user_assigned_to_standalone_equipment_for_insert(standalone_equipment_team_positions.equipment_id)
   )
 );
 

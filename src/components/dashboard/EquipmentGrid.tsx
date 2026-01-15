@@ -31,7 +31,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Performance optimization: Only log in development mode
 const isDev = import.meta.env.DEV;
 const devLog = (...args: any[]) => {
-  if (isDev) // console.log(...args);
+  if (isDev) console.log(...args);
 };
 const devError = (...args: any[]) => {
   if (isDev) console.error(...args);
@@ -1835,12 +1835,12 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
     // For standalone equipment, prioritize last_update (DATE column) over updated_at (timestamp)
     // last_update is already in YYYY-MM-DD format from the database
     // console.log('🔧 handleEditEquipment - Initializing date for equipment:', {
-      id: equipment.id,
-      last_update: (equipment as any).last_update,
-      updated_at: equipment.updated_at,
-      lastUpdate: equipment.lastUpdate,
-      equipmentKeys: Object.keys(equipment)
-    });
+    //   id: equipment.id,
+    //   last_update: (equipment as any).last_update,
+    //   updated_at: equipment.updated_at,
+    //   lastUpdate: equipment.lastUpdate,
+    //   equipmentKeys: Object.keys(equipment)
+    // });
     
     let dateOnly = '';
     // First priority: last_update field (raw DATE from database)
@@ -3158,9 +3158,16 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       const updatedSections = [...currentSections, newSection];
 
       // // console.log('💾 Saving new section to database:', editingEquipmentId, sectionName);
-      await updateEquipment(editingEquipmentId, {
-        technical_sections: updatedSections
-      });
+      // 🔧 FIX: Use correct API based on equipment type
+      if (projectId === 'standalone') {
+        await fastAPI.updateStandaloneEquipment(editingEquipmentId, {
+          technical_sections: updatedSections
+        }, user?.id);
+      } else {
+        await updateEquipment(editingEquipmentId, {
+          technical_sections: updatedSections
+        });
+      }
       // // console.log('✅ Section saved successfully');
 
       toast({
@@ -3209,9 +3216,16 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       );
 
       // // console.log('💾 Updating section name in database:', editingEquipmentId, editingSectionOldName, '->', newSectionName);
-      await updateEquipment(editingEquipmentId, {
-        technical_sections: updatedSections
-      });
+      // 🔧 FIX: Use correct API based on equipment type
+      if (projectId === 'standalone') {
+        await fastAPI.updateStandaloneEquipment(editingEquipmentId, {
+          technical_sections: updatedSections
+        }, user?.id);
+      } else {
+        await updateEquipment(editingEquipmentId, {
+          technical_sections: updatedSections
+        });
+      }
       // // console.log('✅ Section name updated successfully');
 
       // Refresh equipment data to ensure consistency
@@ -3271,9 +3285,16 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       // // console.log('💾 Deleting section in database:', editingEquipmentId, sectionName);
       // // console.log('📊 Sections to save to database:', updatedSections);
 
-      await updateEquipment(editingEquipmentId, {
-        technical_sections: updatedSections
-      });
+      // 🔧 FIX: Use correct API based on equipment type
+      if (projectId === 'standalone') {
+        await fastAPI.updateStandaloneEquipment(editingEquipmentId, {
+          technical_sections: updatedSections
+        }, user?.id);
+      } else {
+        await updateEquipment(editingEquipmentId, {
+          technical_sections: updatedSections
+        });
+      }
       // // console.log('✅ Section deleted successfully from database');
 
       // Refresh equipment data to ensure consistency
@@ -3780,6 +3801,13 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
     try {
       const { equipmentDetails, equipmentManagerContacts, ...baseFormData } = formData;
       const createdEquipmentIds: string[] = [];
+      const uploadErrors: string[] = [];
+      const teamErrors: string[] = [];
+
+      // 🔧 FIX: Validate that equipmentDetails exists and has equipment
+      if (!equipmentDetails || Object.keys(equipmentDetails).length === 0) {
+        throw new Error('Please add at least one equipment unit in Step 1 before submitting.');
+      }
 
       // Process each equipment unit from equipmentDetails
       if (equipmentDetails && Object.keys(equipmentDetails).length > 0) {
@@ -3901,6 +3929,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                     // console.log(`✅ Equipment document ${i + 1} uploaded successfully: ${file.name}`);
                 } catch (docError: any) {
                   console.error(`❌ Error uploading equipment document ${i + 1} (${file.name}):`, docError);
+                  uploadErrors.push(`Failed to upload ${file.name}: ${docError?.message || 'Unknown error'}`);
                   // Continue with other documents even if one fails
                 }
               }
@@ -3908,6 +3937,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
           }
         }
+      }
+
+      // 🔧 FIX: Validate that at least one equipment was created
+      if (createdEquipmentIds.length === 0) {
+        throw new Error('Failed to create equipment. Please ensure all required fields are filled and try again.');
       }
 
       // Upload Core Documents (Unpriced PO, Design Inputs, Client Reference, Other Documents)
@@ -3940,6 +3974,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               return true;
           } catch (error: any) {
             console.error(`❌ Error uploading ${documentType} (${file.name}) for equipment ${equipmentId}:`, error);
+            uploadErrors.push(`Failed to upload ${documentType} (${file.name}): ${error?.message || 'Unknown error'}`);
             return false;
           }
         };
@@ -4049,49 +4084,15 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
             
             // console.log('👥 Adding Equipment Manager to standalone equipment:', { equipmentId, data: teamPositionData });
             
-            // Use REST API directly to avoid hanging issues with Supabase client
-            const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-            const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-            
-            // Add timeout to prevent hanging
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-            
+            // 🔧 FIX: Use fastAPI.createStandaloneTeamPosition instead of direct fetch
+            // This ensures proper JWT authentication for RLS policies
             try {
-              const response = await fetch(
-                `${SUPABASE_URL}/rest/v1/standalone_equipment_team_positions`,
-                {
-                  method: 'POST',
-                  headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=representation'
-                  },
-                  body: JSON.stringify(teamPositionData),
-                  signal: controller.signal
-                }
-              );
-              
-              clearTimeout(timeoutId);
-              
-              if (!response.ok) {
-                const errorText = await response.text();
-                console.error('❌ Error creating standalone team position:', response.status, errorText);
-                throw new Error(`Failed to add equipment manager: ${response.status} ${errorText}`);
-              }
-              
-              const createdData = await response.json();
+              const createdData = await fastAPI.createStandaloneTeamPosition(teamPositionData);
               // console.log('✅ Equipment Manager added to standalone equipment team:', equipmentManagerName, createdData);
             } catch (fetchError: any) {
-              clearTimeout(timeoutId);
-              if (fetchError.name === 'AbortError') {
-                console.error('❌ Timeout creating standalone team position (non-fatal)');
-                // Don't throw - equipment was created successfully, team member addition timed out
-              } else {
-                console.error('❌ Error creating standalone team position (non-fatal):', fetchError);
-                // Don't throw - equipment was created successfully, team member addition failed
-              }
+              console.error('❌ Error creating standalone team position (non-fatal):', fetchError);
+              teamErrors.push(`Failed to add Equipment Manager (${equipmentManagerName}): ${fetchError?.message || 'Unknown error'}`);
+              // Don't throw - equipment was created successfully, team member addition failed
             }
             
             // 🆕 Determine actual role from user record (project_manager) vs stored role (editor)
@@ -4227,6 +4228,7 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           }
         } catch (teamError: any) {
           console.error('❌ Error adding Equipment Manager to team (equipment still created):', teamError);
+          teamErrors.push(`Failed to add Equipment Manager: ${teamError?.message || 'Unknown error'}`);
           // Don't throw error - equipment was created successfully, team member addition failed
         }
       }
@@ -4238,7 +4240,16 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       
       try {
         // console.log('🔄 Refreshing equipment data to show new equipment on frontend...');
-      await refreshEquipmentData();
+        // 🔧 FIX: Add timeout to prevent hanging on refresh
+        const refreshPromise = refreshEquipmentData();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Refresh timeout')), 10000) // 10 second timeout
+        );
+        
+        await Promise.race([refreshPromise, timeoutPromise]).catch((error) => {
+          if (error.message !== 'Refresh timeout') throw error;
+          console.warn('⚠️ Equipment refresh timed out, but equipment was created successfully');
+        });
         // console.log('✅ Equipment data refreshed - new equipment should now be visible');
         
         // After equipment data is refreshed, fetch team members for all newly created equipment
@@ -4306,12 +4317,13 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
       }
 
       // 🆕 Send email invitation to Equipment Manager (only for standalone equipment)
-      if (baseFormData.equipmentManager && equipmentManagerContacts) {
-        const equipmentManagerName = baseFormData.equipmentManager;
-        const equipmentManagerContact = equipmentManagerContacts[equipmentManagerName];
-        
-        if (equipmentManagerContact && equipmentManagerContact.email && equipmentManagerContact.email.trim()) {
-          try {
+      // 🔧 FIX: Wrap in try-catch and add timeout to prevent hanging
+      try {
+        if (baseFormData.equipmentManager && equipmentManagerContacts) {
+          const equipmentManagerName = baseFormData.equipmentManager;
+          const equipmentManagerContact = equipmentManagerContacts[equipmentManagerName];
+          
+          if (equipmentManagerContact && equipmentManagerContact.email && equipmentManagerContact.email.trim()) {
             const firmId = localStorage.getItem('firmId');
             const currentUserId = user?.id || localStorage.getItem('userId');
             const companyName = localStorage.getItem('companyName') || 'Your Company';
@@ -4321,59 +4333,89 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
               ? `Equipment ${createdEquipmentIds[0]}` 
               : (baseFormData.equipmentType || 'Standalone Equipment');
             
-            // Send email notification
-            const emailResult = await sendProjectTeamEmailNotification({
-              project_name: equipmentName,
-              team_member_name: equipmentManagerName,
-              team_member_email: equipmentManagerContact.email.trim(),
-              role: 'Equipment Manager',
-              company_name: companyName,
-              dashboard_url: getDashboardUrl('editor'),
-              equipment_name: equipmentName
-            });
-            
-            if (emailResult.success) {
-              // console.log('✅ Email invitation sent to Equipment Manager');
-            } else {
-              // console.log('⚠️ Email invitation failed:', emailResult.message);
+            // Send email notification with timeout
+            try {
+              const emailPromise = sendProjectTeamEmailNotification({
+                project_name: equipmentName,
+                team_member_name: equipmentManagerName,
+                team_member_email: equipmentManagerContact.email.trim(),
+                role: 'Equipment Manager',
+                company_name: companyName,
+                dashboard_url: getDashboardUrl('editor'),
+                equipment_name: equipmentName
+              });
+              const emailTimeout = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Email timeout')), 5000) // 5 second timeout
+              );
+              
+              const emailResult = await Promise.race([emailPromise, emailTimeout]).catch(() => ({ success: false, message: 'Timeout' }));
+              
+              if (emailResult.success) {
+                // console.log('✅ Email invitation sent to Equipment Manager');
+              } else {
+                // console.log('⚠️ Email invitation failed:', emailResult.message);
+              }
+            } catch (emailError) {
+              console.error('❌ Error sending email invitation (non-fatal):', emailError);
+              // Don't fail the whole operation if email fails
             }
-          } catch (emailError) {
-            console.error('❌ Error sending email invitation (non-fatal):', emailError);
-            // Don't fail the whole operation if email fails
-          }
-          
-          // 🆕 Create invite for Equipment Manager
-          try {
-            await fastAPI.createInvite({
-              email: equipmentManagerContact.email.trim(),
-              full_name: equipmentManagerName,
-              role: 'editor', // Equipment Manager gets editor role
-              firm_id: firmId || '',
-              project_id: null, // No project_id for standalone equipment
-              invited_by: currentUserId || 'system'
-            });
-            // console.log('✅ Invite created for Equipment Manager');
-          } catch (inviteError) {
-            console.error('❌ Error creating invite (equipment still created):', inviteError);
-            // Don't fail the whole operation if invite creation fails
+            
+            // 🆕 Create invite for Equipment Manager with timeout
+            try {
+              const invitePromise = fastAPI.createInvite({
+                email: equipmentManagerContact.email.trim(),
+                full_name: equipmentManagerName,
+                role: 'editor', // Equipment Manager gets editor role
+                firm_id: firmId || '',
+                project_id: null, // No project_id for standalone equipment
+                invited_by: currentUserId || 'system'
+              });
+              const inviteTimeout = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Invite timeout')), 5000) // 5 second timeout
+              );
+              
+              await Promise.race([invitePromise, inviteTimeout]).catch((error) => {
+                if (error.message !== 'Invite timeout') throw error;
+                console.warn('⚠️ Invite creation timed out (non-fatal)');
+              });
+              // console.log('✅ Invite created for Equipment Manager');
+            } catch (inviteError) {
+              console.error('❌ Error creating invite (equipment still created):', inviteError);
+              // Don't fail the whole operation if invite creation fails
+            }
           }
         }
+      } catch (emailInviteError) {
+        console.error('❌ Error in email/invite operations (non-fatal):', emailInviteError);
+        // Don't fail the whole operation
       }
       
-      // console.log('✅ All operations completed, closing form and showing success message');
+      // console.log('✅ All operations completed');
       
-      // Close form and show success - do this synchronously to ensure it happens
-      setShowAddEquipmentForm(false);
-      // console.log('✅ Form closed');
-
-      // Show success toast
-      toast({ 
-        title: 'Success', 
-        description: 'Standalone equipment added successfully!' 
-      });
-      // console.log('✅ Success toast shown');
+      // Report any errors that occurred during document/team operations (non-blocking)
+      if (uploadErrors.length > 0 || teamErrors.length > 0) {
+        const allErrors = [...uploadErrors, ...teamErrors];
+        console.warn('⚠️ Some operations completed with errors:', allErrors);
+        
+        // Show warning toast about partial success
+        toast({
+          title: 'Equipment Created with Warnings',
+          description: `Equipment created successfully, but ${allErrors.length} operation(s) had issues. Check console for details.`,
+          variant: 'default',
+          duration: 5000
+        });
+      } else {
+        // Show success toast
+        toast({ 
+          title: 'Success', 
+          description: 'Standalone equipment added successfully!' 
+        });
+      }
       
-      // Function completed successfully
+      // Don't close the form here - let the form component handle closing after showing success
+      // The form will close itself after displaying the success screen
+      
+      // Function completed successfully - form will handle closing
       return;
     } catch (error: any) {
       console.error('❌ Error creating standalone equipment:', error);
@@ -4655,10 +4697,10 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
   const addTeamMember = async () => {
     // console.log('addTeamMember called', { 
-      newMember, 
-      viewingEquipmentId,
-      allFieldsValid: !!(newMember.name && newMember.email && newMember.position && newMember.role && viewingEquipmentId)
-    });
+    //   newMember, 
+    //   viewingEquipmentId,
+    //   allFieldsValid: !!(newMember.name && newMember.email && newMember.position && newMember.role && viewingEquipmentId)
+    // });
     
     if (!newMember.name || !newMember.email || !newMember.position || !newMember.role || !viewingEquipmentId) {
       console.error('Missing required fields:', {
@@ -4743,7 +4785,8 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
           person_name: newMember.name,
           email: (newMember.email || '').trim().toLowerCase(), // 🔧 FIX: Normalize email when storing
           phone: newMember.phone || "",
-            role: dbStoredRole // Store as editor/viewer for DB, but actual role is in user record
+            role: dbStoredRole, // Store as editor/viewer for DB, but actual role is in user record
+          assigned_by: user?.id || null // 🔧 FIX: Add assigned_by for RLS policy compliance
         };
 
         // console.log('📤 Creating standalone team position with data:', teamPositionData);
@@ -4831,16 +4874,19 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
         // Only refresh team members for standalone equipment
         if (projectId === 'standalone') {
-        // console.log('🔄 Refreshing team members list...');
-        await fetchEquipmentTeamMembers();
-        // console.log('✅ Team members list refreshed');
-        }
-        
-        // Double-check: fetch again after a short delay to ensure we have the latest data
-        setTimeout(async () => {
-          // console.log('🔄 Second refresh of team members list...');
+          // Add a small delay to ensure database transaction is committed
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          // console.log('🔄 Refreshing team members list...');
           await fetchEquipmentTeamMembers();
-        }, 1000);
+          // console.log('✅ Team members list refreshed');
+          
+          // Double-check: fetch again after a short delay to ensure we have the latest data
+          setTimeout(async () => {
+            // console.log('🔄 Second refresh of team members list...');
+            await fetchEquipmentTeamMembers();
+          }, 1000);
+        }
         
         if (onActivityUpdate) {
           onActivityUpdate();
@@ -4898,11 +4944,11 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
 
   const updateTeamMember = async () => {
     // console.log('🔄 updateTeamMember called', { 
-      selectedMember: selectedMember?.id, 
-      newMember: { name: newMember.name, email: newMember.email, role: newMember.role },
-      viewingEquipmentId,
-      projectId
-    });
+    //   selectedMember: selectedMember?.id, 
+    //   newMember: { name: newMember.name, email: newMember.email, role: newMember.role },
+    //   viewingEquipmentId,
+    //   projectId
+    // });
     
     if (!selectedMember) {
       console.error('❌ No selected member');
@@ -4998,47 +5044,10 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
         if (projectId === 'standalone' && memberId) {
           // console.log('🗑️ Deleting from standalone_equipment_team_positions table');
           
-          // Use REST API directly to avoid hanging issues with Supabase client
-          const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-          const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-          
-          // Add timeout to prevent hanging
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-          
-          try {
-            const response = await fetch(
-              `${SUPABASE_URL}/rest/v1/standalone_equipment_team_positions?id=eq.${memberId}`,
-              {
-                method: 'DELETE',
-                headers: {
-                  'apikey': SUPABASE_ANON_KEY,
-                  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                  'Content-Type': 'application/json',
-                  'Prefer': 'return=representation'
-                },
-                signal: controller.signal
-              }
-            );
-            
-            clearTimeout(timeoutId);
-            
-            if (!response.ok) {
-              const errorText = await response.text();
-              console.error('❌ Error deleting standalone team position:', response.status, errorText);
-              throw new Error(`Failed to remove team member: ${response.status} ${errorText}`);
-            }
-            
-            const deletedData = await response.json();
-            // console.log('✅ Team member removed successfully:', deletedData);
-          } catch (fetchError: any) {
-            clearTimeout(timeoutId);
-            if (fetchError.name === 'AbortError') {
-              console.error('❌ Timeout removing team member');
-              throw new Error('Request timed out. Please try again.');
-            }
-            throw fetchError;
-          }
+          // 🔧 FIX: Use fastAPI.deleteStandaloneTeamPosition instead of direct fetch
+          // This ensures proper JWT authentication for RLS policies
+          await fastAPI.deleteStandaloneTeamPosition(memberId);
+          // console.log('✅ Team member removed successfully');
         } else if (memberId) {
           // For project equipment, use the existing delete logic
           // console.log('🗑️ Deleting from project_members table');
@@ -6768,10 +6777,10 @@ const EquipmentGrid = ({ equipment, projectName, projectId, onBack, onViewDetail
                         e.preventDefault();
                         e.stopPropagation();
                         // console.log('Add Team Member button clicked', { 
-                          newMember, 
-                          viewingEquipmentId,
-                          allFieldsValid: !!(newMember.name && newMember.email && newMember.position && newMember.role && viewingEquipmentId)
-                        });
+                        //   newMember, 
+                        //   viewingEquipmentId,
+                        //   allFieldsValid: !!(newMember.name && newMember.email && newMember.position && newMember.role && viewingEquipmentId)
+                        // });
                         addTeamMember();
                       }}
                       disabled={!newMember.name || !newMember.email || !newMember.position || !newMember.role || !viewingEquipmentId}

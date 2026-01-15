@@ -108,13 +108,13 @@ const UnifiedProjectView = ({
     
     // Debug logging (can be removed after testing)
     // console.log('🔍 Equipment Filtering Debug:', {
-      currentUserEmail: normalizedUserEmail,
-      currentUserRole,
-      teamMembersCount: teamMembers.length,
-      teamMembersLoading,
-      equipmentCount: equipment?.length || 0,
-      teamMemberEmails: teamMembers.map((m: any) => m.email?.toLowerCase().trim())
-    });
+    //   currentUserEmail: normalizedUserEmail,
+    //   currentUserRole,
+    //   teamMembersCount: teamMembers.length,
+    //   teamMembersLoading,
+    //   equipmentCount: equipment?.length || 0,
+    //   teamMemberEmails: teamMembers.map((m: any) => m.email?.toLowerCase().trim())
+    // });
     
     // Project managers and VDCR managers can see all equipment
     if (currentUserRole === 'firm_admin' || currentUserRole === 'project_manager' || currentUserRole === 'vdcr_manager') {
@@ -143,12 +143,12 @@ const UnifiedProjectView = ({
       });
       
       // console.log('🔍 User team member search:', {
-        searchingFor: normalizedUserEmail,
-        found: !!userTeamMember,
-        memberEmail: userTeamMember?.email,
-        assignments: userTeamMember?.equipmentAssignments,
-        assignmentsLength: userTeamMember?.equipmentAssignments?.length
-      });
+      //   searchingFor: normalizedUserEmail,
+      //   found: !!userTeamMember,
+      //   memberEmail: userTeamMember?.email,
+      //   assignments: userTeamMember?.equipmentAssignments,
+      //   assignmentsLength: userTeamMember?.equipmentAssignments?.length
+      // });
       
       if (!userTeamMember) {
         // console.log('⚠️ User not found in team members - showing no equipment');
@@ -195,9 +195,9 @@ const UnifiedProjectView = ({
       });
       
       // console.log(`✅ Filtered equipment: ${filtered.length} of ${equipment.length} items`, {
-        assignments,
-        equipmentIds: equipment.map(eq => eq.id)
-      });
+      //   assignments,
+      //   equipmentIds: equipment.map(eq => eq.id)
+      // });
       return filtered;
     }
     
@@ -231,10 +231,10 @@ const UnifiedProjectView = ({
         const logs = await activityApi.getVDCRActivityLogs(projectId);
         const logsArray = Array.isArray(logs) ? logs : [];
         // console.log('📄 UnifiedProjectView: VDCR activity logs loaded:', {
-          count: logsArray.length,
-          firstLog: logsArray[0],
-          allLogs: logsArray
-        });
+        //   count: logsArray.length,
+        //   firstLog: logsArray[0],
+        //   allLogs: logsArray
+        // });
         setVdcrRecords(logsArray);
       } catch (error) {
         console.error('❌ UnifiedProjectView: Error loading VDCR activity logs:', error);
@@ -271,10 +271,10 @@ const UnifiedProjectView = ({
       const entries = await activityApi.getEquipmentActivityLogs(projectId);
       const entriesArray = Array.isArray(entries) ? entries : [];
       // console.log('🔧 UnifiedProjectView: Equipment logs loaded:', {
-        count: entriesArray.length,
-        firstEntry: entriesArray[0],
-        allEntries: entriesArray
-      });
+      //   count: entriesArray.length,
+      //   firstEntry: entriesArray[0],
+      //   allEntries: entriesArray
+      // });
       setEquipmentProgressEntries(entriesArray);
     } catch (error) {
       console.error('❌ UnifiedProjectView: Error loading equipment activity logs:', error);
@@ -1679,9 +1679,9 @@ const UnifiedProjectView = ({
                         {/* Filtered VDCR Logs */}
                         {(() => {
                           // console.log('📄 UnifiedProjectView: Rendering VDCR logs, vdcrRecords:', {
-                            length: vdcrRecords?.length || 0,
-                            records: vdcrRecords
-                          });
+                          //   length: vdcrRecords?.length || 0,
+                          //   records: vdcrRecords
+                          // });
                           // Use VDCR activity logs from database
                           const vdcrLogs = (vdcrRecords || []).map((log, index) => {
                             // Determine status based on activity type and new_value
@@ -2153,9 +2153,9 @@ const UnifiedProjectView = ({
                           // Use real equipment activity logs from equipment_activity_logs table
                           const entries = equipmentProgressEntries || [];
                           // console.log('🔧 UnifiedProjectView: Rendering equipment logs, equipmentProgressEntries:', {
-                            length: entries.length,
-                            entries: entries
-                          });
+                          //   length: entries.length,
+                          //   entries: entries
+                          // });
                           const equipmentLogs = entries.map((log: any, index: number) => {
                             const changes = parseChanges(log);
                             const activityInfo = getActivityTypeInfo(log.activity_type || '');

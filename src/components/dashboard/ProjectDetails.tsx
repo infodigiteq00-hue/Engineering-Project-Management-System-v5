@@ -212,34 +212,22 @@ const ProjectDetails = ({ project, onBack, onViewEquipment, onViewVDCR, vdcrData
 
 
 
-  const handleDocumentClick = (title: string, type: string, description: string) => {
-    // Get the actual document URL from the project data
-    let documentUrl = '';
-
-    if (title === 'Unpriced PO File' && project.unpricedPODocuments && project.unpricedPODocuments.length > 0) {
-      documentUrl = project.unpricedPODocuments[0].file_url;
-    } else if (title === 'Design Inputs PID' && project.designInputsDocuments && project.designInputsDocuments.length > 0) {
-      documentUrl = project.designInputsDocuments[0].file_url;
-    } else if (title === 'Client Reference Doc' && project.clientReferenceDocuments && project.clientReferenceDocuments.length > 0) {
-      documentUrl = project.clientReferenceDocuments[0].file_url;
-    } else if (title === 'Other Documents' && project.otherDocumentsLinks && project.otherDocumentsLinks.length > 0) {
-      documentUrl = project.otherDocumentsLinks[0].file_url;
-    }
-
-    // // console.log('📄 Document click:', { title, documentUrl, hasUrl: !!documentUrl });
-    // // console.log('📄 Full document data:', {
-    //   unpricedPODocuments: project.unpricedPODocuments,
-    //   designInputsDocuments: project.designInputsDocuments,
-    //   clientReferenceDocuments: project.clientReferenceDocuments,
-    //   otherDocumentsLinks: project.otherDocumentsLinks
-    // });
-
+  const handleDocumentClick = (documentUrl: string, documentName: string, type: string, description: string) => {
     setDocumentPreview({
       url: documentUrl,
-      name: title,
+      name: documentName,
       type: type,
       description: description
     });
+  };
+
+  // Helper function to normalize documents (handles both {document_name, file_url} from tables and {name, url} from JSONB)
+  const normalizeDocument = (doc: any) => {
+    return {
+      ...doc,
+      name: doc.document_name || doc.name || 'Document',
+      url: doc.file_url || doc.url || doc.document_url || ''
+    };
   };
 
   // Helper function to sync editData from project
@@ -957,93 +945,53 @@ const ProjectDetails = ({ project, onBack, onViewEquipment, onViewVDCR, vdcrData
                       <h4 className="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3">Core Documents</h4>
 
                       {/* Unpriced PO File */}
-                      <div
-                        className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer ${project.unpricedPOFile?.uploaded
-                            ? 'border-emerald-200 bg-emerald-25 hover:bg-emerald-50 shadow-sm'
-                            : 'border-gray-200 bg-gray-50 hover:bg-blue-50 hover:border-blue-200'
-                          }`}
-                        onClick={() => project.unpricedPOFile?.uploaded && handleDocumentClick('Unpriced PO File', 'PDF', 'Purchase order file for the project')}
-                      >
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center ${project.unpricedPOFile?.uploaded ? 'bg-emerald-100' : 'bg-gray-100'
-                            }`}>
-                            {project.unpricedPOFile?.uploaded ? (
-                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                            ) : (
-                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                              </svg>
-                            )}
+                      <div className="p-3 sm:p-4 rounded-lg border border-blue-200 bg-blue-50">
+                        <h5 className="font-medium text-gray-800 text-sm sm:text-base mb-2">Unpriced PO File</h5>
+                        {project.unpricedPODocuments && project.unpricedPODocuments.length > 0 ? (
+                          <div className="space-y-2">
+                            {project.unpricedPODocuments.map((doc: any, index: number) => {
+                              const normalized = normalizeDocument(doc);
+                              return (
+                                <div key={doc.id || `unpriced-${index}`} className="flex items-center justify-between p-2 bg-white rounded border border-blue-100">
+                                  <span className="text-blue-700 truncate flex-1 min-w-0 text-xs sm:text-sm">{normalized.name}</span>
+                                  <button
+                                    onClick={() => handleDocumentClick(normalized.url, normalized.name, 'PDF', 'Purchase order file for the project')}
+                                    className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded text-xs sm:text-sm transition-colors flex-shrink-0"
+                                  >
+                                    View
+                                  </button>
+                                </div>
+                              );
+                            })}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-800 text-sm sm:text-base">Unpriced PO File</h4>
-                            <p className={`text-xs sm:text-sm ${project.unpricedPOFile?.uploaded ? 'text-emerald-600' : 'text-gray-500'
-                              }`}>
-                              {project.unpricedPOFile?.uploaded ? 'File uploaded • Click to view' : 'No file uploaded'}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1 sm:gap-2">
-                            {project.unpricedPOFile?.uploaded && (
-                              <Eye size={14} className="sm:w-4 sm:h-4 text-emerald-500" />
-                            )}
-                            {isEditMode && project.unpricedPOFile?.uploaded && (
-                              <button
-                                onClick={() => handleRemoveDocument('unpricedPOFile')}
-                                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                                title="Remove document"
-                              >
-                                <X size={12} className="sm:w-3.5 sm:h-3.5" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                        ) : (
+                          <p className="text-xs sm:text-sm text-gray-500">No files uploaded</p>
+                        )}
                       </div>
 
                       {/* Design Inputs PID */}
-                      <div
-                        className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer ${project.designInputsPID?.uploaded
-                            ? 'border-emerald-200 bg-emerald-25 hover:bg-emerald-50 shadow-sm'
-                            : 'border-gray-200 bg-gray-50 hover:bg-blue-50 hover:border-blue-200'
-                          }`}
-                        onClick={() => project.designInputsPID?.uploaded && handleDocumentClick('Design Inputs PID', 'PDF', 'Process and instrumentation diagram')}
-                      >
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center ${project.designInputsPID?.uploaded ? 'bg-emerald-100' : 'bg-gray-100'
-                            }`}>
-                            {project.designInputsPID?.uploaded ? (
-                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                            ) : (
-                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                              </svg>
-                            )}
+                      <div className="p-3 sm:p-4 rounded-lg border border-green-200 bg-green-50">
+                        <h5 className="font-medium text-gray-800 text-sm sm:text-base mb-2">Design Inputs PID</h5>
+                        {project.designInputsDocuments && project.designInputsDocuments.length > 0 ? (
+                          <div className="space-y-2">
+                            {project.designInputsDocuments.map((doc: any, index: number) => {
+                              const normalized = normalizeDocument(doc);
+                              return (
+                                <div key={doc.id || `design-${index}`} className="flex items-center justify-between p-2 bg-white rounded border border-green-100">
+                                  <span className="text-green-700 truncate flex-1 min-w-0 text-xs sm:text-sm">{normalized.name}</span>
+                                  <button
+                                    onClick={() => handleDocumentClick(normalized.url, normalized.name, 'PDF', 'Process and instrumentation diagram')}
+                                    className="text-green-600 hover:text-green-800 hover:bg-green-50 px-2 py-1 rounded text-xs sm:text-sm transition-colors flex-shrink-0"
+                                  >
+                                    View
+                                  </button>
+                                </div>
+                              );
+                            })}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-800 text-sm sm:text-base">Design Inputs PID</h4>
-                            <p className={`text-xs sm:text-sm ${project.designInputsPID?.uploaded ? 'text-emerald-600' : 'text-gray-500'
-                              }`}>
-                              {project.designInputsPID?.uploaded ? 'File uploaded • Click to view' : 'No file uploaded'}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1 sm:gap-2">
-                            {project.designInputsPID?.uploaded && (
-                              <Eye size={14} className="sm:w-4 sm:h-4 text-emerald-500" />
-                            )}
-                            {isEditMode && project.designInputsPID?.uploaded && (
-                              <button
-                                onClick={() => handleRemoveDocument('designInputsPID')}
-                                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                                title="Remove document"
-                              >
-                                <X size={12} className="sm:w-3.5 sm:h-3.5" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                        ) : (
+                          <p className="text-xs sm:text-sm text-gray-500">No files uploaded</p>
+                        )}
                       </div>
                     </div>
 
@@ -1052,96 +1000,53 @@ const ProjectDetails = ({ project, onBack, onViewEquipment, onViewVDCR, vdcrData
                       <h4 className="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3">Additional Documents</h4>
 
                       {/* Client Reference Doc */}
-                      <div
-                        className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer ${project.clientReferenceDoc?.uploaded
-                            ? 'border-emerald-200 bg-emerald-25 hover:bg-emerald-50 shadow-sm'
-                            : 'border-gray-200 bg-gray-50 hover:bg-blue-50 hover:border-blue-200'
-                          }`}
-                        onClick={() => project.clientReferenceDoc?.uploaded && handleDocumentClick('Client Reference Doc', 'PDF', 'Client reference documentation')}
-                      >
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center ${project.clientReferenceDoc?.uploaded ? 'bg-emerald-100' : 'bg-gray-100'
-                            }`}>
-                            {project.clientReferenceDoc?.uploaded ? (
-                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                            ) : (
-                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                              </svg>
-                            )}
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-200 bg-purple-50">
+                        <h5 className="font-medium text-gray-800 text-sm sm:text-base mb-2">Client Reference Doc</h5>
+                        {project.clientReferenceDocuments && project.clientReferenceDocuments.length > 0 ? (
+                          <div className="space-y-2">
+                            {project.clientReferenceDocuments.map((doc: any, index: number) => {
+                              const normalized = normalizeDocument(doc);
+                              return (
+                                <div key={doc.id || `client-${index}`} className="flex items-center justify-between p-2 bg-white rounded border border-purple-100">
+                                  <span className="text-purple-700 truncate flex-1 min-w-0 text-xs sm:text-sm">{normalized.name}</span>
+                                  <button
+                                    onClick={() => handleDocumentClick(normalized.url, normalized.name, 'PDF', 'Client reference documentation')}
+                                    className="text-purple-600 hover:text-purple-800 hover:bg-purple-50 px-2 py-1 rounded text-xs sm:text-sm transition-colors flex-shrink-0"
+                                  >
+                                    View
+                                  </button>
+                                </div>
+                              );
+                            })}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-800 text-sm sm:text-base">Client Reference Doc</h4>
-                            <p className={`text-xs sm:text-sm ${project.clientReferenceDoc?.uploaded ? 'text-emerald-600' : 'text-gray-500'
-                              }`}>
-                              {project.clientReferenceDoc?.uploaded ? 'File uploaded • Click to view' : 'No file uploaded'}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1 sm:gap-2">
-                            {project.clientReferenceDoc?.uploaded && (
-                              <Eye size={14} className="sm:w-4 sm:h-4 text-emerald-500" />
-                            )}
-                            {isEditMode && project.clientReferenceDoc?.uploaded && (
-                              <button
-                                onClick={() => handleRemoveDocument('clientReferenceDoc')}
-                                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                                title="Remove document"
-                              >
-                                <X size={12} className="sm:w-3.5 sm:h-3.5" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                        ) : (
+                          <p className="text-xs sm:text-sm text-gray-500">No files uploaded</p>
+                        )}
                       </div>
 
                       {/* Other Documents */}
-                      <div
-                        className={`p-3 sm:p-4 rounded-lg border transition-all duration-200 cursor-pointer ${project.otherDocuments && project.otherDocuments.some(doc => doc.uploaded)
-                            ? 'border-emerald-200 bg-emerald-25 hover:bg-emerald-50 shadow-sm'
-                            : 'border-gray-200 bg-gray-50 hover:bg-blue-50 hover:border-blue-200'
-                          }`}
-                        onClick={() => project.otherDocuments && project.otherDocuments.some(doc => doc.uploaded) && handleDocumentClick('Other Documents', 'Multiple', 'Additional project documents')}
-                      >
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center ${project.otherDocuments && project.otherDocuments.some(doc => doc.uploaded) ? 'bg-emerald-100' : 'bg-gray-100'
-                            }`}>
-                            {project.otherDocuments && project.otherDocuments.some(doc => doc.uploaded) ? (
-                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                            ) : (
-                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                              </svg>
-                            )}
+                      <div className="p-3 sm:p-4 rounded-lg border border-orange-200 bg-orange-50">
+                        <h5 className="font-medium text-gray-800 text-sm sm:text-base mb-2">Other Documents</h5>
+                        {project.otherDocumentsLinks && project.otherDocumentsLinks.length > 0 ? (
+                          <div className="space-y-2">
+                            {project.otherDocumentsLinks.map((doc: any, index: number) => {
+                              const normalized = normalizeDocument(doc);
+                              return (
+                                <div key={doc.id || `other-${index}`} className="flex items-center justify-between p-2 bg-white rounded border border-orange-100">
+                                  <span className="text-orange-700 truncate flex-1 min-w-0 text-xs sm:text-sm">{normalized.name}</span>
+                                  <button
+                                    onClick={() => handleDocumentClick(normalized.url, normalized.name, 'Multiple', 'Additional project documents')}
+                                    className="text-orange-600 hover:text-orange-800 hover:bg-orange-50 px-2 py-1 rounded text-xs sm:text-sm transition-colors flex-shrink-0"
+                                  >
+                                    View
+                                  </button>
+                                </div>
+                              );
+                            })}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-800 text-sm sm:text-base">Other Documents</h4>
-                            <p className={`text-xs sm:text-sm ${project.otherDocuments && project.otherDocuments.some(doc => doc.uploaded) ? 'text-emerald-600' : 'text-gray-500'
-                              }`}>
-                              {project.otherDocuments && project.otherDocuments.some(doc => doc.uploaded)
-                                ? `${project.otherDocuments.filter(doc => doc.uploaded).length} file(s) uploaded • Click to view`
-                                : 'No files uploaded'
-                              }
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1 sm:gap-2">
-                            {project.otherDocuments && project.otherDocuments.some(doc => doc.uploaded) && (
-                              <Eye size={14} className="sm:w-4 sm:h-4 text-emerald-500" />
-                            )}
-                            {isEditMode && project.otherDocuments && project.otherDocuments.some(doc => doc.uploaded) && (
-                              <button
-                                onClick={() => handleRemoveDocument('otherDocuments')}
-                                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                                title="Remove documents"
-                              >
-                                <X size={12} className="sm:w-3.5 sm:h-3.5" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                        ) : (
+                          <p className="text-xs sm:text-sm text-gray-500">No files uploaded</p>
+                        )}
                       </div>
                     </div>
                   </div>

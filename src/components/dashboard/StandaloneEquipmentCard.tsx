@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Eye, Calendar, User, MapPin, ChevronLeft, ChevronRight, FileText, Users, Settings, TrendingUp, AlertTriangle, ClipboardCheck, Shield, Plus, Edit, Check, X, Camera, Upload, Clock, Building, Trash2, Mic, MicOff, Play, Pause, ChevronDown, Search, ArrowLeft, Target, Wrench, BarChart3, Download, ArrowRight, Image, UserPlus, FileCheck } from "lucide-react";
 import { Equipment } from "@/types/equipment";
 import { fastAPI } from "@/lib/api";
-import { updateEquipment } from "@/lib/database";
+// 🔧 FIX: Removed updateEquipment import - using fastAPI.updateStandaloneEquipment instead
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -1164,7 +1164,8 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                                                 if (isEditMode[item.id]) {
                                                   // Done Editing - Save changes directly to database
                                                   try {
-                                                    await fastAPI.updateEquipment(item.id, {
+                                                    // 🔧 FIX: Use updateStandaloneEquipment for standalone equipment
+                                                    await fastAPI.updateStandaloneEquipment(item.id, {
                                                       technical_sections: technicalSections[item.id] || []
                                                     }, user?.id);
 
@@ -1245,7 +1246,8 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
 
                                                       // Save to database using the same API as main save
                                                       try {
-                                                        await fastAPI.updateEquipment(item.id, {
+                                                        // 🔧 FIX: Use updateStandaloneEquipment for standalone equipment
+                                                        await fastAPI.updateStandaloneEquipment(item.id, {
                                                           technical_sections: updatedSections
                                                         }, user?.id);
 
@@ -1318,9 +1320,9 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
 
                                                         // Save to database immediately
                                                         try {
-                                                          await updateEquipment(item.id, {
+                                                          await fastAPI.updateStandaloneEquipment(item.id, {
                                                             technical_sections: updatedSections
-                                                          });
+                                                          }, user?.id);
                                                           // // console.log('âœ… Field name saved to database, refreshing data...');
                                                           await refreshEquipmentData();
                                                         } catch (error) {
@@ -1349,9 +1351,9 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
 
                                                         // Save to database immediately
                                                         try {
-                                                          await updateEquipment(item.id, {
+                                                          await fastAPI.updateStandaloneEquipment(item.id, {
                                                             technical_sections: updatedSections
-                                                          });
+                                                          }, user?.id);
                                                           // // console.log('âœ… Field value saved to database, refreshing data...');
                                                           await refreshEquipmentData();
                                                         } catch (error) {
@@ -1384,9 +1386,9 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                                                       // Save to database
                                                       try {
                                                         // // console.log('ðŸ—‘ï¸ Deleting custom field from database:', item.id, updatedSections);
-                                                        await updateEquipment(item.id, {
+                                                        await fastAPI.updateStandaloneEquipment(item.id, {
                                                           technical_sections: updatedSections
-                                                        });
+                                                        }, user?.id);
                                                         // // console.log('âœ… Custom field deleted successfully');
                                                         toast({
                                                           title: "Success",
@@ -1690,9 +1692,9 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                                       // Save to database
                                       try {
                                         // // console.log('ðŸ’¾ Saving team custom field to database:', item.id, updatedTeamFields);
-                                        await updateEquipment(item.id, {
+                                        await fastAPI.updateStandaloneEquipment(item.id, {
                                           team_custom_fields: updatedTeamFields
-                                        });
+                                        }, user?.id);
                                         // // console.log('âœ… Team custom field saved successfully');
                                         toast({
                                           title: "Success",
@@ -1790,9 +1792,10 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
 
                                             // Save to database immediately
                                             try {
-                                              await updateEquipment(item.id, {
+                                              // 🔧 FIX: Use updateStandaloneEquipment for standalone equipment
+                                              await fastAPI.updateStandaloneEquipment(item.id, {
                                                 team_custom_fields: updatedFields
-                                              });
+                                              }, user?.id);
                                               await refreshEquipmentData();
                                             } catch (error) {
                                               console.error('Error saving team field name change:', error);
@@ -1838,9 +1841,9 @@ const StandaloneEquipmentCard: React.FC<StandaloneEquipmentCardProps> = (props) 
                                           // Save to database
                                           try {
                                             // // console.log('ðŸ—‘ï¸ Deleting team custom field from database:', item.id, updatedFields);
-                                            await updateEquipment(item.id, {
+                                            await fastAPI.updateStandaloneEquipment(item.id, {
                                               team_custom_fields: updatedFields
-                                            });
+                                            }, user?.id);
                                             // // console.log('âœ… Team custom field deleted successfully');
                                             toast({
                                               title: "Success",

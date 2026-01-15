@@ -27,20 +27,20 @@ const ResetPasswordSimple = () => {
       const storedSession = localStorage.getItem(storageKey);
       
       // console.log('🔍 Checking localStorage for session...', {
-        hasStoredSession: !!storedSession,
-        storageKey
-      });
+      //   hasStoredSession: !!storedSession,
+      //   storageKey
+      // });
       
       if (storedSession) {
         try {
           const sessionData = JSON.parse(storedSession);
           // console.log('📦 Parsed session data:', {
-            hasAccessToken: !!sessionData.access_token,
-            hasUser: !!sessionData.user,
-            hasRefreshToken: !!sessionData.refresh_token,
-            expiresAt: sessionData.expires_at,
-            userEmail: sessionData.user?.email
-          });
+          //   hasAccessToken: !!sessionData.access_token,
+          //   hasUser: !!sessionData.user,
+          //   hasRefreshToken: !!sessionData.refresh_token,
+          //   expiresAt: sessionData.expires_at,
+          //   userEmail: sessionData.user?.email
+          // });
           
           // Check if we have valid tokens and user data
           if (sessionData.access_token && sessionData.user) {
@@ -50,11 +50,11 @@ const ResetPasswordSimple = () => {
             const isExpired = expiresAt && expiresAt <= now;
             
             // console.log('⏰ Token expiry check:', {
-              expiresAt,
-              now,
-              isExpired,
-              timeUntilExpiry: expiresAt ? expiresAt - now : 'N/A'
-            });
+            //   expiresAt,
+            //   now,
+            //   isExpired,
+            //   timeUntilExpiry: expiresAt ? expiresAt - now : 'N/A'
+            // });
             
             // For password reset, even if slightly expired, proceed if we have refresh token
             if (!expiresAt || !isExpired || sessionData.refresh_token) {
@@ -125,10 +125,10 @@ const ResetPasswordSimple = () => {
         const hashError = hashParams.get('error');
         
         // console.log('🔍 Extracted params:', {
-          codeFromParams: code ? 'found' : 'none',
-          codeFromHash: hashCode ? 'found' : 'none',
-          hashError: hashError || 'none'
-        });
+        //   codeFromParams: code ? 'found' : 'none',
+        //   codeFromHash: hashCode ? 'found' : 'none',
+        //   hashError: hashError || 'none'
+        // });
         
         // Check for errors first
         if (hashError) {

@@ -364,10 +364,10 @@ export const fastAPI = {
         // console.log('🔍 Fetching projects for firm_admin, firmId:', firmId);
         const response = await api.get(`/projects?firm_id=eq.${firmId}&select=*&order=created_at.desc`);
         // console.log('✅ Projects API response received:', { 
-          status: response.status, 
-          dataLength: Array.isArray(response.data) ? response.data.length : 0,
-          firstProject: Array.isArray(response.data) ? response.data[0] : null
-        });
+        //   status: response.status, 
+        //   dataLength: Array.isArray(response.data) ? response.data.length : 0,
+        //   firstProject: Array.isArray(response.data) ? response.data[0] : null
+        // });
         projects = (response.data as any[]) || [];
       } else if (userId) {
         // All other roles (project_manager, vdcr_manager, editor, viewer) see only assigned projects
@@ -507,7 +507,48 @@ export const fastAPI = {
     }
     try {
       const response = await api.get(`/projects?id=eq.${projectId}&select=*`);
-      return response.data;
+      const project = response.data[0];
+      
+      if (!project) {
+        return [];
+      }
+
+      // Fetch documents from separate tables (same approach as getAllProjects)
+      try {
+        const [unpricedPODocs, designInputsDocs, clientRefDocs, otherDocs] = await Promise.all([
+          api.get(`/unpriced_po_documents?project_id=eq.${projectId}&select=*&order=created_at.desc`).catch((error) => {
+            return { data: [] };
+          }),
+          api.get(`/design_inputs_documents?project_id=eq.${projectId}&select=*&order=created_at.desc`).catch((error) => {
+            return { data: [] };
+          }),
+          api.get(`/client_reference_documents?project_id=eq.${projectId}&select=*&order=created_at.desc`).catch((error) => {
+            return { data: [] };
+          }),
+          api.get(`/other_documents?project_id=eq.${projectId}&select=*&order=created_at.desc`).catch((error) => {
+            return { data: [] };
+          })
+        ]);
+
+        // Return project with documents from separate tables, or fallback to JSONB columns if separate tables are empty
+        return [{
+          ...project,
+          unpriced_po_documents: (unpricedPODocs.data && unpricedPODocs.data.length > 0) ? unpricedPODocs.data : (project.unpriced_po_documents || []),
+          design_inputs_documents: (designInputsDocs.data && designInputsDocs.data.length > 0) ? designInputsDocs.data : (project.design_inputs_documents || []),
+          client_reference_documents: (clientRefDocs.data && clientRefDocs.data.length > 0) ? clientRefDocs.data : (project.client_reference_documents || []),
+          other_documents: (otherDocs.data && otherDocs.data.length > 0) ? otherDocs.data : (project.other_documents || [])
+        }];
+      } catch (docError) {
+        // If fetching from separate tables fails, return project with JSONB columns
+        console.error('❌ Error fetching documents from separate tables, using JSONB columns:', docError);
+        return [{
+          ...project,
+          unpriced_po_documents: project.unpriced_po_documents || [],
+          design_inputs_documents: project.design_inputs_documents || [],
+          client_reference_documents: project.client_reference_documents || [],
+          other_documents: project.other_documents || []
+        }];
+      }
     } catch (error) {
       console.error('❌ Error fetching project by ID:', error);
       throw error;
@@ -4217,6 +4258,54 @@ export const updateProjectDocumentLinks = async (projectId: string, documentType
   } catch (error: any) {
     console.error('❌ Error updating project document links:', error);
     throw new Error(error.response?.data?.message || 'Failed to update project document links');
+  }
+};
+
+// Delete a project document
+export const deleteProjectDocument = async (documentId: string, documentType: 'unpriced_po_documents' | 'design_inputs_documents' | 'client_reference_documents' | 'other_documents', projectId: string) => {
+  try {
+    // First try to delete from separate table
+    const tableMap: Record<string, string> = {
+      'unpriced_po_documents': 'unpriced_po_documents',
+      'design_inputs_documents': 'design_inputs_documents',
+      'client_reference_documents': 'client_reference_documents',
+      'other_documents': 'other_documents'
+    };
+
+    const tableName = tableMap[documentType];
+    
+    if (tableName) {
+      try {
+        // Try deleting from separate table
+        await api.delete(`/${tableName}?id=eq.${documentId}`);
+        // console.log('✅ Document deleted from separate table');
+        return { success: true };
+      } catch (tableError: any) {
+        // If separate table doesn't exist or document not found, update JSONB column
+        // console.log('⚠️ Document not in separate table, updating JSONB column');
+        
+        // Get current documents
+        const projectResponse = await api.get('/projects', {
+          params: {
+            id: `eq.${projectId}`,
+            select: documentType
+          }
+        });
+        
+        const currentDocs = projectResponse.data[0]?.[documentType] || [];
+        const updatedDocs = currentDocs.filter((doc: any) => doc.id !== documentId && doc.document_name !== documentId);
+        
+        // Update JSONB column
+        await updateProjectDocumentLinks(projectId, documentType, updatedDocs);
+        // console.log('✅ Document removed from JSONB column');
+        return { success: true };
+      }
+    }
+    
+    throw new Error('Invalid document type');
+  } catch (error: any) {
+    console.error('❌ Error deleting project document:', error);
+    throw error;
   }
 };
 

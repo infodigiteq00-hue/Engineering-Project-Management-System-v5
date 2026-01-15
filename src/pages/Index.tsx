@@ -314,11 +314,11 @@ const Index = () => {
           
           // console.log('⏱️ API call completed at:', new Date().toISOString());
           // console.log('📦 Received projects from API:', { 
-            isArray: Array.isArray(supabaseProjects), 
-            length: supabaseProjects?.length || 0,
-            firstProject: supabaseProjects?.[0],
-            type: typeof supabaseProjects
-          });
+          //   isArray: Array.isArray(supabaseProjects), 
+          //   length: supabaseProjects?.length || 0,
+          //   firstProject: supabaseProjects?.[0],
+          //   type: typeof supabaseProjects
+          // });
         } catch (apiError: any) {
           console.error('⏱️ API call failed at:', new Date().toISOString());
           console.error('❌ API call failed:', apiError);

@@ -176,14 +176,14 @@ const SignUp = () => {
 
           if (existingUserByEmail && !existingUserError) {
             // console.log('⚠️ User already exists. Existing data:', {
-              id: (existingUserByEmail as any).id,
-              role: (existingUserByEmail as any).role,
-              firm_id: (existingUserByEmail as any).firm_id
-            });
+            //   id: (existingUserByEmail as any).id,
+            //   role: (existingUserByEmail as any).role,
+            //   firm_id: (existingUserByEmail as any).firm_id
+            // });
             // console.log('✅ Will use INVITE data (not existing user data):', {
-              role: userRole,
-              firm_id: firmId
-            });
+            //   role: userRole,
+            //   firm_id: firmId
+            // });
             
             // User exists - check for ID mismatch
             if ((existingUserByEmail as any).id === data.user.id) {
@@ -397,10 +397,10 @@ const SignUp = () => {
 
         if (existingUserData && !existingUserError) {
           // console.log('✅ User exists! Found existing data:', {
-            id: existingUserData.id,
-            role: existingUserData.role,
-            firm_id: existingUserData.firm_id
-          });
+          //   id: existingUserData.id,
+          //   role: existingUserData.role,
+          //   firm_id: existingUserData.firm_id
+          // });
           userRole = existingUserData.role;
           firmId = existingUserData.firm_id;
           projectId = existingUserData.project_id;

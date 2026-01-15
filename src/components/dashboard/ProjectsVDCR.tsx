@@ -748,11 +748,11 @@ const handleCreateRevisionEvent = async () => {
 
   try {
     // console.log('🔄 Creating revision event with data:', {
-      vdcr_record_id: editingVDCR.id,
-      event_type: revisionEventModal.eventType,
-      revision_number: formData.revision,
-      user_id: user?.id
-    });
+    //   vdcr_record_id: editingVDCR.id,
+    //   event_type: revisionEventModal.eventType,
+    //   revision_number: formData.revision,
+    //   user_id: user?.id
+    // });
 
     // Convert date to ISO string if provided (date only, set to start of day)
     let estimatedReturnDateISO = null;
