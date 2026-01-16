@@ -84,10 +84,27 @@ const Index = () => {
   const [editingProject, setEditingProject] = useState<any>(null);
   const [editMode, setEditMode] = useState(false);
   
-  // User data state
-  const [userName, setUserName] = useState<string>('');
-  const [userRole, setUserRole] = useState<string>('');
-  const [userEmail, setUserEmail] = useState<string>('');
+  // User data state - initialize from localStorage immediately for instant display on refresh
+  const [userName, setUserName] = useState<string>(() => {
+    // Try direct localStorage keys first (set by AuthContext)
+    const storedName = localStorage.getItem('userName');
+    if (storedName) return storedName;
+    // Fallback to userData object
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    return userData?.full_name || '';
+  });
+  const [userRole, setUserRole] = useState<string>(() => {
+    // Try direct localStorage keys first (set by AuthContext)
+    const storedRole = localStorage.getItem('userRole');
+    if (storedRole) return storedRole;
+    // Fallback to userData object
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    return userData?.role || '';
+  });
+  const [userEmail, setUserEmail] = useState<string>(() => {
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    return userData?.email || '';
+  });
   const [loading, setLoading] = useState(true);
   
   // Firm data state
@@ -202,17 +219,31 @@ const Index = () => {
           setUserEmail(userData.email || '');
         } else {
           // Fallback to localStorage if AuthContext values not available
-          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          // First check direct localStorage keys (userName, userRole) - these are set by AuthContext
+          const storedUserName = localStorage.getItem('userName');
+          const storedUserRole = localStorage.getItem('userRole');
           
-          if (userData && userData.full_name) {
-            setUserName(userData.full_name);
-            setUserRole(userData.role);
-            setUserEmail(userData.email);
+          if (storedUserName && storedUserRole) {
+            setUserName(storedUserName);
+            setUserRole(storedUserRole);
+            
+            // Get email from userData object
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            setUserEmail(userData.email || '');
           } else {
-            // Set fallback values
-            setUserName('User');
-            setUserRole('user');
-            setUserEmail('');
+            // Fallback to userData object if direct keys don't exist
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            
+            if (userData && userData.full_name) {
+              setUserName(userData.full_name);
+              setUserRole(userData.role);
+              setUserEmail(userData.email);
+            } else {
+              // Set fallback values
+              setUserName('User');
+              setUserRole('user');
+              setUserEmail('');
+            }
           }
         }
         

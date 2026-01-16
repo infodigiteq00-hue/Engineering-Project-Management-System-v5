@@ -226,18 +226,40 @@ const SuperAdminDashboard = () => {
       // // console.log('✅ Company created:', companyData);
       const firmId = companyData[0]?.id || companyData.id;
 
-      // Upload logo if provided
+      // Upload logo if provided - with timeout protection
       if (newCompanyLogo) {
         try {
-          const logoUrl = await fastAPI.uploadCompanyLogo(newCompanyLogo, firmId);
+          console.log('📤 Starting logo upload for firm:', firmId, 'File size:', newCompanyLogo.size, 'bytes');
+          
+          // Add timeout wrapper to prevent infinite hanging
+          const uploadWithTimeout = Promise.race([
+            fastAPI.uploadCompanyLogo(newCompanyLogo, firmId),
+            new Promise<never>((_, reject) => {
+              setTimeout(() => {
+                reject(new Error('Logo upload timed out. Please try again with a smaller file or check your connection.'));
+              }, 35000); // 35 second timeout (slightly longer than API timeout)
+            })
+          ]);
+          
+          const logoUrl = await uploadWithTimeout;
+          console.log('✅ Logo uploaded successfully:', logoUrl);
+          
           // Update company with logo URL
           await fastAPI.updateCompany(firmId, { logo_url: logoUrl });
-        } catch (logoError) {
-          console.error('⚠️ Error uploading logo (company still created):', logoError);
+          console.log('✅ Company updated with logo URL');
+        } catch (logoError: any) {
+          console.error('⚠️ Error uploading logo (company still created):', {
+            message: logoError?.message,
+            name: logoError?.name,
+            stack: logoError?.stack,
+            error: logoError
+          });
+          const errorMessage = logoError?.message || 'Logo upload failed. You can add it later.';
           toast({ 
             title: 'Warning', 
-            description: 'Company created successfully, but logo upload failed. You can add it later.', 
-            variant: 'default' 
+            description: `Company created successfully, but logo upload failed: ${errorMessage}`, 
+            variant: 'default',
+            duration: 5000
           });
         }
       }
